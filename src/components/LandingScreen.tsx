@@ -1,6 +1,5 @@
 import { Button } from "./ui/button";
-import voterPrimeLogo from 'figma:asset/801ef4806bb3cd8196927850a6f8118dfb616704.png';
-import heroImage from 'figma:asset/cf83705595b05ea37ae69f288385d69f0be31baf.png';
+import { voterPrimeLogo, heroImage } from '@/assets';
 
 interface LandingScreenProps {
   onGetStarted: () => void;

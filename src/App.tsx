@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Toaster } from './components/ui/toaster';
+// Import test functions for development
+import './services/testPolicyMatching';
 import LandingScreen from './components/LandingScreen';
 import PriorityInputScreen from './components/PriorityInputScreen';
 import MappingResultsScreen from './components/MappingResultsScreen';
@@ -1076,6 +1079,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <Toaster />
     </>
   );
 }

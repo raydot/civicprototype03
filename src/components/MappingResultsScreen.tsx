@@ -1,6 +1,11 @@
-import { Button } from "./ui/button";
+import { useState, useEffect } from 'react';
+import { Button } from './ui/button';
 import { ChevronLeft, ThumbsUp, ThumbsDown } from 'lucide-react';
 import BottomNavigation from './BottomNavigation';
+import { getCityStateFromZip } from '../data/zipCodePrefixes';
+import { policyMatchingService } from '../services/policyMatchingService';
+import { PolicyMatch } from '../types/policy';
+import zipCodePrefixes from '../data/zipCodePrefixes.json';
 
 interface MappingResultsScreenProps {
   onBack: () => void;
@@ -17,20 +22,33 @@ interface MappingResultsScreenProps {
   onPriorityReject?: (priorityIndex: number) => void;
 }
 
-// Demo function to convert ZIP code to city/state
-const getCityStateFromZip = (zipCode: string) => {
-  // Mock data for demo purposes
-  const zipMappings: { [key: string]: string } = {
-    '48104': 'Washtenaw County, Michigan',
-    '48105': 'Washtenaw County, Michigan',
-    '48106': 'Washtenaw County, Michigan',
-    '48108': 'Washtenaw County, Michigan',
-    '48109': 'Washtenaw County, Michigan',
-    '48197': 'Wayne County, Michigan',
-    '48198': 'Wayne County, Michigan'
+// Function to convert ZIP code to city/state using our comprehensive data
+const getCityStateFromZip = (zipCode: string): string => {
+  if (zipCode.length === 0) return 'Enter ZIP Code';
+  
+  // Try 3-digit prefix first
+  if (zipCode.length >= 3) {
+    const prefix = zipCode.substring(0, 3);
+    const location = zipCodePrefixes[prefix as keyof typeof zipCodePrefixes];
+    if (location) return location;
+  }
+  
+  // Fallback to first digit for partial entries
+  const firstDigit = zipCode[0];
+  const fallbackMap: { [key: string]: string } = {
+    '0': 'Boston, MA',
+    '1': 'New York, NY', 
+    '2': 'Philadelphia, PA',
+    '3': 'Atlanta, GA',
+    '4': 'Wall, South Dakota',
+    '5': 'Dallas, TX',
+    '6': 'Chicago, IL',
+    '7': 'Kansas City, MO',
+    '8': 'Denver, CO',
+    '9': 'Los Angeles, CA'
   };
   
-  return zipMappings[zipCode] || 'Your County, Michigan';
+  return fallbackMap[firstDigit] || 'Unknown Location';
 };
 
 // Demo policy mappings for user concerns
@@ -75,17 +93,96 @@ export default function MappingResultsScreen({
   onPriorityReject
 }: MappingResultsScreenProps) {
   
+  // AI Policy Matching State
+  const [aiMatches, setAiMatches] = useState<PolicyMatch[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Track individual priority confirmation states
+  const [priorityConfirmations, setPriorityConfirmations] = useState<{[index: number]: boolean}>({});
+  
+  // Fetch AI matches when priorities change
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (priorities.length === 0) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const matches: PolicyMatch[] = [];
+        
+        // Process each priority individually
+        for (let i = 0; i < priorities.length; i++) {
+          const priority = priorities[i];
+          
+          console.log(`🤖 Processing priority ${i + 1}/${priorities.length}: "${priority}"`);
+          
+          const response = await policyMatchingService.matchPolicies({
+            userInput: priority,
+            zipCode
+          });
+          
+          matches.push(response.matches[0]);
+          
+          console.log(`✅ Priority ${i + 1} result:`, {
+            input: priority,
+            match: response.matches[0].name,
+            confidence: response.matches[0].confidence
+          });
+          
+          // Small delay between requests to respect throttling
+          if (i < priorities.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        setAiMatches(matches);
+        
+        console.log('🎉 All priorities processed:', {
+          total: matches.length,
+          matches: matches.map(m => ({ name: m.name, confidence: m.confidence }))
+        });
+        
+      } catch (err) {
+        console.error('AI matching failed:', err);
+        setError('Failed to analyze priorities');
+        // Keep existing hardcoded behavior as fallback
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchMatches();
+  }, [priorities, zipCode]);
+  
   const handlePriorityConfirm = (index: number) => {
+    // Mark this priority as confirmed
+    setPriorityConfirmations(prev => ({
+      ...prev,
+      [index]: true
+    }));
+    
+    console.log(`✅ Priority ${index + 1} confirmed:`, aiMatches[index]?.name);
+    
+    // Call parent handler if provided
     if (onPriorityConfirm) {
       onPriorityConfirm(index);
     }
   };
 
   const handlePriorityReject = (index: number) => {
+    console.log(`👎 Priority ${index + 1} rejected:`, aiMatches[index]?.name);
+    
+    // Call parent handler if provided (this would navigate to PolicyEditScreen)
     if (onPriorityReject) {
       onPriorityReject(index);
     }
   };
+  
+  // Check if all priorities are confirmed
+  const allPrioritiesConfirmed = priorities.length > 0 && 
+    priorities.every((_, index) => priorityConfirmations[index] === true);
 
   const handleNavToMappings = () => {
     // Already on mappings screen, do nothing
@@ -116,6 +213,23 @@ export default function MappingResultsScreen({
             </p>
           </div>
 
+          {/* AI Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-3 mb-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
+              <span className="ml-2 text-sm text-gray-600">Analyzing your priorities...</span>
+            </div>
+          )}
+
+          {/* AI Error State */}
+          {error && (
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-3">
+              <p className="text-sm text-yellow-800">
+                {error} - Using demo data for now.
+              </p>
+            </div>
+          )}
+
           {/* Location Display */}
           <div className="mb-3 text-center">
             <div className="text-sm font-medium text-gray-900">
@@ -127,18 +241,23 @@ export default function MappingResultsScreen({
             {priorities.map((priority, index) => {
               const policyName = getPolicyMapping(priority, index, isFirstPriorityCorrected, selectedPolicyOption);
               const definition = getPolicyDefinition(policyName);
-              const isCompleted = index === 0 && isFirstPriorityCorrected;
-              const needsReview = index === 0 && !isFirstPriorityCorrected;
+              
+              // New logic: each priority can be confirmed individually
+              const isConfirmed = priorityConfirmations[index] === true;
+              const needsReview = !isConfirmed; // All unconfirmed priorities need review
+              
+              // Hide all priorities while AI is loading to prevent showing hardcoded data
+              if (isLoading) {
+                return null;
+              }
               
               return (
                 <div 
                   key={index} 
                   className={`rounded-lg border-2 transition-all duration-200 ${
-                    needsReview 
-                      ? 'border-orange-200 bg-orange-50' 
-                      : isCompleted
+                    isConfirmed
                       ? 'border-green-200 bg-green-50'
-                      : 'border-gray-200 bg-gray-50'
+                      : 'border-orange-200 bg-orange-50'
                   }`}
                 >
                   {/* Header section */}
@@ -153,7 +272,7 @@ export default function MappingResultsScreen({
                       </div>
                     )}
                     
-                    {isCompleted && (
+                    {isConfirmed && (
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <span className="text-xs font-medium text-green-700 uppercase tracking-wide">
@@ -165,11 +284,9 @@ export default function MappingResultsScreen({
                     {/* Number badge and user concern */}
                     <div className="flex items-start gap-3">
                       <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                        needsReview 
-                          ? 'bg-orange-500 text-white' 
-                          : isCompleted
+                        isConfirmed
                           ? 'bg-green-500 text-white'
-                          : 'bg-gray-500 text-white'
+                          : 'bg-orange-500 text-white'
                       }`}>
                         {index + 1}
                       </div>
@@ -189,15 +306,22 @@ export default function MappingResultsScreen({
                   <div className="p-3">
                     <div className="mb-3">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-base font-medium text-black">{policyName}</h3>
+                        <h3 className="text-base font-medium text-black">
+                          {/* Use AI policy name if available, fallback to hardcoded */}
+                          {aiMatches[index] ? aiMatches[index].name : policyName}
+                        </h3>
                         <div className="flex items-center gap-1">
                           <span className="text-sm">✅</span>
-                          <span className="text-xs font-medium text-gray-600">92% match</span>
+                          <span className="text-xs font-medium text-gray-600">
+                            {/* Use AI confidence if available, fallback to 92% */}
+                            {aiMatches[index] ? `${aiMatches[index].confidence}% match` : '92% match'}
+                          </span>
                         </div>
                       </div>
                       
                       <p className="text-sm text-gray-600 leading-relaxed">
-                        {definition}
+                        {/* Use AI description if available, fallback to hardcoded */}
+                        {aiMatches[index] ? aiMatches[index].description : definition}
                       </p>
                     </div>
 
@@ -208,7 +332,8 @@ export default function MappingResultsScreen({
                         <div className="flex gap-3">
                           <Button 
                             onClick={() => handlePriorityConfirm(index)}
-                            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                            variant="outline"
+                            className="flex-1 border-2 border-green-500 text-green-600 bg-green-50 hover:bg-green-100 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
                           >
                             <ThumbsUp size={16} />
                             Yes, that's right
@@ -225,20 +350,13 @@ export default function MappingResultsScreen({
                       </div>
                     )}
 
-                    {/* Completed state */}
-                    {isCompleted && (
+                    {/* Confirmed state */}
+                    {isConfirmed && (
                       <div className="flex items-center justify-center py-2">
                         <div className="flex items-center gap-2 text-green-600">
                           <ThumbsUp size={16} />
                           <span className="text-sm font-medium">Confirmed</span>
                         </div>
-                      </div>
-                    )}
-
-                    {/* Other priorities - no action needed */}
-                    {!needsReview && !isCompleted && (
-                      <div className="text-center py-2">
-                        <span className="text-sm text-gray-500 italic">Ready for recommendations</span>
                       </div>
                     )}
                   </div>
@@ -251,10 +369,14 @@ export default function MappingResultsScreen({
           <div className="mt-6 pb-4">
             <Button 
               onClick={onGetRecommendations}
-              className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-base font-semibold"
-              disabled={!isFirstPriorityCorrected} // Only enable after first priority is confirmed
+              className={`w-full h-12 rounded-md text-base font-semibold transition-all ${
+                allPrioritiesConfirmed 
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              disabled={!allPrioritiesConfirmed} // Only enable when ALL priorities are confirmed
             >
-              {isFirstPriorityCorrected ? 'Get Recommendations' : 'Review mapping above to continue'}
+              {allPrioritiesConfirmed ? 'Get Recommendations' : 'Review all mappings to continue'}
             </Button>
           </div>
         </div>
