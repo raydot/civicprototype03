@@ -11,7 +11,6 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
       className="w-full bg-white flex flex-col"
       style={{ 
         height: '100%',
-        minHeight: '100vh',
         minHeight: '100dvh' // Dynamic viewport height for mobile browsers
       }}
     >

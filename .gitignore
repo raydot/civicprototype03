@@ -58,3 +58,5 @@ temp/
 
 # Project documentation
 docs/
+# Local Netlify folder
+.netlify
