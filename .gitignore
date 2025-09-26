@@ -1,3 +1,4 @@
+## FRONTEND
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -15,6 +16,52 @@ dist/
 build/
 *.tsbuildinfo
 
+# Local Netlify folder
+.netlify
+
+
+## BACKEND
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment files
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Virtual environments
+backend/venv/
+backend/env/
+backend/ENV/
+
+# Testing
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+
+# Logs
+backend/*.log
+
+## OTHER
 # IDE and editor files
 .vscode/settings.json
 .vscode/launch.json
@@ -58,5 +105,3 @@ temp/
 
 # Project documentation
 docs/
-# Local Netlify folder
-.netlify
