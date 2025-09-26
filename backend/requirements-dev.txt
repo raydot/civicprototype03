@@ -1,0 +1,32 @@
+# Include production requirements
+-r requirements.txt
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+pytest-cov==4.1.0
+pytest-xdist==3.5.0
+
+# Mocking and test data
+responses==0.24.1
+fakeredis==2.20.1
+faker==20.1.0
+factory-boy==3.3.0
+
+# Database testing
+pytest-postgresql==5.0.0
+
+# Code quality
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Development tools
+pre-commit==3.6.0
+watchdog==3.0.0
+
+# Interactive testing
+ipython==8.17.2
+jupyter==1.0.0

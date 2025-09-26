@@ -1,0 +1,36 @@
+# FastAPI and server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database and storage
+supabase==2.3.0
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# AI/ML libraries
+sentence-transformers==2.2.2
+scikit-learn==1.3.2
+numpy==1.24.4
+pandas==2.1.4
+spacy==3.7.2
+transformers==4.36.2
+
+# NLP and text processing
+nltk==3.8.1
+beautifulsoup4==4.12.2
+feedparser==6.0.10
+
+# HTTP and requests
+httpx==0.25.2
+requests==2.31.0
+
+# Utilities
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Development and testing (will move to requirements-dev.txt)
+pytest==7.4.3
+pytest-asyncio==0.21.1
