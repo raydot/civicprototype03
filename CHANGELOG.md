@@ -1,3 +1,10 @@
+## v0.8.3 (2025-09-26)
+
+### Fix
+
+- Hard coding the port to 8000
+-  still not expanding properly.
+
 ## v0.8.2 (2025-09-26)
 
 ### Fix
