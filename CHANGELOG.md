@@ -1,3 +1,9 @@
+## v0.8.4 (2025-09-26)
+
+### Fix
+
+- no longer escaping the  variable
+
 ## v0.8.3 (2025-09-26)
 
 ### Fix
