@@ -71,7 +71,7 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.version,
     description="AI-powered recommendation system that learns from user feedback",
-    Lifecycle=lifespan,
+    lifespan=Lifecycle,
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
 )
