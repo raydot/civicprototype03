@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # Server settings
     host: str = "0.0.0.0"
-    port: int = int(os.getenv("PORT", "8000"))
+    port: int = Field(default=8000, env="PORT")
     
     # Database settings
     database_url: Optional[str] = os.getenv("DATABASE_URL")

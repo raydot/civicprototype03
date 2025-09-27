@@ -98,7 +98,7 @@ if [ -d "backend" ]; then
 fi
 
 # Stage the version files
-git add frontend/package.json VERSION backend/VERSION 2>/dev/null || true
+# git add frontend/package.json VERSION backend/VERSION 2>/dev/null || true
 
 # Create git tag
 TAG_NAME="v${NEW_VERSION}"

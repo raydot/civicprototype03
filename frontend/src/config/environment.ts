@@ -1,7 +1,8 @@
 export const config = {
   // API
-  API_MODE: (import.meta.env.VITE_API_MODE as 'mock' | 'production') || 'mock',
+  API_MODE: (import.meta.env.VITE_API_MODE as 'mock' | 'production' | 'fastapi') || 'mock',
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000',
   
   // Claude AI
   CLAUDE_API_KEY: import.meta.env.VITE_CLAUDE_API_KEY,
@@ -34,13 +35,25 @@ if (config.isProduction && !config.API_BASE_URL) {
   throw new Error('VITE_API_BASE_URL is required when API_MODE is production')
 }
 
+// Claude API key only required if specifically using Claude provider
 if (config.API_MODE === 'production' && !config.CLAUDE_API_KEY) {
-  throw new Error('VITE_CLAUDE_API_KEY is required when API_MODE is production')
+  console.warn('VITE_CLAUDE_API_KEY not set - Claude provider will not work')
 }
 
-if (!['mock', 'production'].includes(config.API_MODE)) {
-  throw new Error('VITE_API_MODE must be either "mock" or "production"')
+if (config.API_MODE === 'fastapi' && !config.BACKEND_URL) {
+  throw new Error('VITE_BACKEND_URL is required when API_MODE is fastapi')
 }
+
+if (!['mock', 'production', 'fastapi'].includes(config.API_MODE)) {
+  throw new Error('VITE_API_MODE must be either "mock", "production", or "fastapi"')
+}
+
+// Debug: Log raw environment variables
+console.log('🔍 Raw Environment Variables:', {
+  VITE_API_MODE: import.meta.env.VITE_API_MODE,
+  VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+  VITE_DEBUG_MODE: import.meta.env.VITE_DEBUG_MODE,
+});
 
 // Log configuration in development
 if (config.isDevelopment && config.DEBUG_MODE) {

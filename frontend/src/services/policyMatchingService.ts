@@ -1,6 +1,7 @@
 import { PolicyMatchingProvider, PolicyMatchingRequest, PolicyMatchingResponse } from '../types/policy';
 import { ClaudeProvider } from './providers/claudeProvider';
 import { MockProvider } from './providers/mockProvider';
+import { FastApiProvider } from './providers/fastApiProvider';
 import { config } from '../config/environment';
 
 // Service factory - easy to swap providers based on environment
@@ -11,20 +12,29 @@ class PolicyMatchingService {
     // Provider options:
     // - MockProvider (for testing without API)
     // - ClaudeProvider (current AI implementation)
-    // - FastAPI Provider (future backend integration)
+    // - FastApiProvider (VoterPrime AI backend integration)
     this.provider = this.createProvider();
   }
 
   private createProvider(): PolicyMatchingProvider {
     const apiMode = config.API_MODE;
     
+    // Debug logging to see which provider is being used
+    console.log('🔧 PolicyMatchingService - API Mode:', apiMode);
+    console.log('🔧 PolicyMatchingService - Backend URL:', config.BACKEND_URL);
+    
     switch (apiMode) {
       case 'mock':
+        console.log('📝 Using MockProvider');
         return new MockProvider();
       case 'production':
+        console.log('🤖 Using ClaudeProvider');
         return new ClaudeProvider();
+      case 'fastapi':
+        console.log('🚀 Using FastApiProvider');
+        return new FastApiProvider();
       default:
-        throw new Error(`Unknown API mode: ${apiMode}. Use 'mock' or 'production'.`);
+        throw new Error(`Unknown API mode: ${apiMode}. Use 'mock', 'production', or 'fastapi'.`);
     }
   }
 
