@@ -1,9 +1,9 @@
 """
-Text encoder using sentence transformers for semantic similarity matching
+Text encoder using OpenAI embeddings API for semantic similarity matching
 """
 import numpy as np
 from typing import List, Optional, Dict, Any
-from sentence_transformers import SentenceTransformer
+from openai import OpenAI
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
 from ..config import settings
@@ -12,47 +12,33 @@ from ..utils.logging import structured_logger
 
 class TextEncoder:
     """
-    Text encoder for converting text to embeddings and calculating similarity
+    Text encoder for converting text to embeddings and calculating similarity using OpenAI API
     """
     
     def __init__(self):
-        self.model: Optional[SentenceTransformer] = None
-        self.model_name = settings.ai_model_name
-        self.vector_dimension = settings.vector_dimension
+        self.client: Optional[OpenAI] = None
+        self.model_name = "text-embedding-3-small"  # OpenAI's efficient embedding model
+        self.vector_dimension = 1536  # OpenAI embedding dimension
         self.logger = structured_logger
-        # Don't load model immediately - load on first use
+        # Initialize OpenAI client immediately since it's lightweight
+        self._initialize_client()
     
-    def _ensure_model_loaded(self) -> None:
-        """Ensure the model is loaded, load it if not"""
-        if self.model is None:
-            self._load_model()
-    
-    def _load_model(self) -> None:
-        """Load the sentence transformer model"""
+    def _initialize_client(self) -> None:
+        """Initialize the OpenAI client"""
         try:
-            self.logger.info(f"Loading text encoder model: {self.model_name}")
-            self.logger.info("This may take 30-60 seconds for first download...")
+            if not settings.openai_api_key:
+                raise ValueError("OpenAI API key not found in environment variables")
             
-            # Load with explicit cache directory and timeout handling
-            self.model = SentenceTransformer(
-                self.model_name,
-                cache_folder=None,  # Use default cache
-                use_auth_token=False
-            )
-            
-            self.logger.info("Text encoder model loaded successfully")
-            self.logger.info(f"Model max sequence length: {getattr(self.model, 'max_seq_length', 'unknown')}")
+            self.client = OpenAI(api_key=settings.openai_api_key)
+            self.logger.info("OpenAI client initialized successfully")
             
         except Exception as e:
-            self.logger.error(f"Failed to load text encoder model: {str(e)}")
-            self.logger.error(f"Error type: {type(e).__name__}")
-            # Don't crash the whole app - just mark as failed
-            self.model = None
-            raise RuntimeError(f"Could not load text encoder model: {str(e)}")
+            self.logger.error(f"Failed to initialize OpenAI client: {str(e)}")
+            raise RuntimeError(f"Could not initialize OpenAI client: {str(e)}")
     
     def encode_text(self, text: str) -> np.ndarray:
         """
-        Encode a single text string to embeddings
+        Encode a single text string to embeddings using OpenAI API
         
         Args:
             text: Input text to encode
@@ -60,7 +46,8 @@ class TextEncoder:
         Returns:
             numpy array of embeddings
         """
-        self._ensure_model_loaded()
+        if not self.client:
+            raise RuntimeError("OpenAI client not initialized")
         
         if not text or not text.strip():
             raise ValueError("Input text cannot be empty")
@@ -69,20 +56,28 @@ class TextEncoder:
             # Clean and normalize text
             cleaned_text = text.strip()
             
-            # Generate embeddings
-            embeddings = self.model.encode([cleaned_text])
+            self.logger.info(f"Encoding text with OpenAI: '{cleaned_text[:50]}...'")
             
-            self.logger.debug(f"Encoded text: '{cleaned_text[:50]}...' -> {embeddings.shape}")
+            # Call OpenAI embeddings API
+            response = self.client.embeddings.create(
+                model=self.model_name,
+                input=cleaned_text
+            )
             
-            return embeddings[0]
+            # Extract embeddings from response
+            embeddings = np.array(response.data[0].embedding)
+            
+            self.logger.info(f"Encoded text -> {embeddings.shape}")
+            
+            return embeddings
         
         except Exception as e:
-            self.logger.error(f"Failed to encode text: {str(e)}")
-            raise RuntimeError(f"Text encoding failed: {str(e)}")
+            self.logger.error(f"Failed to encode text with OpenAI: {str(e)}")
+            raise RuntimeError(f"OpenAI text encoding failed: {str(e)}")
     
     def encode_batch(self, texts: List[str]) -> np.ndarray:
         """
-        Encode multiple text strings to embeddings
+        Encode multiple text strings to embeddings using OpenAI API
         
         Args:
             texts: List of input texts to encode
@@ -90,7 +85,8 @@ class TextEncoder:
         Returns:
             numpy array of embeddings (one per text)
         """
-        self._ensure_model_loaded()
+        if not self.client:
+            raise RuntimeError("OpenAI client not initialized")
         
         if not texts:
             raise ValueError("Input texts list cannot be empty")
@@ -102,16 +98,24 @@ class TextEncoder:
             if not cleaned_texts:
                 raise ValueError("No valid texts found after cleaning")
             
-            # Generate embeddings
-            embeddings = self.model.encode(cleaned_texts)
+            self.logger.info(f"Encoding {len(cleaned_texts)} texts with OpenAI")
             
-            self.logger.debug(f"Encoded {len(cleaned_texts)} texts -> {embeddings.shape}")
+            # Call OpenAI embeddings API with batch
+            response = self.client.embeddings.create(
+                model=self.model_name,
+                input=cleaned_texts
+            )
+            
+            # Extract embeddings from response
+            embeddings = np.array([item.embedding for item in response.data])
+            
+            self.logger.info(f"Encoded {len(cleaned_texts)} texts -> {embeddings.shape}")
             
             return embeddings
         
         except Exception as e:
-            self.logger.error(f"Failed to encode text batch: {str(e)}")
-            raise RuntimeError(f"Batch text encoding failed: {str(e)}")
+            self.logger.error(f"Failed to encode text batch with OpenAI: {str(e)}")
+            raise RuntimeError(f"OpenAI batch text encoding failed: {str(e)}")
     
     def calculate_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
         """
@@ -165,20 +169,20 @@ class TextEncoder:
             query_embedding = self.encode_text(query_text)
             candidate_embeddings = self.encode_batch(candidate_texts)
             
-            # Calculate similarities
-            similarities = []
+            # Calculate similarity
+            similarity_scores = []
             for i, candidate_embedding in enumerate(candidate_embeddings):
-                similarity = self.calculate_similarity(query_embedding, candidate_embedding)
-                similarities.append({
+                similarity_score = self.calculate_similarity(query_embedding, candidate_embedding)
+                similarity_scores.append({
                     'index': i,
                     'text': candidate_texts[i],
-                    'similarity': similarity
+                    'similarity': similarity_score
                 })
             
             # Sort by similarity (highest first) and return top_k
-            similarities.sort(key=lambda x: x['similarity'], reverse=True)
+            similarity_scores.sort(key=lambda x: x['similarity'], reverse=True)
             
-            return similarities[:top_k]
+            return similarity_scores[:top_k]
         
         except Exception as e:
             self.logger.error(f"Failed to find similar texts: {str(e)}")
@@ -186,7 +190,7 @@ class TextEncoder:
     
     def get_model_info(self) -> Dict[str, Any]:
         """
-        Get information about the loaded model
+        Get information about the OpenAI model
         
         Returns:
             Dictionary with model information
@@ -194,9 +198,9 @@ class TextEncoder:
         return {
             'model_name': self.model_name,
             'vector_dimension': self.vector_dimension,
-            'is_loaded': self.model is not None,
-            'model_max_seq_length': getattr(self.model, 'max_seq_length', None) if self.model else None,
-            'status': 'loaded' if self.model is not None else 'not_loaded'
+            'is_loaded': self.client is not None,
+            'api_provider': 'OpenAI',
+            'status': 'ready' if self.client is not None else 'not_initialized'
         }
 
 

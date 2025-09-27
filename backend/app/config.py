@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     secret_key: Optional[str] = None
     
     # External API settings
-    openai_api_key: Optional[str] = None
+    openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
     
     # Logging settings
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
