@@ -102,7 +102,16 @@ git add frontend/package.json VERSION backend/VERSION 2>/dev/null || true
 
 # Create git tag
 TAG_NAME="v${NEW_VERSION}"
-git tag -a "$TAG_NAME" -m "Release version ${NEW_VERSION}"
-echo -e "${GREEN}🏷️  Created tag: ${TAG_NAME}${NC}"
+
+# Check if tag already exists
+if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Tag ${TAG_NAME} already exists. Skipping tag creation.${NC}"
+    echo -e "${YELLOW}💡 You may need to manually commit version changes and push.${NC}"
+    exit 0
+else
+    git tag -a "$TAG_NAME" -m "Release version ${NEW_VERSION}"
+    echo -e "${GREEN}🏷️  Created tag: ${TAG_NAME}${NC}"
+fi
 
 echo -e "${GREEN}✨ Version bump complete!${NC}"
+echo -e "${YELLOW}💡 Remember to commit the version changes: git add . && git commit -m 'chore: bump version to ${NEW_VERSION}'${NC}"

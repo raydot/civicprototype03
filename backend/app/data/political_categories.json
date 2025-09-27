@@ -1,0 +1,439 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Climate & Environment",
+      "type": "issue",
+      "description": "Environmental protection, climate change action, renewable energy, conservation",
+      "keywords": [
+        "climate", "environment", "green energy", "renewable", "carbon", "emissions", 
+        "sustainability", "conservation", "pollution", "clean air", "global warming",
+        "solar", "wind", "electric vehicles", "carbon tax", "paris agreement"
+      ],
+      "success_count": 45,
+      "total_usage_count": 60,
+      "metadata": {
+        "priority_level": "high",
+        "political_spectrum": "progressive",
+        "policy_areas": ["energy", "transportation", "regulation"]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Healthcare & Social Services",
+      "type": "issue",
+      "description": "Healthcare access, medical insurance, social safety net, public health",
+      "keywords": [
+        "healthcare", "medical", "insurance", "medicare", "medicaid", "hospitals",
+        "prescription drugs", "mental health", "public health", "social services",
+        "disability", "elderly care", "nursing homes", "health coverage"
+      ],
+      "success_count": 52,
+      "total_usage_count": 65,
+      "metadata": {
+        "priority_level": "high",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["healthcare", "social_policy"]
+      }
+    },
+    {
+      "id": 3,
+      "name": "Economy & Jobs",
+      "type": "issue",
+      "description": "Economic policy, employment, wages, business regulation, trade",
+      "keywords": [
+        "economy", "jobs", "employment", "wages", "minimum wage", "unemployment",
+        "business", "trade", "tariffs", "taxes", "inflation", "recession",
+        "small business", "corporations", "labor", "unions", "workforce"
+      ],
+      "success_count": 48,
+      "total_usage_count": 70,
+      "metadata": {
+        "priority_level": "high",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["economic", "labor", "trade"]
+      }
+    },
+    {
+      "id": 4,
+      "name": "Education & Research",
+      "type": "issue",
+      "description": "Public education, higher education funding, research investment, student loans",
+      "keywords": [
+        "education", "schools", "teachers", "students", "college", "university",
+        "student loans", "research", "science funding", "STEM", "literacy",
+        "school choice", "public schools", "private schools", "charter schools"
+      ],
+      "success_count": 38,
+      "total_usage_count": 55,
+      "metadata": {
+        "priority_level": "medium",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["education", "research"]
+      }
+    },
+    {
+      "id": 5,
+      "name": "Immigration & Border Security",
+      "type": "issue",
+      "description": "Immigration policy, border security, refugee assistance, citizenship pathways",
+      "keywords": [
+        "immigration", "border", "refugees", "asylum", "citizenship", "deportation",
+        "visa", "green card", "undocumented", "border wall", "border patrol",
+        "DACA", "dreamers", "sanctuary cities", "ICE"
+      ],
+      "success_count": 35,
+      "total_usage_count": 58,
+      "metadata": {
+        "priority_level": "high",
+        "political_spectrum": "polarized",
+        "policy_areas": ["immigration", "security"]
+      }
+    },
+    {
+      "id": 6,
+      "name": "Criminal Justice & Public Safety",
+      "type": "issue",
+      "description": "Law enforcement, criminal justice reform, public safety, gun policy",
+      "keywords": [
+        "police", "crime", "justice", "prison", "reform", "safety", "law enforcement",
+        "guns", "firearms", "second amendment", "background checks", "violence",
+        "community policing", "incarceration", "rehabilitation", "sentencing"
+      ],
+      "success_count": 42,
+      "total_usage_count": 62,
+      "metadata": {
+        "priority_level": "high",
+        "political_spectrum": "polarized",
+        "policy_areas": ["justice", "security", "guns"]
+      }
+    },
+    {
+      "id": 7,
+      "name": "Civil Rights & Social Justice",
+      "type": "issue",
+      "description": "Equal rights, discrimination, voting rights, social equality",
+      "keywords": [
+        "civil rights", "equality", "discrimination", "voting rights", "LGBTQ",
+        "racial justice", "gender equality", "women's rights", "minority rights",
+        "social justice", "inclusion", "diversity", "bias", "prejudice"
+      ],
+      "success_count": 40,
+      "total_usage_count": 58,
+      "metadata": {
+        "priority_level": "high",
+        "political_spectrum": "progressive",
+        "policy_areas": ["civil_rights", "social_policy"]
+      }
+    },
+    {
+      "id": 8,
+      "name": "Infrastructure & Transportation",
+      "type": "issue",
+      "description": "Roads, bridges, public transit, broadband, utilities infrastructure",
+      "keywords": [
+        "infrastructure", "roads", "bridges", "transportation", "public transit",
+        "broadband", "internet", "utilities", "water", "sewer", "airports",
+        "railways", "highways", "construction", "maintenance"
+      ],
+      "success_count": 33,
+      "total_usage_count": 45,
+      "metadata": {
+        "priority_level": "medium",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["infrastructure", "transportation"]
+      }
+    },
+    {
+      "id": 9,
+      "name": "Foreign Policy & Defense",
+      "type": "issue",
+      "description": "International relations, military, defense spending, diplomacy",
+      "keywords": [
+        "foreign policy", "military", "defense", "war", "peace", "diplomacy",
+        "international", "allies", "NATO", "China", "Russia", "Middle East",
+        "veterans", "armed forces", "national security", "terrorism"
+      ],
+      "success_count": 28,
+      "total_usage_count": 42,
+      "metadata": {
+        "priority_level": "medium",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["foreign_policy", "defense"]
+      }
+    },
+    {
+      "id": 10,
+      "name": "Technology & Privacy",
+      "type": "issue",
+      "description": "Digital privacy, tech regulation, cybersecurity, artificial intelligence",
+      "keywords": [
+        "technology", "privacy", "data", "cybersecurity", "artificial intelligence",
+        "social media", "big tech", "regulation", "surveillance", "encryption",
+        "digital rights", "internet freedom", "AI", "algorithms", "platforms"
+      ],
+      "success_count": 25,
+      "total_usage_count": 35,
+      "metadata": {
+        "priority_level": "medium",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["technology", "privacy"]
+      }
+    },
+    {
+      "id": 101,
+      "name": "Progressive Champion",
+      "type": "candidate_attribute",
+      "description": "Strong progressive positions on social and economic issues",
+      "keywords": [
+        "progressive", "liberal", "left-wing", "activist", "reform", "change",
+        "social justice", "economic equality", "environmental champion",
+        "civil rights advocate", "anti-establishment", "grassroots"
+      ],
+      "success_count": 32,
+      "total_usage_count": 48,
+      "metadata": {
+        "political_spectrum": "progressive",
+        "voter_appeal": ["young_voters", "urban", "college_educated"]
+      }
+    },
+    {
+      "id": 102,
+      "name": "Conservative Leader",
+      "type": "candidate_attribute",
+      "description": "Traditional conservative values and limited government approach",
+      "keywords": [
+        "conservative", "traditional", "right-wing", "limited government",
+        "fiscal responsibility", "family values", "constitutional", "patriotic",
+        "pro-business", "law and order", "strong defense"
+      ],
+      "success_count": 35,
+      "total_usage_count": 52,
+      "metadata": {
+        "political_spectrum": "conservative",
+        "voter_appeal": ["rural", "religious", "older_voters"]
+      }
+    },
+    {
+      "id": 103,
+      "name": "Moderate Pragmatist",
+      "type": "candidate_attribute",
+      "description": "Centrist approach focused on bipartisan solutions and practical governance",
+      "keywords": [
+        "moderate", "centrist", "bipartisan", "pragmatic", "compromise",
+        "practical", "experienced", "consensus-builder", "mainstream",
+        "reasonable", "balanced", "middle-ground"
+      ],
+      "success_count": 41,
+      "total_usage_count": 58,
+      "metadata": {
+        "political_spectrum": "centrist",
+        "voter_appeal": ["suburban", "independents", "swing_voters"]
+      }
+    },
+    {
+      "id": 104,
+      "name": "Political Newcomer",
+      "type": "candidate_attribute",
+      "description": "Fresh perspective from outside traditional politics",
+      "keywords": [
+        "newcomer", "outsider", "fresh", "new", "change", "reform",
+        "anti-establishment", "business background", "community leader",
+        "first-time candidate", "grassroots", "citizen politician"
+      ],
+      "success_count": 22,
+      "total_usage_count": 38,
+      "metadata": {
+        "experience_level": "newcomer",
+        "voter_appeal": ["anti_establishment", "change_seekers"]
+      }
+    },
+    {
+      "id": 105,
+      "name": "Experienced Veteran",
+      "type": "candidate_attribute",
+      "description": "Long track record in public service and government",
+      "keywords": [
+        "experienced", "veteran", "seasoned", "established", "proven",
+        "long-serving", "institutional knowledge", "legislative experience",
+        "government service", "political veteran", "establishment"
+      ],
+      "success_count": 38,
+      "total_usage_count": 55,
+      "metadata": {
+        "experience_level": "veteran",
+        "voter_appeal": ["stability_seekers", "older_voters"]
+      }
+    },
+    {
+      "id": 201,
+      "name": "Universal Healthcare",
+      "type": "policy",
+      "description": "Government-provided healthcare coverage for all citizens",
+      "keywords": [
+        "universal healthcare", "medicare for all", "single payer",
+        "government healthcare", "public option", "health coverage",
+        "medical care", "insurance reform", "healthcare access"
+      ],
+      "success_count": 28,
+      "total_usage_count": 45,
+      "metadata": {
+        "policy_category": "healthcare",
+        "implementation_complexity": "high",
+        "political_feasibility": "medium"
+      }
+    },
+    {
+      "id": 202,
+      "name": "Green New Deal",
+      "type": "policy",
+      "description": "Comprehensive climate action and economic transformation plan",
+      "keywords": [
+        "green new deal", "climate action", "renewable energy transition",
+        "green jobs", "carbon neutral", "environmental justice",
+        "clean energy", "climate emergency", "sustainable economy"
+      ],
+      "success_count": 24,
+      "total_usage_count": 42,
+      "metadata": {
+        "policy_category": "environment",
+        "implementation_complexity": "high",
+        "political_feasibility": "low"
+      }
+    },
+    {
+      "id": 203,
+      "name": "Tax Reform",
+      "type": "policy",
+      "description": "Changes to tax structure, rates, and collection policies",
+      "keywords": [
+        "tax reform", "tax cuts", "tax increases", "progressive taxation",
+        "corporate taxes", "income tax", "capital gains", "tax code",
+        "tax simplification", "tax fairness", "revenue"
+      ],
+      "success_count": 35,
+      "total_usage_count": 58,
+      "metadata": {
+        "policy_category": "economic",
+        "implementation_complexity": "medium",
+        "political_feasibility": "medium"
+      }
+    },
+    {
+      "id": 204,
+      "name": "Immigration Reform",
+      "type": "policy",
+      "description": "Comprehensive changes to immigration laws and enforcement",
+      "keywords": [
+        "immigration reform", "pathway to citizenship", "border security",
+        "comprehensive immigration", "DACA", "visa reform",
+        "guest worker program", "family reunification", "asylum reform"
+      ],
+      "success_count": 20,
+      "total_usage_count": 48,
+      "metadata": {
+        "policy_category": "immigration",
+        "implementation_complexity": "high",
+        "political_feasibility": "low"
+      }
+    },
+    {
+      "id": 205,
+      "name": "Infrastructure Investment",
+      "type": "policy",
+      "description": "Major public investment in roads, bridges, broadband, and utilities",
+      "keywords": [
+        "infrastructure investment", "infrastructure bill", "roads and bridges",
+        "broadband expansion", "public works", "construction jobs",
+        "modernization", "repair", "upgrade", "public investment"
+      ],
+      "success_count": 42,
+      "total_usage_count": 55,
+      "metadata": {
+        "policy_category": "infrastructure",
+        "implementation_complexity": "medium",
+        "political_feasibility": "high"
+      }
+    },
+    {
+      "id": 301,
+      "name": "Fiscal Conservative",
+      "type": "attribute",
+      "description": "Emphasis on reducing government spending and debt",
+      "keywords": [
+        "fiscal conservative", "spending cuts", "balanced budget",
+        "debt reduction", "government efficiency", "taxpayer money",
+        "fiscal responsibility", "waste reduction", "smaller government"
+      ],
+      "success_count": 30,
+      "total_usage_count": 45,
+      "metadata": {
+        "attribute_type": "economic_philosophy"
+      }
+    },
+    {
+      "id": 302,
+      "name": "Social Progressive",
+      "type": "attribute",
+      "description": "Strong support for social justice and civil rights",
+      "keywords": [
+        "social progressive", "civil rights", "equality", "inclusion",
+        "social justice", "diversity", "human rights", "discrimination",
+        "marginalized communities", "systemic change"
+      ],
+      "success_count": 33,
+      "total_usage_count": 48,
+      "metadata": {
+        "attribute_type": "social_philosophy"
+      }
+    },
+    {
+      "id": 303,
+      "name": "Pro-Business",
+      "type": "attribute",
+      "description": "Supportive of business interests and free market policies",
+      "keywords": [
+        "pro-business", "free market", "deregulation", "business friendly",
+        "economic growth", "job creation", "entrepreneurship",
+        "private sector", "competition", "market solutions"
+      ],
+      "success_count": 36,
+      "total_usage_count": 52,
+      "metadata": {
+        "attribute_type": "economic_philosophy"
+      }
+    },
+    {
+      "id": 304,
+      "name": "Environmentalist",
+      "type": "attribute",
+      "description": "Strong commitment to environmental protection and sustainability",
+      "keywords": [
+        "environmentalist", "green", "sustainability", "conservation",
+        "climate advocate", "renewable energy", "environmental protection",
+        "clean air", "clean water", "biodiversity", "ecosystem"
+      ],
+      "success_count": 29,
+      "total_usage_count": 41,
+      "metadata": {
+        "attribute_type": "issue_focus"
+      }
+    },
+    {
+      "id": 305,
+      "name": "Populist",
+      "type": "attribute",
+      "description": "Appeals to ordinary people against established elites",
+      "keywords": [
+        "populist", "anti-establishment", "working class", "common people",
+        "elite", "outsider", "grassroots", "ordinary Americans",
+        "forgotten", "left behind", "system change"
+      ],
+      "success_count": 25,
+      "total_usage_count": 42,
+      "metadata": {
+        "attribute_type": "political_style"
+      }
+    }
+  ]
+}

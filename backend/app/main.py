@@ -12,7 +12,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from .config import settings
 from .utils.logging import setup_logging, structured_logger
 from .utils.exceptions import AIRecommendationException
-from .api.routes import health, text_analysis
+from .api.routes import health, text_analysis, category_matching, sentiment_analysis
 
 
 # Set up logging before anything else
@@ -34,8 +34,22 @@ async def lifespan(app: FastAPI):
         port=settings.port
     )
     
-    # TODO: Initialize AI models here
-    # TODO: Initialize database connections here
+    # Initialize political categories for matching
+    try:
+        from .data.category_loader import get_category_loader
+        from .models.category_matcher import get_category_matcher
+        
+        category_loader = get_category_loader()
+        categories = category_loader.load_political_categories()
+        
+        category_matcher = get_category_matcher()
+        category_matcher.load_categories(categories)
+        
+        logger.info(f"✅ Loaded {len(categories)} political categories for matching")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to load political categories: {str(e)}")
+        # Don't raise here - let the app start but category endpoints will fail gracefully
     
     logger.info(f"🚀 {settings.app_name} v{settings.version} starting up...")
     logger.info(f"Environment: {settings.environment}")
@@ -80,6 +94,8 @@ if settings.environment == "production":
 # Include routers
 app.include_router(health.router)
 app.include_router(text_analysis.router)
+app.include_router(category_matching.router)
+app.include_router(sentiment_analysis.router)
 
 
 @app.exception_handler(AIRecommendationException)
