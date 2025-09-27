@@ -1,3 +1,9 @@
+## v0.8.7 (2025-09-26)
+
+### Fix
+
+- Removed health check entirely.
+
 ## v0.8.6 (2025-09-26)
 
 ### Fix
