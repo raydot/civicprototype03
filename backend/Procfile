@@ -1,1 +1,1 @@
-web: conda run -n ai-recommendation-service uvicorn app.main:app --host 0.0.0.0 --port $PORT
+web: bash -c "conda run -n ai-recommendation-service uvicorn app.main:app --host 0.0.0.0 --port $PORT"
