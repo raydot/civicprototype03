@@ -1,3 +1,9 @@
+## v0.8.6 (2025-09-26)
+
+### Fix
+
+- adding keyword 'python' to uvicorn call
+
 ## v0.8.5 (2025-09-26)
 
 ### Fix
