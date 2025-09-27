@@ -1,5 +1,5 @@
 # Multi-stage Docker build for Railway deployment with Conda
-FROM continuumio/miniconda3:latest as base
+FROM continuumio/miniconda3:latest AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -39,7 +39,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+    CMD python -c "import requests, os; requests.get(f'http://localhost:{os.getenv(\"PORT\", \"8000\")}/health')"
 
 # Command to run the application
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash", "-c", "python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
