@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "bash -c \"conda run -n ai-recommendation-service uvicorn app.main:app --host 0.0.0.0 --port $PORT\"",
+    "startCommand": "/opt/conda/envs/ai-recommendation-service/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
