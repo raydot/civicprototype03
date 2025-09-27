@@ -1,3 +1,9 @@
+## v0.9.0 (2025-09-27)
+
+### Feat
+
+- add VoterPrime admin dashboard for category management
+
 ## v0.8.7 (2025-09-26)
 
 ### Fix
