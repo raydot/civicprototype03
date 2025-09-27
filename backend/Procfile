@@ -1,1 +1,1 @@
-web: /opt/conda/envs/ai-recommendation-service/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT
+web: bash -c "/opt/conda/envs/ai-recommendation-service/bin/uvicorn app.main:app --host 0.0.0.0 --port \$PORT"
