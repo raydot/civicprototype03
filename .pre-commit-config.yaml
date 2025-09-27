@@ -4,10 +4,3 @@ repos:
     hooks:
       - id: commitizen
         stages: [commit-msg]
-  - repo: local
-    hooks:
-      - id: version-bump
-        name: Auto version bump
-        entry: ./scripts/version-bump.sh
-        language: script
-        stages: [pre-push]
