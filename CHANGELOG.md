@@ -1,3 +1,10 @@
+## v0.8.2 (2025-09-26)
+
+### Fix
+
+- removed nixpacks.
+- disabling health check.
+
 ## v0.8.1 (2025-09-26)
 
 ### Fix
