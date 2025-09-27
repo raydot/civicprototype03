@@ -1,3 +1,10 @@
+## v0.8.5 (2025-09-26)
+
+### Fix
+
+- removed the port entirely from railway.json and Procfile.
+- removing the start command from railway.json entirely.
+
 ## v0.8.4 (2025-09-26)
 
 ### Fix
