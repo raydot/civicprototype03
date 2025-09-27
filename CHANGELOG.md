@@ -1,3 +1,12 @@
+## v0.8.1 (2025-09-26)
+
+### Fix
+
+- adjustment to Procfile to try to set port properly.
+- missing from pydantic import Field import in config.py.
+- removed bad  setting from railway config.
+- allow all origins for CORS in production to fix Netlify connection
+
 ## v0.8.0 (2025-09-26)
 
 ### Feat
