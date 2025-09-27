@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoterPrime Admin Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          sans-serif;
+        background: #f5f7fa;
+        color: #2d3748;
+        line-height: 1.6;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+
+      .card h3 {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f7fafc;
+      }
+
+      .metric:last-child {
+        border-bottom: none;
+      }
+
+      .metric-value {
+        font-weight: 600;
+        color: #2b6cb0;
+      }
+
+      .category-list {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .category-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        background: #f8fafc;
+      }
+
+      .category-name {
+        font-weight: 500;
+        color: #2d3748;
+      }
+
+      .category-type {
+        font-size: 0.8rem;
+        color: #718096;
+        background: #edf2f7;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+      }
+
+      .success-rate {
+        font-weight: 600;
+      }
+
+      .success-rate.high {
+        color: #38a169;
+      }
+      .success-rate.medium {
+        color: #d69e2e;
+      }
+      .success-rate.low {
+        color: #e53e3e;
+      }
+
+      .btn {
+        background: #4299e1;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+      }
+
+      .btn:hover {
+        background: #3182ce;
+      }
+
+      .btn-danger {
+        background: #e53e3e;
+      }
+
+      .btn-danger:hover {
+        background: #c53030;
+      }
+
+      .auth-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #718096;
+      }
+
+      .error {
+        background: #fed7d7;
+        color: #c53030;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+      }
+
+      .success {
+        background: #c6f6d5;
+        color: #2f855a;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>🗳️ VoterPrime Admin Dashboard</h1>
+      <p>Category Management & Analytics</p>
+    </div>
+
+    <div class="container">
+      <!-- Authentication Section -->
+      <div id="auth-section" class="auth-section">
+        <h3>Admin Authentication</h3>
+        <div class="form-group">
+          <label for="admin-token">Admin Token:</label>
+          <input
+            type="password"
+            id="admin-token"
+            placeholder="Enter admin token"
+          />
+        </div>
+        <button class="btn" onclick="authenticate()">Login</button>
+      </div>
+
+      <!-- Dashboard Content (hidden until authenticated) -->
+      <div id="dashboard-content" class="hidden">
+        <!-- Analytics Overview -->
+        <div class="card">
+          <h3>📊 System Analytics</h3>
+          <div id="analytics-content" class="loading">Loading analytics...</div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Category Performance -->
+          <div class="card">
+            <h3>🎯 Category Performance</h3>
+            <div id="performance-content" class="loading">
+              Loading performance data...
+            </div>
+          </div>
+
+          <!-- Category Management -->
+          <div class="card">
+            <h3>⚙️ Category Management</h3>
+            <button class="btn" onclick="showCreateForm()">
+              Create New Category
+            </button>
+            <div id="create-form" class="hidden" style="margin-top: 1rem">
+              <div class="form-group">
+                <label>Name:</label>
+                <input type="text" id="new-name" placeholder="Category name" />
+              </div>
+              <div class="form-group">
+                <label>Type:</label>
+                <select id="new-type">
+                  <option value="issue">Issue</option>
+                  <option value="candidate_attribute">
+                    Candidate Attribute
+                  </option>
+                  <option value="policy">Policy</option>
+                  <option value="attribute">Attribute</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Description:</label>
+                <textarea
+                  id="new-description"
+                  placeholder="Category description"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label>Keywords (comma-separated):</label>
+                <input
+                  type="text"
+                  id="new-keywords"
+                  placeholder="keyword1, keyword2, keyword3"
+                />
+              </div>
+              <button class="btn" onclick="createCategory()">Create</button>
+              <button class="btn btn-danger" onclick="hideCreateForm()">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let adminToken = ''
+      const API_BASE = window.location.origin
+
+      async function authenticate() {
+        const token = document.getElementById('admin-token').value
+        if (!token) {
+          alert('Please enter admin token')
+          return
+        }
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/admin/categories/analytics?token=${token}`
+          )
+          if (response.ok) {
+            adminToken = token
+            document.getElementById('auth-section').classList.add('hidden')
+            document
+              .getElementById('dashboard-content')
+              .classList.remove('hidden')
+            loadDashboard()
+          } else {
+            alert('Invalid admin token')
+          }
+        } catch (error) {
+          alert('Authentication failed: ' + error.message)
+        }
+      }
+
+      async function loadDashboard() {
+        await Promise.all([loadAnalytics(), loadPerformance()])
+      }
+
+      async function loadAnalytics() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/admin/categories/analytics?token=${adminToken}`
+          )
+          const data = await response.json()
+
+          document.getElementById('analytics-content').innerHTML = `
+                    <div class="metric">
+                        <span>Total Categories:</span>
+                        <span class="metric-value">${
+                          data.total_categories
+                        }</span>
+                    </div>
+                    <div class="metric">
+                        <span>Average Success Rate:</span>
+                        <span class="metric-value">${(
+                          data.avg_success_rate * 100
+                        ).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric">
+                        <span>Best Performing:</span>
+                        <span class="metric-value">${
+                          data.most_successful_category
+                        }</span>
+                    </div>
+                    <div class="metric">
+                        <span>Needs Attention:</span>
+                        <span class="metric-value">${
+                          data.categories_needing_attention.length
+                        } categories</span>
+                    </div>
+                `
+        } catch (error) {
+          document.getElementById(
+            'analytics-content'
+          ).innerHTML = `<div class="error">Failed to load analytics: ${error.message}</div>`
+        }
+      }
+
+      async function loadPerformance() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/admin/categories/performance?token=${adminToken}&sort_by=success_rate&order=desc`
+          )
+          const data = await response.json()
+
+          const performanceHtml = data
+            .map((cat) => {
+              const successRate = (cat.success_rate * 100).toFixed(1)
+              const rateClass =
+                successRate >= 70
+                  ? 'high'
+                  : successRate >= 50
+                  ? 'medium'
+                  : 'low'
+
+              return `
+                        <div class="category-item">
+                            <div>
+                                <div class="category-name">${cat.category_name}</div>
+                                <div class="category-type">${cat.category_id}</div>
+                            </div>
+                            <div>
+                                <div class="success-rate ${rateClass}">${successRate}%</div>
+                                <div style="font-size: 0.8rem; color: #718096;">${cat.success_count}/${cat.total_usage}</div>
+                            </div>
+                        </div>
+                    `
+            })
+            .join('')
+
+          document.getElementById('performance-content').innerHTML = `
+                    <div class="category-list">${performanceHtml}</div>
+                `
+        } catch (error) {
+          document.getElementById(
+            'performance-content'
+          ).innerHTML = `<div class="error">Failed to load performance data: ${error.message}</div>`
+        }
+      }
+
+      function showCreateForm() {
+        document.getElementById('create-form').classList.remove('hidden')
+      }
+
+      function hideCreateForm() {
+        document.getElementById('create-form').classList.add('hidden')
+      }
+
+      async function createCategory() {
+        const name = document.getElementById('new-name').value
+        const type = document.getElementById('new-type').value
+        const description = document.getElementById('new-description').value
+        const keywordsStr = document.getElementById('new-keywords').value
+
+        if (!name || !description || !keywordsStr) {
+          alert('Please fill in all fields')
+          return
+        }
+
+        const keywords = keywordsStr
+          .split(',')
+          .map((k) => k.trim())
+          .filter((k) => k)
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/admin/categories?token=${adminToken}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                name,
+                type,
+                description,
+                keywords
+              })
+            }
+          )
+
+          if (response.ok) {
+            alert('Category created successfully!')
+            hideCreateForm()
+            // Clear form
+            document.getElementById('new-name').value = ''
+            document.getElementById('new-description').value = ''
+            document.getElementById('new-keywords').value = ''
+            // Reload dashboard
+            loadDashboard()
+          } else {
+            const error = await response.json()
+            alert('Failed to create category: ' + error.detail)
+          }
+        } catch (error) {
+          alert('Error creating category: ' + error.message)
+        }
+      }
+    </script>
+  </body>
+</html>
