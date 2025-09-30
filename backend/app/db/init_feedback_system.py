@@ -45,7 +45,8 @@ async def init_feedback_system():
         return
         
     try:
-        await database.connect()
+        # Database should already be connected by main app lifecycle
+        # Just run the health check without connecting/disconnecting
         
         # Check if all required tables exist
         required_tables = ['user_sessions', 'user_interactions', 'category_feedback', 'learning_metrics']
@@ -72,8 +73,6 @@ async def init_feedback_system():
     except Exception as e:
         print(f"❌ Health check failed: {str(e)}")
         raise
-    finally:
-        await database.disconnect()
 
 
 if __name__ == "__main__":

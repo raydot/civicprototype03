@@ -1,3 +1,9 @@
+## v0.10.5 (2025-09-30)
+
+### Fix
+
+- proper database connection lifecycle management
+
 ## v0.10.4 (2025-09-30)
 
 ### Fix

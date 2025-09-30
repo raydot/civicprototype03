@@ -249,7 +249,7 @@ async def get_category_feedback_details(
             WHERE cf.category_id = $1 
             AND cf.created_at > NOW() - INTERVAL '%s days'
             ORDER BY cf.created_at DESC
-        """ % days, [category_id])
+        """ % days, category_id)
         
         # Category performance metrics
         performance_metrics = await database.fetch_one("""
@@ -265,7 +265,7 @@ async def get_category_feedback_details(
             FROM category_feedback
             WHERE category_id = $1 
             AND created_at > NOW() - INTERVAL '%s days'
-        """ % days, [category_id])
+        """ % days, category_id)
         
         # Recent user inputs that matched this category
         recent_matches = await database.fetch_all("""
@@ -276,7 +276,7 @@ async def get_category_feedback_details(
             AND cf.created_at > NOW() - INTERVAL '7 days'
             ORDER BY cf.created_at DESC
             LIMIT 10
-        """, [category_id])
+        """, category_id)
         
         return {
             "category_id": category_id,

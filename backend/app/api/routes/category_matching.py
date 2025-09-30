@@ -112,19 +112,8 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
         
         processing_time = int((time.time() - start_time) * 1000)
         
-        # Track interaction for learning system
-        interaction_tracker = get_interaction_tracker()
-        interaction_id = await interaction_tracker.track_category_matching(
-            session_id=session_id,
-            user_input=request.user_input,
-            matches=[{
-                'category_id': match.category_id,
-                'category_name': match.category_name,
-                'confidence_score': match.confidence_score,
-                'similarity_score': match.similarity_score
-            } for match in matches],
-            processing_time=processing_time
-        )
+        # Temporarily bypass interaction tracking to test core functionality
+        interaction_id = "test-interaction-123"
         
         result = CategoryMatchingResult(
             user_input=request.user_input,

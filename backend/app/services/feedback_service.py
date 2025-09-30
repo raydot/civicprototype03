@@ -40,7 +40,7 @@ class UserSession:
         try:
             query = """
             INSERT INTO user_sessions (session_id, user_ip, user_agent, last_activity)
-            VALUES ($1, $2, $3, NOW())
+            VALUES (:session_id, :user_ip, :user_agent, NOW())
             ON CONFLICT (session_id) 
             DO UPDATE SET 
                 last_activity = NOW(),
@@ -48,10 +48,14 @@ class UserSession:
             RETURNING id, session_id
             """
             
-            result = await database.fetch_one(
-                query, 
-                [self.session_id, self.user_ip, self.user_agent]
-            )
+            # Use dictionary mapping for parameters (SQLAlchemy requirement)
+            values = {
+                "session_id": self.session_id,
+                "user_ip": self.user_ip, 
+                "user_agent": self.user_agent
+            }
+            
+            result = await database.fetch_one(query, values)
             
             logger.info(f"Session created/updated: {self.session_id}")
             return self.session_id
@@ -104,7 +108,7 @@ class InteractionTracker:
             
             interaction = await database.fetch_one(
                 interaction_query, 
-                [session_id, user_input, original_query or user_input, processing_time, json.dumps(metadata)]
+                session_id, user_input, original_query or user_input, processing_time, json.dumps(metadata)
             )
             
             interaction_id = str(interaction['id'])
@@ -153,7 +157,7 @@ class InteractionTracker:
             
             interaction = await database.fetch_one(
                 interaction_query,
-                [session_id, user_input, processing_time, json.dumps(metadata)]
+                session_id, user_input, processing_time, json.dumps(metadata)
             )
             
             interaction_id = str(interaction['id'])
@@ -235,7 +239,7 @@ class FeedbackCollector:
         FROM user_interactions 
         WHERE id = $1
         """
-        return await database.fetch_one(query, [interaction_id])
+        return await database.fetch_one(query, interaction_id)
     
     async def _get_match_data_from_interaction(
         self, 
@@ -287,10 +291,10 @@ class FeedbackCollector:
         
         return await database.fetch_one(
             feedback_query,
-            [interaction_id, category_feedback['category_id'], category_feedback['feedback_type'], 
-             category_feedback.get('user_rating'), category_feedback.get('feedback_reason'),
-             match_data.get('confidence_score', 0.0), match_data.get('similarity_score', 0.0),
-             json.dumps(feedback_metadata)]
+            interaction_id, category_feedback['category_id'], category_feedback['feedback_type'], 
+            category_feedback.get('user_rating'), category_feedback.get('feedback_reason'),
+            match_data.get('confidence_score', 0.0), match_data.get('similarity_score', 0.0),
+            json.dumps(feedback_metadata)
         )
     
     def _get_match_rank(self, match_data: Dict[str, Any], category_id: int) -> int:
@@ -321,7 +325,7 @@ class FeedbackCollector:
             FROM feedback_stats
             """
             
-            stats = await database.fetch_one(success_query, [category_id])
+            stats = await database.fetch_one(success_query, category_id)
             
             if stats and stats['total_feedback'] > 0:
                 success_rate = stats['positive_feedback'] / stats['total_feedback']
@@ -365,7 +369,7 @@ class FeedbackCollector:
         
         await database.execute(
             metric_query,
-            [category_id, metric_type, metric_value, sample_size]
+            category_id, metric_type, metric_value, sample_size
         )
 
 
