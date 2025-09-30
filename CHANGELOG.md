@@ -1,3 +1,9 @@
+## v0.10.4 (2025-09-30)
+
+### Fix
+
+- enable docs endpoint and fix remaining database parameter issues
+
 ## v0.10.3 (2025-09-30)
 
 ### Fix

@@ -98,8 +98,8 @@ app = FastAPI(
     version=settings.version,
     description="AI-powered recommendation system that learns from user feedback",
     lifespan=Lifecycle,
-    docs_url="/docs" if settings.debug else None,
-    redoc_url="/redoc" if settings.debug else None,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # Add CORS middleware
