@@ -1,3 +1,9 @@
+## v0.10.1 (2025-09-30)
+
+### Fix
+
+- **deploy**: resolve Railway deployment issues for feedback system
+
 ## v0.10.0 (2025-09-30)
 
 ### Feat
