@@ -1,6 +1,6 @@
 {
   "name": "VoterPrime Demo",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "private": true,
   "dependencies": {
     "class-variance-authority": "^0.7.1",

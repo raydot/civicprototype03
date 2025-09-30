@@ -1,3 +1,9 @@
+## v0.10.3 (2025-09-30)
+
+### Fix
+
+- correct database query parameter format for Railway deployment
+
 ## v0.10.2 (2025-09-30)
 
 ### Fix
