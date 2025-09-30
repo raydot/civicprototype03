@@ -223,6 +223,16 @@ async def get_category_feedback_details(
     try:
         from ...db.database import database
         
+        if database is None:
+            return {
+                "category_id": category_id,
+                "analysis_period_days": days,
+                "feedback_details": [],
+                "performance_metrics": {"total_feedback": 0},
+                "recent_matches": [],
+                "insights": ["Database not available - cannot provide category insights"]
+            }
+        
         # Category feedback details
         feedback_details = await database.fetch_all("""
             SELECT 
@@ -294,6 +304,19 @@ async def feedback_system_health():
     """
     try:
         from ...db.database import database
+        
+        if database is None:
+            return {
+                "status": "degraded",
+                "database_connected": False,
+                "recent_sessions_24h": 0,
+                "recent_feedback_24h": 0,
+                "system_info": {
+                    "feedback_collection": "disabled",
+                    "analytics": "disabled"
+                },
+                "message": "Database not available - feedback system disabled"
+            }
         
         # Check database connectivity
         db_check = await database.fetch_one("SELECT COUNT(*) as session_count FROM user_sessions WHERE created_at > NOW() - INTERVAL '24 hours'")

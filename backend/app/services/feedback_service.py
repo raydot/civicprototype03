@@ -33,6 +33,10 @@ class UserSession:
     
     async def create_or_update_session(self) -> str:
         """Create new session or update existing one."""
+        if database is None:
+            logger.warning("Database not available - using session ID without persistence")
+            return self.session_id
+            
         try:
             query = """
             INSERT INTO user_sessions (session_id, user_ip, user_agent, last_activity)
@@ -71,6 +75,10 @@ class InteractionTracker:
         original_query: Optional[str] = None
     ) -> str:
         """Track a category matching interaction."""
+        
+        if database is None:
+            logger.warning("Database not available - skipping interaction tracking")
+            return str(uuid.uuid4())  # Return a fake interaction ID
         
         try:
             # Create interaction record
@@ -123,6 +131,10 @@ class InteractionTracker:
     ) -> str:
         """Track a category refinement interaction."""
         
+        if database is None:
+            logger.warning("Database not available - skipping refinement tracking")
+            return str(uuid.uuid4())  # Return a fake interaction ID
+        
         try:
             interaction_query = """
             INSERT INTO user_interactions 
@@ -169,10 +181,13 @@ class FeedbackCollector:
         self,
         interaction_id: str,
         category_feedbacks: List[Dict[str, Any]],
-        overall_satisfaction: Optional[int] = None,
-        additional_comments: Optional[str] = None
+        user_rating: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Submit user feedback on category matches."""
+        """Submit user feedback for category matches."""
+        
+        if database is None:
+            logger.warning("Database not available - skipping feedback submission")
+            return {"status": "skipped", "message": "Database not available"}
         
         try:
             # Verify interaction exists
@@ -221,6 +236,9 @@ class FeedbackCollector:
     
     async def _get_interaction(self, interaction_id: str) -> Optional[Dict[str, Any]]:
         """Get interaction details by ID."""
+        if database is None:
+            return None
+            
         query = """
         SELECT id, session_id, interaction_type, user_input, interaction_metadata
         FROM user_interactions 
@@ -374,8 +392,13 @@ class FeedbackAnalytics:
     async def get_category_performance_summary(self, days: int = 30) -> List[Dict[str, Any]]:
         """Get category performance summary."""
         
+        if database is None:
+            logger.warning("Database not available - returning empty performance summary")
+            return []
+        
         query = """
         SELECT * FROM category_performance_summary
+        WHERE total_feedback > 0
         ORDER BY acceptance_rate DESC, total_feedback DESC
         """
         
@@ -384,6 +407,10 @@ class FeedbackAnalytics:
     
     async def get_feedback_trends(self, days: int = 30) -> List[Dict[str, Any]]:
         """Get daily feedback trends."""
+        
+        if database is None:
+            logger.warning("Database not available - returning empty feedback trends")
+            return []
         
         query = """
         SELECT * FROM daily_feedback_trends

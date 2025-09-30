@@ -35,6 +35,19 @@ async def Lifecycle(app: FastAPI):
         port=settings.port
     )
     
+    # Initialize feedback system database (only if DATABASE_URL is available)
+    try:
+        from .db.database import database
+        if database is not None:
+            from .db.init_feedback_system import init_feedback_system
+            await init_feedback_system()
+            logger.info("Feedback system database initialized successfully")
+        else:
+            logger.warning("DATABASE_URL not available - skipping feedback system initialization")
+    except Exception as e:
+        logger.error(f"Failed to initialize feedback system database: {str(e)}")
+        # Don't raise here - let the app start but feedback endpoints may not work
+    
     # Initialize political categories for matching
     try:
         from .data.category_loader import get_category_loader

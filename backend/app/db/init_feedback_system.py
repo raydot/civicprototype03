@@ -41,6 +41,10 @@ async def run_migration(migration_file: str):
 
 async def init_feedback_system():
     """Initialize the feedback system database tables."""
+    if database is None:
+        print("⚠️ DATABASE_URL not available - skipping feedback system initialization")
+        return
+        
     try:
         # Connect to database
         await database.connect()
@@ -106,6 +110,10 @@ async def init_feedback_system():
 
 async def check_feedback_system_health():
     """Check if feedback system is properly set up."""
+    if database is None:
+        print("⚠️ DATABASE_URL not available - feedback system not available")
+        return
+        
     try:
         await database.connect()
         
@@ -140,6 +148,13 @@ async def check_feedback_system_health():
 
 if __name__ == "__main__":
     import sys
+    
+    # Check for local testing flag
+    if len(sys.argv) > 1 and sys.argv[1] == "local":
+        # Use local SQLite for testing
+        import os
+        os.environ["DATABASE_URL"] = "sqlite:///./test_feedback.db"
+        print("🧪 Using local SQLite database for testing")
     
     if len(sys.argv) > 1 and sys.argv[1] == "check":
         # Health check mode
