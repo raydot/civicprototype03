@@ -1,3 +1,9 @@
+## v0.10.2 (2025-09-30)
+
+### Fix
+
+- make database connection optional to prevent Railway deployment crashes
+
 ## v0.10.1 (2025-09-30)
 
 ### Fix
