@@ -1,13 +1,14 @@
 """
 Category matching API routes for VoterPrime political recommendations
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 import time
 
 from ...models.category_matcher import get_category_matcher, CategoryMatch
 from ...data.category_loader import get_category_loader
+from ...services.feedback_service import UserSession, get_interaction_tracker
 from ...utils.logging import structured_logger
 
 router = APIRouter(prefix="/category-matching", tags=["Category Matching"])
@@ -43,6 +44,7 @@ class CategoryMatchingResult(BaseModel):
     total_categories_searched: int
     processing_time_ms: int
     model_info: Dict[str, Any]
+    interaction_id: Optional[str] = Field(None, description="ID for tracking user feedback on this interaction")
 
 
 class CategoryRefinementRequest(BaseModel):
@@ -67,7 +69,7 @@ class CategoryInfoResponse(BaseModel):
 
 
 @router.post("/find-matches", response_model=CategoryMatchingResult)
-async def find_category_matches(request: CategoryMatchRequest):
+async def find_category_matches(request: CategoryMatchRequest, http_request: Request):
     """
     Find political categories that match user's priorities
     
@@ -80,6 +82,10 @@ async def find_category_matches(request: CategoryMatchRequest):
     
     try:
         logger.info(f"Finding category matches for: '{request.user_input[:50]}...'")
+        
+        # Create or update user session for feedback tracking
+        user_session = UserSession(http_request)
+        session_id = await user_session.create_or_update_session()
         
         category_matcher = get_category_matcher()
         
@@ -106,15 +112,30 @@ async def find_category_matches(request: CategoryMatchRequest):
         
         processing_time = int((time.time() - start_time) * 1000)
         
+        # Track interaction for learning system
+        interaction_tracker = get_interaction_tracker()
+        interaction_id = await interaction_tracker.track_category_matching(
+            session_id=session_id,
+            user_input=request.user_input,
+            matches=[{
+                'category_id': match.category_id,
+                'category_name': match.category_name,
+                'confidence_score': match.confidence_score,
+                'similarity_score': match.similarity_score
+            } for match in matches],
+            processing_time=processing_time
+        )
+        
         result = CategoryMatchingResult(
             user_input=request.user_input,
             matches=match_responses,
             total_categories_searched=len(category_matcher.categories),
             processing_time_ms=processing_time,
-            model_info=category_matcher.get_model_info()
+            model_info=category_matcher.get_model_info(),
+            interaction_id=interaction_id
         )
         
-        logger.info(f"Found {len(matches)} matches in {processing_time}ms")
+        logger.info(f"Found {len(matches)} matches in {processing_time}ms, interaction_id: {interaction_id}")
         
         return result
         

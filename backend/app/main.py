@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import settings
 from .utils.logging import setup_logging, structured_logger
 from .utils.exceptions import AIRecommendationException
-from .api.routes import health, text_analysis, category_matching, sentiment_analysis, admin
+from .api.routes import health, text_analysis, category_matching, sentiment_analysis, admin, feedback
 
 
 # Set up logging before anything else
@@ -101,6 +101,7 @@ app.include_router(text_analysis.router)
 app.include_router(category_matching.router)
 app.include_router(sentiment_analysis.router)
 app.include_router(admin.router)
+app.include_router(feedback.router)
 
 
 @app.exception_handler(AIRecommendationException)
