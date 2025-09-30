@@ -35,10 +35,14 @@ async def Lifecycle(app: FastAPI):
         port=settings.port
     )
     
-    # Initialize feedback system database (only if DATABASE_URL is available)
+    # Initialize and connect to database (only if DATABASE_URL is available)
     try:
         from .db.database import database
         if database is not None:
+            # Connect to database for the application lifecycle
+            await database.connect()
+            logger.info("Database connected for application lifecycle")
+            
             from .db.init_feedback_system import init_feedback_system
             await init_feedback_system()
             logger.info("Feedback system database initialized successfully")
@@ -77,6 +81,15 @@ async def Lifecycle(app: FastAPI):
         service=settings.app_name
     )
     logger.info("Application shutting down...")
+    
+    # Disconnect from database
+    try:
+        from .db.database import database
+        if database is not None:
+            await database.disconnect()
+            logger.info("Database disconnected")
+    except Exception as e:
+        logger.error(f"Error disconnecting from database: {str(e)}")
 
 
 # Create FastAPI application
@@ -142,7 +155,7 @@ async def root():
         "version": settings.version,
         "status": "running",
         "environment": settings.environment,
-        "docs_url": "/docs" if settings.debug else "disabled"
+        "docs_url": "/docs"
     }
 
 
