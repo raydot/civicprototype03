@@ -1,3 +1,9 @@
+## v0.10.0 (2025-09-30)
+
+### Feat
+
+- integrate issueTerminology.json with enhanced political categories
+
 ## v0.9.1 (2025-09-27)
 
 ### Fix
