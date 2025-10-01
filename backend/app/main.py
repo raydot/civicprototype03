@@ -98,8 +98,8 @@ app = FastAPI(
     version=settings.version,
     description="AI-powered recommendation system that learns from user feedback",
     lifespan=Lifecycle,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if settings.enable_docs else None,
+    redoc_url="/redoc" if settings.enable_docs else None,
 )
 
 # Add CORS middleware
@@ -150,13 +150,19 @@ async def ai_recommendation_exception_handler(request, exc: AIRecommendationExce
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {
+    response = {
         "service": settings.app_name,
         "version": settings.version,
         "status": "running",
         "environment": settings.environment,
-        "docs_url": "/docs"
     }
+    
+    # Only include docs_url if docs are enabled
+    if settings.enable_docs:
+        response["docs_url"] = "/docs"
+        response["redoc_url"] = "/redoc"
+    
+    return response
 
 
 def handle_shutdown_signal(signum, frame):

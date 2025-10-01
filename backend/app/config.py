@@ -4,7 +4,7 @@ Railway-optimized configuration with environment variables
 """
 import os
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -44,6 +44,15 @@ class Settings(BaseSettings):
     # Logging settings
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
     
+    # Documentation settings
+    # Pydantic will read DOO_DOCZ from .env file and convert to boolean
+    doo_docz: str = "true"  # This will be read from .env
+    
+    @property
+    def enable_docs(self) -> bool:
+        """Convert doo_docz string to boolean"""
+        return self.doo_docz.lower() in ("true", "1", "yes", "on")
+    
     # CORS settings
     allowed_origins: list = [
         "http://localhost:3000",  # Local frontend
@@ -54,9 +63,14 @@ class Settings(BaseSettings):
     model_config = {
         "env_file": ".env",
         "case_sensitive": False,
-        "protected_namespaces": ()  # Disable protected namespaces to allow model_name
+        "protected_namespaces": (),  # Disable protected namespaces to allow model_name
+        "extra": "ignore"  # Ignore extra fields from .env file
     }
 
 
 # Global settings instance
 settings = Settings()
+
+# Debug: Print the enable_docs value
+print(f"🔍 DEBUG: doo_docz from .env = {settings.doo_docz}")
+print(f"🔍 DEBUG: enable_docs (computed) = {settings.enable_docs}")
