@@ -70,7 +70,3 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
-
-# Debug: Print the enable_docs value
-print(f"🔍 DEBUG: doo_docz from .env = {settings.doo_docz}")
-print(f"🔍 DEBUG: enable_docs (computed) = {settings.enable_docs}")

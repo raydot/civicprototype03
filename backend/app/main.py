@@ -129,6 +129,10 @@ app.include_router(sentiment_analysis.router)
 app.include_router(admin.router)
 app.include_router(feedback.router)
 
+# Import and include learning router
+from .api.routes import learning
+app.include_router(learning.router)
+
 
 @app.exception_handler(AIRecommendationException)
 async def ai_recommendation_exception_handler(request, exc: AIRecommendationException):

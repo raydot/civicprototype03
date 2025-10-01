@@ -221,8 +221,11 @@ class FeedbackCollector:
                 
                 feedback_records.append(feedback_record)
             
-            # Update category performance metrics
+            # Update category performance metrics (legacy method)
             await self._update_category_metrics(category_feedbacks)
+            
+            # Trigger learning service to update metrics
+            await self._trigger_learning_updates(category_feedbacks)
             
             # Log successful feedback submission
             logger.info(f"Feedback submitted for interaction {interaction_id}: {len(feedback_records)} items")
@@ -365,6 +368,35 @@ class FeedbackCollector:
                         metric_value=float(stats['avg_rating']),
                         sample_size=stats['total_feedback']
                     )
+    
+    async def _trigger_learning_updates(self, category_feedbacks: List[Dict[str, Any]]):
+        """
+        Trigger learning service to update category metrics.
+        
+        This is called after feedback is submitted to update:
+        - Success rates
+        - Confidence scores
+        - User satisfaction ratings
+        """
+        try:
+            from .learning_service import get_learning_service
+            
+            learning_service = get_learning_service()
+            
+            # Update metrics for each category that received feedback
+            for feedback in category_feedbacks:
+                await learning_service.update_category_metrics(
+                    category_id=feedback['category_id'],
+                    feedback_type=feedback['feedback_type'],
+                    confidence_score=feedback.get('confidence_score', 0.0),
+                    user_rating=feedback.get('user_rating')
+                )
+                
+            logger.info(f"Learning updates triggered for {len(category_feedbacks)} categories")
+            
+        except Exception as e:
+            # Don't fail the feedback submission if learning update fails
+            logger.warning(f"Learning update failed (non-critical): {str(e)}")
     
     async def _store_daily_metric(
         self,

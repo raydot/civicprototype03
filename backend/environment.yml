@@ -42,6 +42,9 @@ dependencies:
   - isort=5.12.*
   - flake8=6.1.*
   - mypy=1.7.*
+  
+  # Database migrations
+  - alembic=1.13.*
 
   # Pip dependencies (for packages not available in conda)
   - pip

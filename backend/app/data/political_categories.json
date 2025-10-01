@@ -4,7 +4,7 @@
       "id": 1,
       "name": "Climate & Environment",
       "type": "issue",
-      "description": "Environmental protection, climate change action, renewable energy, conservation",
+      "description": "Climate change and extreme weather threaten communities and the economy. Policy must accelerate the transition to clean energy while ensuring affordability and resilience.",
       "keywords": [
         "climate",
         "environment",
@@ -42,7 +42,7 @@
       "id": 2,
       "name": "Healthcare & Social Services",
       "type": "issue",
-      "description": "Healthcare access, medical insurance, social safety net, public health",
+      "description": "Americans face high healthcare costs and unequal access to care. Reform is needed to reduce costs, improve quality, and ensure coverage for all, including mental health and long-term care.",
       "keywords": [
         "healthcare",
         "medical",
@@ -77,7 +77,7 @@
       "id": 3,
       "name": "Economy & Jobs",
       "type": "issue",
-      "description": "Economic policy, employment, wages, business regulation, trade",
+      "description": "Rising living costs, stagnant wages, and job insecurity are major concerns. Economic policy must focus on creating opportunities, reducing inequality, and supporting the modern workforce.",
       "keywords": [
         "economy",
         "jobs",
@@ -161,7 +161,7 @@
       "id": 5,
       "name": "Immigration & Border Security",
       "type": "issue",
-      "description": "Immigration policy, border security, refugee assistance, citizenship pathways",
+      "description": "America's immigration system needs reform to support legal immigration, address border security, and reflect both economic needs and humanitarian values.",
       "keywords": [
         "immigration",
         "border",
@@ -519,7 +519,7 @@
       "id": 207,
       "name": "Reproductive Rights",
       "type": "issue",
-      "description": "Abortion access, reproductive healthcare, family planning",
+      "description": "Access to reproductive healthcare, including contraception and abortion, is a deeply personal and contested issue requiring clear, rights-based policies.",
       "keywords": [
         "abortion rights",
         "pro-choice",
@@ -541,7 +541,7 @@
       "id": 208,
       "name": "Pro-Life Values",
       "type": "issue",
-      "description": "Abortion restrictions, protection of unborn, traditional values",
+      "description": "Policies centered on the sanctity of life emphasize restricting abortion and supporting alternatives like adoption, grounded in traditional moral and religious beliefs.",
       "keywords": [
         "pro-life",
         "abortion restrictions",
@@ -649,6 +649,28 @@
         "priority_level": "medium",
         "political_spectrum": "bipartisan",
         "policy_areas": ["governance", "democracy"]
+      }
+    },
+    {
+      "id": 300,
+      "name": "Contraception Access",
+      "type": "policy",
+      "description": "Focus on ensuring affordable, reliable access to birth control and family planning services without being abortion-specific.",
+      "keywords": [
+        "birth control",
+        "contraception",
+        "family planning",
+        "preventive care",
+        "access"
+      ],
+      "success_count": 0,
+      "total_usage_count": 0,
+      "terminology_source": "issueTerminology.json",
+      "terminology_sections": ["contraception"],
+      "metadata": {
+        "priority_level": "medium",
+        "political_spectrum": "bipartisan",
+        "policy_areas": ["healthcare", "social_policy"]
       }
     }
   ]
