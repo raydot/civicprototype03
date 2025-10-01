@@ -246,10 +246,10 @@ async def get_category_feedback_details(
                 cf.feedback_metadata
             FROM category_feedback cf
             JOIN user_interactions ui ON cf.interaction_id = ui.id
-            WHERE cf.category_id = $1 
+            WHERE cf.category_id = :category_id 
             AND cf.created_at > NOW() - INTERVAL '%s days'
             ORDER BY cf.created_at DESC
-        """ % days, category_id)
+        """ % days, {"category_id": category_id})
         
         # Category performance metrics
         performance_metrics = await database.fetch_one("""
@@ -263,20 +263,20 @@ async def get_category_feedback_details(
                 AVG(confidence_score) as avg_confidence,
                 AVG(similarity_score) as avg_similarity
             FROM category_feedback
-            WHERE category_id = $1 
+            WHERE category_id = :category_id 
             AND created_at > NOW() - INTERVAL '%s days'
-        """ % days, category_id)
+        """ % days, {"category_id": category_id})
         
         # Recent user inputs that matched this category
         recent_matches = await database.fetch_all("""
             SELECT DISTINCT ui.user_input, cf.feedback_type, cf.created_at
             FROM user_interactions ui
             JOIN category_feedback cf ON ui.id = cf.interaction_id
-            WHERE cf.category_id = $1
+            WHERE cf.category_id = :category_id
             AND cf.created_at > NOW() - INTERVAL '7 days'
             ORDER BY cf.created_at DESC
             LIMIT 10
-        """, category_id)
+        """, {"category_id": category_id})
         
         return {
             "category_id": category_id,

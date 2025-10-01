@@ -81,20 +81,18 @@ class InteractionTracker:
         if database is None:
             logger.warning("Database not available - skipping interaction tracking")
             return str(uuid.uuid4())  # Return a fake interaction ID
-        
         try:
             # Create interaction record
             interaction_query = """
             INSERT INTO user_interactions 
             (session_id, interaction_type, user_input, original_query, processing_time_ms, interaction_metadata)
-            VALUES ($1, 'category_match', $2, $3, $4, $5)
+            VALUES (:session_id, 'category_matching', :user_input, :original_query, :processing_time, :metadata)
             RETURNING id
             """
             
             metadata = {
-                'total_matches': len(matches),
-                'top_confidence': matches[0].get('confidence_score', 0) if matches else 0,
-                'categories_searched': len(matches),
+                'matches_count': len(matches),
+                'top_match': matches[0] if matches else None,
                 'match_details': [
                     {
                         'category_id': match.get('category_id'),
@@ -108,7 +106,13 @@ class InteractionTracker:
             
             interaction = await database.fetch_one(
                 interaction_query, 
-                session_id, user_input, original_query or user_input, processing_time, json.dumps(metadata)
+                {
+                    "session_id": session_id,
+                    "user_input": user_input,
+                    "original_query": original_query or user_input,
+                    "processing_time": processing_time,
+                    "metadata": json.dumps(metadata)
+                }
             )
             
             interaction_id = str(interaction['id'])
@@ -137,7 +141,7 @@ class InteractionTracker:
             interaction_query = """
             INSERT INTO user_interactions 
             (session_id, interaction_type, user_input, processing_time_ms, interaction_metadata)
-            VALUES ($1, 'refinement', $2, $3, $4)
+            VALUES (:session_id, 'refinement', :user_input, :processing_time, :metadata)
             RETURNING id
             """
             
@@ -157,7 +161,12 @@ class InteractionTracker:
             
             interaction = await database.fetch_one(
                 interaction_query,
-                session_id, user_input, processing_time, json.dumps(metadata)
+                {
+                    "session_id": session_id,
+                    "user_input": user_input,
+                    "processing_time": processing_time,
+                    "metadata": json.dumps(metadata)
+                }
             )
             
             interaction_id = str(interaction['id'])
@@ -176,7 +185,9 @@ class FeedbackCollector:
         self,
         interaction_id: str,
         category_feedbacks: List[Dict[str, Any]],
-        user_rating: Optional[int] = None
+        user_rating: Optional[int] = None,
+        overall_satisfaction: Optional[int] = None,
+        additional_comments: Optional[str] = None
     ) -> Dict[str, Any]:
         """Submit user feedback for category matches."""
         
@@ -237,9 +248,9 @@ class FeedbackCollector:
         query = """
         SELECT id, session_id, interaction_type, user_input, interaction_metadata
         FROM user_interactions 
-        WHERE id = $1
+        WHERE id = :interaction_id
         """
-        return await database.fetch_one(query, interaction_id)
+        return await database.fetch_one(query, {"interaction_id": interaction_id})
     
     async def _get_match_data_from_interaction(
         self, 
@@ -276,7 +287,8 @@ class FeedbackCollector:
         INSERT INTO category_feedback 
         (interaction_id, category_id, category_name, feedback_type, 
          confidence_score, similarity_score, user_rating, feedback_reason, feedback_metadata)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES (:interaction_id, :category_id, :category_name, :feedback_type, 
+         :confidence_score, :similarity_score, :user_rating, :feedback_reason, :feedback_metadata)
         RETURNING id, created_at
         """
         
@@ -291,10 +303,17 @@ class FeedbackCollector:
         
         return await database.fetch_one(
             feedback_query,
-            interaction_id, category_feedback['category_id'], category_feedback['feedback_type'], 
-            category_feedback.get('user_rating'), category_feedback.get('feedback_reason'),
-            match_data.get('confidence_score', 0.0), match_data.get('similarity_score', 0.0),
-            json.dumps(feedback_metadata)
+            {
+                "interaction_id": interaction_id,
+                "category_id": category_feedback['category_id'],
+                "category_name": category_feedback.get('category_name', 'Unknown'),
+                "feedback_type": category_feedback['feedback_type'],
+                "user_rating": category_feedback.get('user_rating'),
+                "feedback_reason": category_feedback.get('feedback_reason'),
+                "confidence_score": match_data.get('confidence_score', 0.0),
+                "similarity_score": match_data.get('similarity_score', 0.0),
+                "feedback_metadata": json.dumps(feedback_metadata)
+            }
         )
     
     def _get_match_rank(self, match_data: Dict[str, Any], category_id: int) -> int:
@@ -317,7 +336,7 @@ class FeedbackCollector:
                     COUNT(*) FILTER (WHERE feedback_type IN ('accept', 'maybe')) as positive_feedback,
                     AVG(user_rating) as avg_rating
                 FROM category_feedback 
-                WHERE category_id = $1 
+                WHERE category_id = :category_id 
                 AND created_at > NOW() - INTERVAL '30 days'
                 GROUP BY category_id
             )
@@ -325,7 +344,7 @@ class FeedbackCollector:
             FROM feedback_stats
             """
             
-            stats = await database.fetch_one(success_query, category_id)
+            stats = await database.fetch_one(success_query, {"category_id": category_id})
             
             if stats and stats['total_feedback'] > 0:
                 success_rate = stats['positive_feedback'] / stats['total_feedback']
@@ -356,20 +375,22 @@ class FeedbackCollector:
     ):
         """Store or update daily metric for a category."""
         
+        # Simple insert - ON CONFLICT removed because constraint doesn't exist yet
+        # TODO: Add unique constraint on (category_id, metric_type, DATE(calculated_at)) in Phase 2
         metric_query = """
         INSERT INTO learning_metrics 
         (category_id, metric_type, metric_value, sample_size, time_period, calculated_at)
-        VALUES ($1, $2, $3, $4, 'daily', NOW())
-        ON CONFLICT (category_id, metric_type, DATE(calculated_at))
-        DO UPDATE SET 
-            metric_value = $3,
-            sample_size = $4,
-            calculated_at = NOW()
+        VALUES (:category_id, :metric_type, :metric_value, :sample_size, 'daily', NOW())
         """
         
         await database.execute(
             metric_query,
-            category_id, metric_type, metric_value, sample_size
+            {
+                "category_id": category_id,
+                "metric_type": metric_type,
+                "metric_value": metric_value,
+                "sample_size": sample_size
+            }
         )
 
 
