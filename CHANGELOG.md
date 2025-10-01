@@ -1,3 +1,10 @@
+## v0.11.1 (2025-09-30)
+
+### Fix
+
+- added environment variable to toggle docs endpoint.
+- added docs endpoint toggle environment variable.
+
 ## v0.11.0 (2025-09-30)
 
 ### Feat
