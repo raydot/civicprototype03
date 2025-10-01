@@ -1,3 +1,9 @@
+## v0.11.0 (2025-09-30)
+
+### Feat
+
+- complete Phase 1 - database operations and professional test suite
+
 ## v0.10.5 (2025-09-30)
 
 ### Fix
