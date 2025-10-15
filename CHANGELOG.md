@@ -1,3 +1,13 @@
+## v1.0.0 (2025-10-15)
+
+### BREAKING CHANGE
+
+- Admin endpoints now require authentication
+
+### Feat
+
+- **admin**: add password-protected category admin tool
+
 ## v0.11.2 (2025-10-01)
 
 ### Fix
