@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Admin - VoterPrime</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Browse Tab Styles */
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        /* Category Cards */
+        .categories-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .category-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .category-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        
+        .category-header {
+            padding: 20px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .category-header:hover {
+            background: #f8f9fa;
+        }
+        
+        .category-info {
+            flex: 1;
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .category-meta {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-issue {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .badge-policy {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .keyword-count {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* Temperature Bar */
+        .temperature-bar-container {
+            margin-top: 10px;
+        }
+        
+        .temperature-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .temperature-bar {
+            position: relative;
+            height: 8px;
+            background: linear-gradient(to right, 
+                #1565c0 0%, 
+                #42a5f5 25%, 
+                #9c27b0 50%, 
+                #ef5350 75%, 
+                #c62828 100%);
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .temperature-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .temperature-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #999;
+        }
+        
+        .expand-icon {
+            font-size: 20px;
+            color: #667eea;
+            transition: transform 0.3s;
+        }
+        
+        .category-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        .category-details {
+            display: none;
+            padding: 0 20px 20px 20px;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .category-card.expanded .category-details {
+            display: block;
+        }
+        
+        .category-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .keywords-section {
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            min-height: 60px;
+        }
+        
+        .keyword-tag {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .keyword-tag.editing {
+            background: white;
+            color: #333;
+            border: 2px solid #667eea;
+            padding: 4px 10px;
+        }
+        
+        .keyword-remove {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        
+        .keyword-remove:hover {
+            opacity: 1;
+        }
+        
+        .keyword-input {
+            padding: 6px 12px;
+            border: 2px dashed #667eea;
+            border-radius: 16px;
+            font-size: 13px;
+            outline: none;
+            min-width: 100px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #5568d3;
+        }
+        
+        .btn-enhance {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-enhance:hover {
+            background: #218838;
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-deactivate {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .enhance-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .enhance-form.active {
+            display: block;
+        }
+        
+        .enhance-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        /* Create Tab Styles */
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #preview {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .warning-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        .preview-card {
+            background: #f8f9fa;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 25px;
+        }
+        
+        .preview-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .preview-card p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .meta-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .meta-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .meta-value {
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .keywords-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .keyword {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .actions {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .example-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .example-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .example-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .example-section li {
+            color: #666;
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .example-section li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Category Admin</h1>
+        <p class="subtitle">Browse, edit, and create political categories for VoterPrime</p>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('browse')">📋 Browse Categories</button>
+            <button class="tab" onclick="switchTab('create')">✨ Create New</button>
+        </div>
+        
+        <!-- Tab 1: Browse Categories -->
+        <div id="browseTab" class="tab-content active">
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value" id="totalCategories">0</div>
+                    <div class="stat-label">Total Categories</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="issueCount">0</div>
+                    <div class="stat-label">Issues</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="policyCount">0</div>
+                    <div class="stat-label">Policies</div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="searchInput" placeholder="Search by name or description..." oninput="filterCategories()">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="typeFilter" onchange="filterCategories()">
+                        <option value="">All Types</option>
+                        <option value="issue">Issue</option>
+                        <option value="policy">Policy</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Political Spectrum</label>
+                    <select id="spectrumFilter" onchange="filterCategories()">
+                        <option value="">All Spectrum</option>
+                        <option value="progressive">Progressive</option>
+                        <option value="bipartisan">Bipartisan</option>
+                        <option value="polarized">Polarized</option>
+                        <option value="conservative">Conservative</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Categories List -->
+            <div class="categories-list" id="categoriesList">
+                <div class="loading" id="loadingCategories">
+                    <div class="spinner"></div>
+                    <div>Loading categories...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Create New Category -->
+        <div id="createTab" class="tab-content">
+            <div class="example-section">
+                <h3>Example Requests:</h3>
+                <ul>
+                    <li>"I want to track candidates' positions on cryptocurrency regulation"</li>
+                    <li>"Need a category for rural broadband access and digital divide issues"</li>
+                    <li>"Track positions on student loan forgiveness and college debt"</li>
+                    <li>"Monitor stances on police reform and qualified immunity"</li>
+                </ul>
+            </div>
+            
+            <div class="input-section">
+                <label for="description">Describe the category you want to create:</label>
+                <textarea 
+                    id="description" 
+                    rows="4" 
+                    placeholder="Example: I want to track candidates' positions on cryptocurrency regulation and digital asset policy. This should cover blockchain technology, crypto taxation, and regulatory frameworks."
+                ></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="generatePreview()">
+                    ✨ Generate Category
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>AI is analyzing your request...</div>
+            </div>
+            
+            <div id="preview">
+                <div id="warnings"></div>
+                
+                <div class="preview-card">
+                    <h2 id="categoryName"></h2>
+                    <p id="categoryDescription"></p>
+                    
+                    <div class="meta-info">
+                        <div class="meta-item">
+                            <div class="meta-label">Type</div>
+                            <div class="meta-value" id="categoryType"></div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Political Spectrum</div>
+                            <div class="meta-value" id="categorySpectrum"></div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Policy Areas</div>
+                            <div class="meta-value" id="categoryAreas"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="keywords-section">
+                        <div class="keywords-label">Keywords (<span id="keywordCount">0</span>):</div>
+                        <div class="keywords" id="keywords"></div>
+                    </div>
+                    
+                    <div class="actions">
+                        <div class="button-group">
+                            <button class="btn-success" onclick="approveCategory()">
+                                ✓ Approve & Save Category
+                            </button>
+                            <button class="btn-secondary" onclick="resetForm()">
+                                ✗ Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                <strong>✓ Success!</strong> <span id="successText"></span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let currentPreview = null;
+        let allCategories = [];
+        let filteredCategories = [];
+        const API_BASE = window.location.origin;
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+        });
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'browse') {
+                document.getElementById('browseTab').classList.add('active');
+            } else {
+                document.getElementById('createTab').classList.add('active');
+            }
+        }
+        
+        // Load all categories
+        async function loadCategories() {
+            const loadingEl = document.getElementById('loadingCategories');
+            const listEl = document.getElementById('categoriesList');
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_BASE}/category-admin/categories`);
+                if (!response.ok) throw new Error('Failed to load categories');
+                
+                const data = await response.json();
+                console.log('Loaded categories:', data);
+                console.log('Total categories:', data.total);
+                console.log('Categories array:', data.categories);
+                
+                allCategories = data.categories;
+                filteredCategories = allCategories;
+                
+                console.log('allCategories:', allCategories);
+                console.log('filteredCategories:', filteredCategories);
+                
+                updateStats();
+                renderCategories();
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                if (listEl) {
+                    listEl.innerHTML = '<div class="no-results">Failed to load categories. Please refresh the page.</div>';
+                }
+            } finally {
+                const loadingElFinal = document.getElementById('loadingCategories');
+                if (loadingElFinal) loadingElFinal.style.display = 'none';
+            }
+        }
+        
+        // Update stats bar
+        function updateStats() {
+            const issueCount = filteredCategories.filter(c => c.type === 'issue').length;
+            const policyCount = filteredCategories.filter(c => c.type === 'policy').length;
+            
+            document.getElementById('totalCategories').textContent = filteredCategories.length;
+            document.getElementById('issueCount').textContent = issueCount;
+            document.getElementById('policyCount').textContent = policyCount;
+        }
+        
+        // Filter categories
+        function filterCategories() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const spectrumFilter = document.getElementById('spectrumFilter').value;
+            
+            filteredCategories = allCategories.filter(cat => {
+                const matchesSearch = !searchTerm || 
+                    cat.name.toLowerCase().includes(searchTerm) ||
+                    cat.description.toLowerCase().includes(searchTerm);
+                
+                const matchesType = !typeFilter || cat.type === typeFilter;
+                
+                const matchesSpectrum = !spectrumFilter || 
+                    cat.metadata?.political_spectrum === spectrumFilter;
+                
+                return matchesSearch && matchesType && matchesSpectrum;
+            });
+            
+            updateStats();
+            renderCategories();
+        }
+        
+        // Render category cards
+        function renderCategories() {
+            const container = document.getElementById('categoriesList');
+            
+            if (filteredCategories.length === 0) {
+                container.innerHTML = '<div class="no-results">No categories found matching your filters.</div>';
+                return;
+            }
+            
+            container.innerHTML = filteredCategories.map(cat => createCategoryCard(cat)).join('');
+        }
+        
+        // Create category card HTML
+        function createCategoryCard(cat) {
+            const spectrum = cat.metadata?.political_spectrum || 'bipartisan';
+            const spectrumPosition = getSpectrumPosition(spectrum);
+            
+            return `
+                <div class="category-card" data-id="${cat.id}">
+                    <div class="category-header" onclick="toggleCategory(${cat.id})">
+                        <div class="category-info">
+                            <div class="category-title">#${cat.id} ${cat.name}</div>
+                            <div class="category-meta">
+                                <span class="badge badge-${cat.type}">${cat.type}</span>
+                                <span class="keyword-count">${cat.keywords?.length || 0} keywords</span>
+                            </div>
+                            <div class="temperature-bar-container">
+                                <div class="temperature-label">Political Spectrum</div>
+                                <div class="temperature-bar">
+                                    <div class="temperature-indicator" style="left: ${spectrumPosition}%"></div>
+                                </div>
+                                <div class="temperature-labels">
+                                    <span>Progressive</span>
+                                    <span>Moderate</span>
+                                    <span>Conservative</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="category-details">
+                        <div class="category-description">${cat.description}</div>
+                        
+                        <div class="keywords-section">
+                            <div class="section-header">
+                                <div class="section-title">Keywords (${cat.keywords?.length || 0})</div>
+                            </div>
+                            <div class="keywords-container" id="keywords-${cat.id}">
+                                ${(cat.keywords || []).map(kw => 
+                                    `<span class="keyword-tag">${kw}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn-small btn-edit" onclick="editKeywords(${cat.id}, event)">
+                                ✏️ Edit Keywords
+                            </button>
+                            <button class="btn-small btn-enhance" onclick="showEnhanceForm(${cat.id}, event)">
+                                ✨ Enhance with AI
+                            </button>
+                        </div>
+                        
+                        <div class="enhance-form" id="enhance-${cat.id}">
+                            <label>What's missing? Describe the context:</label>
+                            <textarea rows="3" id="enhance-context-${cat.id}" 
+                                placeholder="Example: Users are searching for 'digital divide' and 'internet access' but not matching well"></textarea>
+                            <div class="button-group">
+                                <button class="btn-small btn-enhance" onclick="enhanceCategory(${cat.id}, event)">
+                                    Generate Keywords
+                                </button>
+                                <button class="btn-small btn-cancel" onclick="hideEnhanceForm(${cat.id}, event)">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Get temperature bar position (0-100%)
+        function getSpectrumPosition(spectrum) {
+            const positions = {
+                'progressive': 0,
+                'bipartisan': 50,
+                'polarized': 50,
+                'conservative': 100
+            };
+            return positions[spectrum] || 50;
+        }
+        
+        // Toggle category expansion
+        function toggleCategory(id) {
+            const card = document.querySelector(`.category-card[data-id="${id}"]`);
+            card.classList.toggle('expanded');
+        }
+        
+        // Edit keywords inline
+        let editingCategory = null;
+        
+        function editKeywords(id, event) {
+            event.stopPropagation();
+            
+            if (editingCategory === id) {
+                saveKeywords(id);
+                return;
+            }
+            
+            editingCategory = id;
+            const category = allCategories.find(c => c.id === id);
+            const container = document.getElementById(`keywords-${id}`);
+            
+            container.innerHTML = category.keywords.map((kw, idx) => 
+                `<span class="keyword-tag editing">
+                    ${kw}
+                    <span class="keyword-remove" onclick="removeKeyword(${id}, ${idx}, event)">×</span>
+                </span>`
+            ).join('') + 
+            `<input type="text" class="keyword-input" id="new-keyword-${id}" 
+                placeholder="Add keyword..." onkeypress="if(event.key==='Enter') addKeyword(${id}, event)">`;
+            
+            event.target.textContent = '💾 Save Keywords';
+        }
+        
+        function removeKeyword(catId, kwIdx, event) {
+            event.stopPropagation();
+            const category = allCategories.find(c => c.id === catId);
+            category.keywords.splice(kwIdx, 1);
+            editKeywords(catId, event);
+        }
+        
+        function addKeyword(catId, event) {
+            event.stopPropagation();
+            const input = document.getElementById(`new-keyword-${catId}`);
+            const keyword = input.value.trim();
+            
+            if (keyword) {
+                const category = allCategories.find(c => c.id === catId);
+                category.keywords.push(keyword);
+                input.value = '';
+                editKeywords(catId, event);
+            }
+        }
+        
+        async function saveKeywords(id) {
+            const category = allCategories.find(c => c.id === id);
+            
+            try {
+                const response = await fetch(`${API_BASE}/category-admin/categories/${id}/update-keywords`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({keywords: category.keywords})
+                });
+                
+                if (!response.ok) throw new Error('Failed to save keywords');
+                
+                editingCategory = null;
+                renderCategories();
+                alert('Keywords saved successfully!');
+                
+            } catch (error) {
+                console.error('Error saving keywords:', error);
+                alert('Failed to save keywords: ' + error.message);
+            }
+        }
+        
+        // Show/hide enhance form
+        function showEnhanceForm(id, event) {
+            event.stopPropagation();
+            document.getElementById(`enhance-${id}`).classList.add('active');
+        }
+        
+        function hideEnhanceForm(id, event) {
+            event.stopPropagation();
+            document.getElementById(`enhance-${id}`).classList.remove('active');
+        }
+        
+        // Enhance category with AI
+        async function enhanceCategory(id, event) {
+            event.stopPropagation();
+            
+            const context = document.getElementById(`enhance-context-${id}`).value.trim();
+            if (!context) {
+                alert('Please describe what keywords are missing');
+                return;
+            }
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/category-admin/categories/${id}/enhance`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({additional_context: context})
+                });
+                
+                if (!response.ok) throw new Error('Failed to enhance category');
+                
+                const result = await response.json();
+                
+                alert(`Added ${result.added_keywords.length} new keywords:\n${result.added_keywords.join(', ')}`);
+                
+                // Reload categories
+                await loadCategories();
+                hideEnhanceForm(id, event);
+                
+            } catch (error) {
+                console.error('Error enhancing category:', error);
+                alert('Failed to enhance category: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate Keywords';
+            }
+        }
+        
+        // CREATE TAB FUNCTIONS (existing code)
+        async function generatePreview() {
+            const description = document.getElementById('description').value.trim();
+            
+            if (!description) {
+                alert('Please describe the category you want to create');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_BASE}/category-admin/generate-preview`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({description})
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to generate preview');
+                }
+                
+                currentPreview = await response.json();
+                displayPreview(currentPreview);
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error('Error generating preview:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        function displayPreview(preview) {
+            document.getElementById('categoryName').textContent = preview.name;
+            document.getElementById('categoryDescription').textContent = preview.description;
+            document.getElementById('categoryType').textContent = preview.type;
+            document.getElementById('categorySpectrum').textContent = preview.political_spectrum;
+            document.getElementById('categoryAreas').textContent = preview.policy_areas.join(', ');
+            
+            const keywordsDiv = document.getElementById('keywords');
+            keywordsDiv.innerHTML = preview.keywords.map(k => 
+                `<span class="keyword">${k}</span>`
+            ).join('');
+            document.getElementById('keywordCount').textContent = preview.keywords.length;
+            
+            const warningsDiv = document.getElementById('warnings');
+            if (preview.similarity_warnings && preview.similarity_warnings.length > 0) {
+                warningsDiv.innerHTML = preview.similarity_warnings.map(w =>
+                    `<div class="warning">
+                        <span class="warning-icon">⚠️</span>
+                        <strong>Warning:</strong> ${w.message}
+                        <br><small>Recommendation: ${w.recommendation}</small>
+                    </div>`
+                ).join('');
+            } else {
+                warningsDiv.innerHTML = '';
+            }
+            
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('preview').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        async function approveCategory() {
+            if (!currentPreview) return;
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/category-admin/create-category`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(currentPreview)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create category');
+                }
+                
+                const result = await response.json();
+                
+                document.getElementById('successText').textContent = 
+                    `Category "${currentPreview.name}" created with ID ${result.category_id}`;
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Reload categories in browse tab
+                await loadCategories();
+                
+                setTimeout(() => {
+                    resetForm();
+                    switchTab('browse');
+                }, 2000);
+                
+            } catch (error) {
+                alert('Error saving category: ' + error.message);
+                console.error('Error creating category:', error);
+                btn.disabled = false;
+                btn.textContent = '✓ Approve & Save Category';
+            }
+        }
+        
+        function resetForm() {
+            document.getElementById('description').value = '';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            currentPreview = null;
+        }
+        
+        document.getElementById('description').addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                generatePreview();
+            }
+        });
+    </script>
+</body>
+</html>

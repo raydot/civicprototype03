@@ -1,1 +1,2 @@
+release: /opt/conda/envs/ai-recommendation-service/bin/alembic upgrade head
 web: /opt/conda/envs/ai-recommendation-service/bin/python -m uvicorn app.main:app --host 0.0.0.0

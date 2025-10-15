@@ -1,17 +1,35 @@
 # Docker Compose for local development
-version: '3.8'
-
 services:
+  # PostgreSQL database for local development
+  postgres:
+    image: postgres:15-alpine
+    container_name: voterprime-postgres
+    environment:
+      POSTGRES_USER: voterprime
+      POSTGRES_PASSWORD: voterprime_dev
+      POSTGRES_DB: voterprime_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U voterprime']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI application
   api:
     build: .
+    container_name: voterprime-api
     ports:
       - '8000:8000'
     environment:
       - ENVIRONMENT=development
-      - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
+      - DATABASE_URL=postgresql://voterprime:voterprime_dev@postgres:5432/voterprime_dev
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - LOG_LEVEL=DEBUG
+      - DOO_DOCZ=true
     volumes:
       - .:/app # Mount source code for hot reloading
       - /app/__pycache__ # Exclude pycache from volume mount
@@ -28,7 +46,10 @@ services:
         '--reload'
       ]
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   # Redis for session management (optional for development)
   redis:
@@ -40,4 +61,5 @@ services:
       - redis_data:/data
 
 volumes:
+  postgres_data:
   redis_data:
