@@ -149,7 +149,7 @@ async def generate_category_preview(request: CategoryRequest, admin: str = Depen
         client = OpenAI(api_key=settings.openai_api_key)
         
         # Load existing categories
-        data = load_categories()
+        data = await load_categories()
         existing_categories = data["categories"]
         
         # Create context for AI - show existing categories
@@ -203,7 +203,7 @@ Example good keywords for "Climate & Environment":
 """
         
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},
             temperature=0.3  # Lower temp for consistency
@@ -426,7 +426,7 @@ Return JSON: {{"new_keywords": ["keyword1", "keyword2", ...]}}
 """
         
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},
             temperature=0.3

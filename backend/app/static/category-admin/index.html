@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category Admin - VoterPrime</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>📊 Category Admin</h1>
+      <p class="subtitle">
+        Browse, edit, and create political categories for VoterPrime
+      </p>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('browse', event)">
+          📋 Browse Categories
+        </button>
+        <button class="tab" onclick="switchTab('create', event)">✨ Create New</button>
+      </div>
+
+      <!-- Tab 1: Browse Categories -->
+      <div id="browseTab" class="tab-content active">
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-value" id="totalCategories">0</div>
+            <div class="stat-label">Total Categories</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="issueCount">0</div>
+            <div class="stat-label">Issues</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="policyCount">0</div>
+            <div class="stat-label">Policies</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-group">
+            <label>Search</label>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search by name or description..."
+              oninput="filterCategories()"
+            />
+          </div>
+          <div class="filter-group">
+            <label>Type</label>
+            <select id="typeFilter" onchange="filterCategories()">
+              <option value="">All Types</option>
+              <option value="issue">Issue</option>
+              <option value="policy">Policy</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Political Spectrum</label>
+            <select id="spectrumFilter" onchange="filterCategories()">
+              <option value="">All Spectrum</option>
+              <option value="progressive">Progressive</option>
+              <option value="bipartisan">Bipartisan</option>
+              <option value="polarized">Polarized</option>
+              <option value="conservative">Conservative</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Categories List -->
+        <div class="categories-list" id="categoriesList">
+          <div class="loading" id="loadingCategories">
+            <div class="spinner"></div>
+            <div>Loading categories...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Create New Category -->
+      <div id="createTab" class="tab-content">
+        <div class="example-section">
+          <h3>Example Requests:</h3>
+          <ul>
+            <li>
+              "I want to track candidates' positions on cryptocurrency
+              regulation"
+            </li>
+            <li>
+              "Need a category for rural broadband access and digital divide
+              issues"
+            </li>
+            <li>
+              "Track positions on student loan forgiveness and college debt"
+            </li>
+            <li>"Monitor stances on police reform and qualified immunity"</li>
+          </ul>
+        </div>
+
+        <div class="input-section">
+          <label for="description"
+            >Describe the category you want to create:</label
+          >
+          <textarea
+            id="description"
+            rows="4"
+            placeholder="Example: I want to track candidates' positions on cryptocurrency regulation and digital asset policy. This should cover blockchain technology, crypto taxation, and regulatory frameworks."
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="generatePreview()">
+            ✨ Generate Category
+          </button>
+        </div>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <div>AI is analyzing your request...</div>
+        </div>
+
+        <div id="preview">
+          <div id="warnings"></div>
+
+          <div class="preview-card">
+            <h2 id="categoryName"></h2>
+            <p id="categoryDescription"></p>
+
+            <div class="meta-info">
+              <div class="meta-item">
+                <div class="meta-label">Type</div>
+                <div class="meta-value" id="categoryType"></div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">Political Spectrum</div>
+                <div class="meta-value" id="categorySpectrum"></div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">Policy Areas</div>
+                <div class="meta-value" id="categoryAreas"></div>
+              </div>
+            </div>
+
+            <div class="keywords-section">
+              <div class="keywords-label">
+                Keywords (<span id="keywordCount">0</span>):
+              </div>
+              <div class="keywords" id="keywords"></div>
+            </div>
+
+            <div class="actions">
+              <div class="button-group">
+                <button class="btn-success" onclick="approveCategory(event)">
+                  ✓ Approve & Save Category
+                </button>
+                <button class="btn-secondary" onclick="resetForm()">
+                  ✗ Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="success-message" id="successMessage">
+          <strong>✓ Success!</strong> <span id="successText"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load JavaScript modules -->
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
