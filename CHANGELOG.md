@@ -1,3 +1,9 @@
+## v1.0.1 (2025-10-15)
+
+### Fix
+
+- **category-admin**: resolve switchTab event.target error on programmatic calls
+
 ## v1.0.0 (2025-10-15)
 
 ### BREAKING CHANGE

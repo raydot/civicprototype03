@@ -1,3 +1,25 @@
+## v1.0.1 (2025-10-15)
+
+### Fix
+
+- **category-admin**: resolve switchTab event.target error on programmatic calls
+
+## v1.0.0 (2025-10-15)
+
+### BREAKING CHANGE
+
+- Admin endpoints now require authentication
+
+### Feat
+
+- **admin**: add password-protected category admin tool
+
+## v0.11.2 (2025-10-01)
+
+### Fix
+
+- Political categories tweaks from SS.
+
 ## v0.11.1 (2025-09-30)
 
 ### Fix
