@@ -1,3 +1,9 @@
+## v1.2.0 (2025-10-17)
+
+### Feat
+
+- **category-admin**: add transform category feature with split/merge capabilities
+
 ## v1.1.0 (2025-10-17)
 
 ### Feat

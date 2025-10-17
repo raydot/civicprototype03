@@ -67,6 +67,11 @@ class EnhanceRequest(BaseModel):
     additional_context: str
 
 
+class TransformRequest(BaseModel):
+    transform_instructions: str
+    source_category_ids: List[int]  # Can be one (split) or multiple (merge)
+
+
 async def load_categories():
     """Load categories from database"""
     if database is None:
@@ -465,6 +470,217 @@ Return JSON: {{"new_keywords": ["keyword1", "keyword2", ...]}}
     except Exception as e:
         logger.error(f"Error enhancing category: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to enhance category: {str(e)}")
+
+
+@router.post("/categories/transform")
+async def transform_categories(request: TransformRequest, admin: str = Depends(verify_admin)):
+    """
+    Transform categories via natural language - handles both split and merge operations.
+    Takes one or more source categories and generates new categories based on instructions.
+    """
+    try:
+        if not settings.openai_api_key:
+            raise HTTPException(
+                status_code=500, 
+                detail="OpenAI API key not configured"
+            )
+        
+        client = OpenAI(api_key=settings.openai_api_key)
+        
+        if database is None:
+            raise HTTPException(status_code=503, detail="Database not available")
+        
+        # Get source categories from database
+        source_categories = []
+        for cat_id in request.source_category_ids:
+            query = """
+                SELECT id, name, type, description, keywords, metadata
+                FROM political_categories 
+                WHERE id = :category_id AND is_active = true
+            """
+            row = await database.fetch_one(query, {"category_id": cat_id})
+            if not row:
+                raise HTTPException(status_code=404, detail=f"Category {cat_id} not found")
+            
+            source_categories.append({
+                "id": row["id"],
+                "name": row["name"],
+                "type": row["type"],
+                "description": row["description"],
+                "keywords": json.loads(row["keywords"]) if isinstance(row["keywords"], str) else (row["keywords"] or []),
+                "metadata": json.loads(row["metadata"]) if isinstance(row["metadata"], str) else (row["metadata"] or {})
+            })
+        
+        # Build context for AI
+        source_context = "\n\n".join([
+            f"SOURCE CATEGORY {cat['id']}: {cat['name']}\n"
+            f"Type: {cat['type']}\n"
+            f"Description: {cat['description']}\n"
+            f"Keywords: {', '.join(cat['keywords'][:20])}...\n"
+            f"Political Spectrum: {cat['metadata'].get('political_spectrum', 'unknown')}\n"
+            f"Policy Areas: {', '.join(cat['metadata'].get('policy_areas', []))}"
+            for cat in source_categories
+        ])
+        
+        # Load existing categories for similarity checking
+        all_categories = await load_categories()
+        existing_summary = "\n".join([
+            f"- ID {cat['id']}: {cat['name']}"
+            for cat in all_categories["categories"][:20]
+        ])
+        
+        prompt = f"""You are transforming political categories based on natural language instructions.
+
+SOURCE CATEGORIES TO TRANSFORM:
+{source_context}
+
+USER INSTRUCTIONS: "{request.transform_instructions}"
+
+EXISTING CATEGORIES (for similarity checking):
+{existing_summary}
+
+TASK:
+Interpret the user's instructions and generate the appropriate new categories. This could be:
+- SPLIT: Breaking one category into multiple more specific categories
+- MERGE: Combining multiple categories into one or more new categories
+- REFINE: Adjusting scope while creating new categories
+
+For each new category you create:
+1. Distribute keywords from source categories based on semantic relevance
+2. Consider the source categories' metadata but make fresh determinations
+3. Check for similarity with existing categories
+4. Follow the user's specific instructions about keyword distribution
+
+Return JSON with this structure:
+{{
+  "operation_type": "split" or "merge" or "refine",
+  "new_categories": [
+    {{
+      "name": "Clear category name",
+      "description": "2-3 sentences explaining scope and policy focus",
+      "keywords": ["15-30 relevant keywords from source + new ones"],
+      "type": "issue" or "policy",
+      "political_spectrum": "progressive" or "conservative" or "bipartisan" or "polarized",
+      "policy_areas": ["2-3 policy areas"],
+      "keyword_source_notes": "Brief note on which source keywords went here"
+    }}
+  ],
+  "similarity_warnings": [
+    {{
+      "category_name": "name of new category",
+      "warning_type": "too_similar" or "too_broad" or "too_narrow",
+      "message": "Description of the issue",
+      "similar_to": ["existing category names"] or null
+    }}
+  ]
+}}
+
+GUIDELINES:
+- Be specific and focused in category definitions
+- Ensure keywords are well-distributed (no category should be empty)
+- Include both formal and colloquial terms in keywords
+- Make categories distinct enough to be useful for matching
+- Consider both progressive and conservative terminology
+"""
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            temperature=0.3
+        )
+        
+        result = json.loads(response.choices[0].message.content)
+        
+        logger.info(f"Transform operation '{result['operation_type']}' generated {len(result['new_categories'])} categories")
+        
+        # Format response for frontend
+        return {
+            "status": "success",
+            "operation_type": result["operation_type"],
+            "source_category_ids": request.source_category_ids,
+            "new_categories": result["new_categories"],
+            "similarity_warnings": result.get("similarity_warnings", [])
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error transforming categories: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to transform categories: {str(e)}")
+
+
+@router.post("/categories/transform/approve")
+async def approve_transform(request: dict, admin: str = Depends(verify_admin)):
+    """
+    Approve a transform operation - creates new categories and deactivates source categories.
+    """
+    try:
+        if database is None:
+            raise HTTPException(status_code=503, detail="Database not available")
+        
+        new_categories = request.get("new_categories", [])
+        source_category_ids = request.get("source_category_ids", [])
+        
+        if not new_categories or not source_category_ids:
+            raise HTTPException(status_code=400, detail="Missing required data")
+        
+        created_ids = []
+        
+        # Create new categories
+        for cat_data in new_categories:
+            # Find next available ID
+            query = "SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM political_categories"
+            result = await database.fetch_one(query)
+            next_id = result["next_id"]
+            
+            new_category = {
+                "id": next_id,
+                "name": cat_data["name"],
+                "type": cat_data["type"],
+                "description": cat_data["description"],
+                "keywords": cat_data["keywords"],
+                "success_count": 0,
+                "total_usage_count": 0,
+                "terminology_source": "ai_transform",
+                "terminology_sections": [],
+                "metadata": {
+                    "priority_level": "medium",
+                    "political_spectrum": cat_data["political_spectrum"],
+                    "policy_areas": cat_data["policy_areas"],
+                    "created_from_transform": True,
+                    "source_category_ids": source_category_ids
+                }
+            }
+            
+            await save_category(new_category, created_by="ai_admin")
+            created_ids.append(next_id)
+            logger.info(f"Created transformed category: ID {next_id} - {cat_data['name']}")
+        
+        # Deactivate source categories
+        for cat_id in source_category_ids:
+            deactivate_query = """
+                UPDATE political_categories 
+                SET is_active = false, 
+                    updated_at = NOW(), 
+                    updated_by = 'ai_admin'
+                WHERE id = :category_id
+            """
+            await database.execute(deactivate_query, {"category_id": cat_id})
+            logger.info(f"Deactivated source category: ID {cat_id}")
+        
+        return {
+            "status": "success",
+            "created_category_ids": created_ids,
+            "deactivated_category_ids": source_category_ids,
+            "message": f"Created {len(created_ids)} new categories and deactivated {len(source_category_ids)} source categories"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving transform: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to approve transform: {str(e)}")
 
 
 @router.delete("/categories/{category_id}")
