@@ -1,3 +1,9 @@
+## v1.3.1 (2025-10-17)
+
+### Refactor
+
+- **political-spectrum**: migrate to 5-point spectrum system
+
 ## v1.3.0 (2025-10-17)
 
 ### Feat

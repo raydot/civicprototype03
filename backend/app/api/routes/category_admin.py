@@ -185,7 +185,7 @@ Return JSON with this exact structure:
     "description": "2-3 sentences explaining the issue/policy. Be specific and policy-focused.",
     "keywords": ["15-25 relevant keywords including synonyms, phrases, and common terms"],
     "type": "issue" or "policy",
-    "political_spectrum": "progressive" or "conservative" or "bipartisan" or "polarized",
+    "political_spectrum": "progressive" or "leans_left" or "bipartisan" or "leans_right" or "conservative",
     "policy_areas": ["2-3 specific policy areas"]
   }}
 }}
@@ -560,7 +560,7 @@ Return JSON with this structure:
       "description": "2-3 sentences explaining scope and policy focus",
       "keywords": ["15-30 relevant keywords from source + new ones"],
       "type": "issue" or "policy",
-      "political_spectrum": "progressive" or "conservative" or "bipartisan" or "polarized",
+      "political_spectrum": "progressive" or "leans_left" or "bipartisan" or "leans_right" or "conservative",
       "policy_areas": ["2-3 policy areas"],
       "keyword_source_notes": "Brief note on which source keywords went here"
     }}
