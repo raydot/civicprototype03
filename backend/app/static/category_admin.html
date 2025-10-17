@@ -166,7 +166,7 @@
         cursor: pointer;
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
       }
 
       .category-header:hover {
@@ -264,6 +264,8 @@
         font-size: 20px;
         color: #667eea;
         transition: transform 0.3s;
+        align-self: flex-end;
+        margin-left: 15px;
       }
 
       .category-card.expanded .expand-icon {
@@ -751,11 +753,202 @@
       .toast.removing {
         animation: slideOut 0.3s ease-out forwards;
       }
+
+      /* Transform Modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal {
+        background: white;
+        border-radius: 12px;
+        max-width: 900px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-header {
+        padding: 24px;
+        border-bottom: 2px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+      }
+
+      .modal-close:hover {
+        color: #333;
+      }
+
+      .modal-body {
+        padding: 24px;
+      }
+
+      .transform-preview-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .transform-card {
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .transform-card-header {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .transform-card-header:hover {
+        background: #e9ecef;
+      }
+
+      .transform-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .transform-card.expanded .transform-card-body {
+        display: block;
+      }
+
+      .transform-card-body {
+        display: none;
+        padding: 20px;
+        background: white;
+      }
+
+      .editable-field {
+        margin-bottom: 15px;
+      }
+
+      .editable-field label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #666;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .editable-field input,
+      .editable-field textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-family: inherit;
+      }
+
+      .btn-transform {
+        background: #764ba2;
+        color: white;
+      }
+
+      .btn-transform:hover {
+        background: #5a3a7a;
+      }
     </style>
   </head>
   <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Transform Modal -->
+    <div class="modal-overlay" id="transformModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">🔀 Transform Category</h2>
+          <button class="modal-close" onclick="closeTransformModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div id="transformStep1">
+            <div id="sourceCategoryDisplay" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
+              <h3 id="sourceCategoryName" style="margin: 0 0 8px 0; color: #333; font-size: 18px;"></h3>
+              <p id="sourceCategoryDescription" style="margin: 0; color: #666; font-size: 14px;"></p>
+            </div>
+            <p style="margin-bottom: 15px; color: #666;">
+              Describe how you want to transform this category. You can split it into multiple categories, merge it with others, or refine its scope.
+            </p>
+            <div class="input-section">
+              <label>✨ Transform Instructions (AI-Powered):</label>
+              <textarea
+                id="transformInstructions"
+                rows="4"
+                placeholder="Example: Split this into four categories: Criminal Justice Reform, Public Safety, 2nd Amendment Rights, and Gun Safety Policy. Distribute keywords based on semantic relevance."
+              ></textarea>
+            </div>
+            <div class="button-group">
+              <button class="btn-primary" onclick="generateTransform()">
+                ✨ Generate Transform
+              </button>
+              <button class="btn-secondary" onclick="closeTransformModal()">
+                Cancel
+              </button>
+            </div>
+            <div class="loading" id="transformLoading">
+              <div class="spinner"></div>
+              <div>AI is analyzing transformation...</div>
+            </div>
+          </div>
+
+          <div id="transformStep2" style="display: none;">
+            <div id="transformWarnings"></div>
+            <div class="transform-preview-cards" id="transformPreviewCards"></div>
+            <div class="button-group" style="margin-top: 20px;">
+              <button class="btn-success" onclick="approveTransform()">
+                ✓ Approve & Create Categories
+              </button>
+              <button class="btn-secondary" onclick="backToTransformStep1()">
+                ← Back to Edit
+              </button>
+              <button class="btn-secondary" onclick="closeTransformModal()">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="container">
       <h1>📊 Category Admin</h1>
@@ -1113,8 +1306,10 @@
                                   <div class="temperature-indicator" style="left: ${spectrumPosition}%"></div>
                               </div>
                               <div class="temperature-labels">
-                                  <span>Progressive</span>
-                                  <span>Moderate</span>
+                                  <span>Liberal</span>
+                                  <span>Leans Left</span>
+                                  <span>Bipartisan</span>
+                                  <span>Leans Right</span>
                                   <span>Conservative</span>
                               </div>
                           </div>
@@ -1153,6 +1348,11 @@
                           }, event)">
                               ✨ Enhance with AI
                           </button>
+                          <button class="btn-small btn-transform" onclick="showTransformModal(${
+                            cat.id
+                          }, event)">
+                              🔀 Transform Category
+                          </button>
                       </div>
 
                       <div class="enhance-form" id="enhance-${cat.id}">
@@ -1180,10 +1380,14 @@
       // Get temperature bar position (0-100%)
       function getSpectrumPosition(spectrum) {
         const positions = {
-          progressive: 0,
+          liberal: 0,
+          leans_left: 25,
           bipartisan: 50,
-          polarized: 50,
-          conservative: 100
+          leans_right: 75,
+          conservative: 100,
+          // Legacy mappings for backward compatibility
+          progressive: 0,
+          polarized: 50
         }
         return positions[spectrum] || 50
       }
@@ -1405,6 +1609,203 @@
         } finally {
           btn.disabled = false
           btn.textContent = 'Generate Keywords'
+        }
+      }
+
+      // TRANSFORM CATEGORY FUNCTIONS
+      let currentTransformData = null
+      let currentTransformSourceId = null
+
+      function showTransformModal(categoryId, event) {
+        event.stopPropagation()
+        currentTransformSourceId = categoryId
+        
+        // Find and display the source category
+        const category = allCategories.find(c => c.id === categoryId)
+        if (category) {
+          document.getElementById('sourceCategoryName').textContent = category.name
+          document.getElementById('sourceCategoryDescription').textContent = category.description
+        }
+        
+        document.getElementById('transformModal').classList.add('active')
+        document.getElementById('transformStep1').style.display = 'block'
+        document.getElementById('transformStep2').style.display = 'none'
+        document.getElementById('transformInstructions').value = ''
+      }
+
+      function closeTransformModal() {
+        document.getElementById('transformModal').classList.remove('active')
+        currentTransformData = null
+        currentTransformSourceId = null
+      }
+
+      function backToTransformStep1() {
+        document.getElementById('transformStep1').style.display = 'block'
+        document.getElementById('transformStep2').style.display = 'none'
+      }
+
+      async function generateTransform() {
+        const instructions = document.getElementById('transformInstructions').value.trim()
+        
+        if (!instructions) {
+          showToast('Please provide transformation instructions', 'error')
+          return
+        }
+
+        const loadingEl = document.getElementById('transformLoading')
+        loadingEl.style.display = 'block'
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/category-admin/categories/transform`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                transform_instructions: instructions,
+                source_category_ids: [currentTransformSourceId]
+              })
+            }
+          )
+
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.detail || 'Failed to generate transform')
+          }
+
+          currentTransformData = await response.json()
+          displayTransformPreview(currentTransformData)
+        } catch (error) {
+          showToast('Error: ' + error.message, 'error')
+          console.error('Error generating transform:', error)
+        } finally {
+          loadingEl.style.display = 'none'
+        }
+      }
+
+      function displayTransformPreview(data) {
+        // Show warnings if any
+        const warningsDiv = document.getElementById('transformWarnings')
+        if (data.similarity_warnings && data.similarity_warnings.length > 0) {
+          warningsDiv.innerHTML = data.similarity_warnings
+            .map(
+              (w) =>
+                `<div class="warning">
+                  <span class="warning-icon">⚠️</span>
+                  <strong>${w.category_name}:</strong> ${w.message}
+                  ${w.similar_to ? `<br><small>Similar to: ${w.similar_to.join(', ')}</small>` : ''}
+                </div>`
+            )
+            .join('')
+        } else {
+          warningsDiv.innerHTML = ''
+        }
+
+        // Display category cards
+        const cardsDiv = document.getElementById('transformPreviewCards')
+        cardsDiv.innerHTML = data.new_categories
+          .map((cat, idx) => createTransformCard(cat, idx))
+          .join('')
+
+        // Show step 2
+        document.getElementById('transformStep1').style.display = 'none'
+        document.getElementById('transformStep2').style.display = 'block'
+      }
+
+      function createTransformCard(cat, idx) {
+        return `
+          <div class="transform-card" id="transform-card-${idx}">
+            <div class="transform-card-header" onclick="toggleTransformCard(${idx})">
+              <div class="transform-card-title">${cat.name}</div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="transform-card-body">
+              <div class="editable-field">
+                <label>Name</label>
+                <input type="text" id="transform-name-${idx}" value="${cat.name}" />
+              </div>
+              <div class="editable-field">
+                <label>Description</label>
+                <textarea rows="3" id="transform-desc-${idx}">${cat.description}</textarea>
+              </div>
+              <div class="editable-field">
+                <label>Type</label>
+                <select id="transform-type-${idx}">
+                  <option value="issue" ${cat.type === 'issue' ? 'selected' : ''}>Issue</option>
+                  <option value="policy" ${cat.type === 'policy' ? 'selected' : ''}>Policy</option>
+                </select>
+              </div>
+              <div class="editable-field">
+                <label>Political Spectrum</label>
+                <select id="transform-spectrum-${idx}">
+                  <option value="liberal" ${cat.political_spectrum === 'liberal' ? 'selected' : ''}>Liberal</option>
+                  <option value="leans_left" ${cat.political_spectrum === 'leans_left' ? 'selected' : ''}>Leans Left</option>
+                  <option value="bipartisan" ${cat.political_spectrum === 'bipartisan' ? 'selected' : ''}>Bipartisan</option>
+                  <option value="leans_right" ${cat.political_spectrum === 'leans_right' ? 'selected' : ''}>Leans Right</option>
+                  <option value="conservative" ${cat.political_spectrum === 'conservative' ? 'selected' : ''}>Conservative</option>
+                </select>
+              </div>
+              <div class="editable-field">
+                <label>Keywords (${cat.keywords.length})</label>
+                <div class="keywords">
+                  ${cat.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}
+                </div>
+              </div>
+              ${cat.keyword_source_notes ? `<p style="color: #666; font-size: 13px; margin-top: 10px;"><em>Note: ${cat.keyword_source_notes}</em></p>` : ''}
+            </div>
+          </div>
+        `
+      }
+
+      function toggleTransformCard(idx) {
+        const card = document.getElementById(`transform-card-${idx}`)
+        card.classList.toggle('expanded')
+      }
+
+      async function approveTransform() {
+        if (!currentTransformData) return
+
+        // Collect edited data from form fields
+        const editedCategories = currentTransformData.new_categories.map((cat, idx) => ({
+          name: document.getElementById(`transform-name-${idx}`).value,
+          description: document.getElementById(`transform-desc-${idx}`).value,
+          type: document.getElementById(`transform-type-${idx}`).value,
+          political_spectrum: document.getElementById(`transform-spectrum-${idx}`).value,
+          keywords: cat.keywords, // Keywords aren't editable in this UI (could add later)
+          policy_areas: cat.policy_areas
+        }))
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/category-admin/categories/transform/approve`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                new_categories: editedCategories,
+                source_category_ids: currentTransformData.source_category_ids
+              })
+            }
+          )
+
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.detail || 'Failed to approve transform')
+          }
+
+          const result = await response.json()
+
+          showToast(
+            `Successfully created ${result.created_category_ids.length} new categories!`,
+            'success'
+          )
+
+          // Reload categories and close modal
+          await loadCategories()
+          closeTransformModal()
+        } catch (error) {
+          showToast('Error approving transform: ' + error.message, 'error')
+          console.error('Error approving transform:', error)
         }
       }
 
