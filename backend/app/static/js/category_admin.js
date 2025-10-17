@@ -198,7 +198,7 @@ function createCategoryCard(cat) {
                             <div class="temperature-indicator" style="left: ${spectrumPosition}%"></div>
                         </div>
                         <div class="temperature-labels">
-                            <span>Liberal</span>
+                            <span>Progressive</span>
                             <span>Leans Left</span>
                             <span>Bipartisan</span>
                             <span>Leans Right</span>
@@ -272,13 +272,13 @@ function createCategoryCard(cat) {
 // Get temperature bar position (0-100%)
 function getSpectrumPosition(spectrum) {
   const positions = {
-    liberal: 0,
+    progressive: 0,
     leans_left: 25,
     bipartisan: 50,
     leans_right: 75,
     conservative: 100,
     // Legacy mappings for backward compatibility
-    progressive: 0,
+    liberal: 0,
     polarized: 50
   }
   return positions[spectrum] || 50
@@ -638,9 +638,9 @@ function createTransformCard(cat, idx) {
         <div class="editable-field">
           <label>Political Spectrum</label>
           <select id="transform-spectrum-${idx}">
-            <option value="liberal" ${
-              cat.political_spectrum === 'liberal' ? 'selected' : ''
-            }>Liberal</option>
+            <option value="progressive" ${
+              cat.political_spectrum === 'progressive' ? 'selected' : ''
+            }>Progressive</option>
             <option value="leans_left" ${
               cat.political_spectrum === 'leans_left' ? 'selected' : ''
             }>Leans Left</option>
