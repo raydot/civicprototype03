@@ -1,3 +1,9 @@
+## v1.2.1 (2025-10-17)
+
+### Refactor
+
+- **category-admin**: separate concerns into CSS and JS files
+
 ## v1.2.0 (2025-10-17)
 
 ### Feat
