@@ -663,9 +663,100 @@
         padding: 40px;
         color: #999;
       }
+
+      /* Toast Notifications */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .toast {
+        background: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        animation: slideIn 0.3s ease-out;
+        border-left: 4px solid #667eea;
+      }
+
+      .toast.success {
+        border-left-color: #28a745;
+      }
+
+      .toast.error {
+        border-left-color: #dc3545;
+      }
+
+      .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .toast-message {
+        flex: 1;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .toast-close {
+        cursor: pointer;
+        color: #999;
+        font-size: 20px;
+        font-weight: bold;
+        background: none;
+        border: none;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .toast-close:hover {
+        color: #333;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      .toast.removing {
+        animation: slideOut 0.3s ease-out forwards;
+      }
     </style>
   </head>
   <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <div class="container">
       <h1>📊 Category Admin</h1>
       <p class="subtitle">
@@ -835,6 +926,29 @@
       let filteredCategories = []
       const API_BASE = window.location.origin
       const DEBUG = false
+
+      // Toast notification system
+      function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer')
+        const toast = document.createElement('div')
+        toast.className = `toast ${type}`
+        
+        const icon = type === 'success' ? '✓' : '✕'
+        
+        toast.innerHTML = `
+          <span class="toast-icon">${icon}</span>
+          <span class="toast-message">${message}</span>
+          <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `
+        
+        container.appendChild(toast)
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+          toast.classList.add('removing')
+          setTimeout(() => toast.remove(), 300)
+        }, 3000)
+      }
 
       // Initialize on page load
       document.addEventListener('DOMContentLoaded', () => {
@@ -1106,19 +1220,32 @@
             )
             .join('') +
           `<input type="text" class="keyword-input" id="new-keyword-${id}"
-              placeholder="Add keyword..." onkeypress="if(event.key==='Enter') addKeyword(${id}, event)">`
+              placeholder="Add keyword...">`
+
+        // Attach event listener to the input field
+        const input = document.getElementById(`new-keyword-${id}`)
+        if (input) {
+          input.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+              e.stopPropagation()
+              await addKeyword(id, e)
+            }
+          })
+        }
 
         event.target.textContent = '💾 Save Keywords'
       }
 
-      function removeKeyword(catId, kwIdx, event) {
+      async function removeKeyword(catId, kwIdx, event) {
         event.stopPropagation()
         const category = allCategories.find((c) => c.id === catId)
         category.keywords.splice(kwIdx, 1)
-        editKeywords(catId, event)
+        renderKeywordsInEditMode(catId)
+        // Auto-save after removing
+        await saveKeywordsQuietly(catId)
       }
 
-      function addKeyword(catId, event) {
+      async function addKeyword(catId, event) {
         event.stopPropagation()
         const input = document.getElementById(`new-keyword-${catId}`)
         const keyword = input.value.trim()
@@ -1127,12 +1254,24 @@
           const category = allCategories.find((c) => c.id === catId)
           category.keywords.push(keyword)
           input.value = ''
-          editKeywords(catId, event)
+          renderKeywordsInEditMode(catId)
+          // Auto-save after adding
+          await saveKeywordsQuietly(catId)
         }
       }
 
       async function saveKeywords(id) {
         const category = allCategories.find((c) => c.id === id)
+        
+        // Check if there's text in the input field and add it first
+        const input = document.getElementById(`new-keyword-${id}`)
+        if (input) {
+          const keyword = input.value.trim()
+          if (keyword) {
+            category.keywords.push(keyword)
+            input.value = ''
+          }
+        }
 
         try {
           const response = await fetch(
@@ -1146,13 +1285,69 @@
 
           if (!response.ok) throw new Error('Failed to save keywords')
 
-          editingCategory = null
-          renderCategories()
-          alert('Keywords saved successfully!')
+          // Stay in edit mode and keep category expanded
+          showToast('Keywords saved successfully!', 'success')
+          // Re-render the keywords in edit mode without triggering save again
+          renderKeywordsInEditMode(id)
         } catch (error) {
           console.error('Error saving keywords:', error)
-          alert('Failed to save keywords: ' + error.message)
+          showToast('Failed to save keywords: ' + error.message, 'error')
         }
+      }
+
+      // Save keywords without showing alert (for auto-save)
+      async function saveKeywordsQuietly(id) {
+        const category = allCategories.find((c) => c.id === id)
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/category-admin/categories/${id}/update-keywords`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ keywords: category.keywords })
+            }
+          )
+
+          if (!response.ok) throw new Error('Failed to save keywords')
+          // Silent save - no toast
+        } catch (error) {
+          console.error('Error auto-saving keywords:', error)
+          // Show error only if save fails
+          showToast('Failed to auto-save keywords: ' + error.message, 'error')
+        }
+      }
+
+      function renderKeywordsInEditMode(id) {
+        const category = allCategories.find((c) => c.id === id)
+        const container = document.getElementById(`keywords-${id}`)
+
+        container.innerHTML =
+          category.keywords
+            .map(
+              (kw, idx) =>
+                `<span class="keyword-tag editing">
+                  ${kw}
+                  <span class="keyword-remove" onclick="removeKeyword(${id}, ${idx}, event)">×</span>
+              </span>`
+            )
+            .join('') +
+          `<input type="text" class="keyword-input" id="new-keyword-${id}"
+              placeholder="Add keyword...">`
+        
+        // Attach event listener to the input field
+        setTimeout(() => {
+          const input = document.getElementById(`new-keyword-${id}`)
+          if (input) {
+            input.focus()
+            input.addEventListener('keypress', async (e) => {
+              if (e.key === 'Enter') {
+                e.stopPropagation()
+                await addKeyword(id, e)
+              }
+            })
+          }
+        }, 0)
       }
 
       // Show/hide enhance form
@@ -1196,10 +1391,9 @@
 
           const result = await response.json()
 
-          alert(
-            `Added ${
-              result.added_keywords.length
-            } new keywords:\n${result.added_keywords.join(', ')}`
+          showToast(
+            `Added ${result.added_keywords.length} new keywords: ${result.added_keywords.join(', ')}`,
+            'success'
           )
 
           // Reload categories
@@ -1207,7 +1401,7 @@
           hideEnhanceForm(id, event)
         } catch (error) {
           console.error('Error enhancing category:', error)
-          alert('Failed to enhance category: ' + error.message)
+          showToast('Failed to enhance category: ' + error.message, 'error')
         } finally {
           btn.disabled = false
           btn.textContent = 'Generate Keywords'
@@ -1219,7 +1413,7 @@
         const description = document.getElementById('description').value.trim()
 
         if (!description) {
-          alert('Please describe the category you want to create')
+          showToast('Please describe the category you want to create', 'error')
           return
         }
 
@@ -1245,7 +1439,7 @@
           currentPreview = await response.json()
           displayPreview(currentPreview)
         } catch (error) {
-          alert('Error: ' + error.message)
+          showToast('Error: ' + error.message, 'error')
           console.error('Error generating preview:', error)
         } finally {
           document.getElementById('loading').style.display = 'none'
@@ -1331,7 +1525,7 @@
             switchTab('browse')
           }, 2000)
         } catch (error) {
-          alert('Error saving category: ' + error.message)
+          showToast('Error saving category: ' + error.message, 'error')
           console.error('Error creating category:', error)
           btn.disabled = false
           btn.textContent = '✓ Approve & Save Category'
