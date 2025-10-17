@@ -1,3 +1,9 @@
+## v1.3.0 (2025-10-17)
+
+### Feat
+
+- **category-admin**: add delete category functionality with custom modal
+
 ## v1.2.1 (2025-10-17)
 
 ### Refactor
