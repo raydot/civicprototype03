@@ -15,17 +15,17 @@ function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer')
   const toast = document.createElement('div')
   toast.className = `toast ${type}`
-  
+
   const icon = type === 'success' ? '✓' : '✕'
-  
+
   toast.innerHTML = `
     <span class="toast-icon">${icon}</span>
     <span class="toast-message">${message}</span>
     <button class="toast-close" onclick="this.parentElement.remove()">×</button>
   `
-  
+
   container.appendChild(toast)
-  
+
   // Auto-remove after 3 seconds
   setTimeout(() => {
     toast.classList.add('removing')
@@ -36,7 +36,7 @@ function showToast(message, type = 'success') {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   loadCategories()
-  
+
   // Add keyboard shortcut for create tab
   const descriptionEl = document.getElementById('description')
   if (descriptionEl) {
@@ -54,7 +54,7 @@ function switchTab(tabName, event) {
   document
     .querySelectorAll('.tab')
     .forEach((tab) => tab.classList.remove('active'))
-  
+
   // If event is provided, highlight the clicked tab
   if (event && event.target) {
     event.target.classList.add('active')
@@ -123,9 +123,7 @@ async function loadCategories() {
 
 // Update stats bar
 function updateStats() {
-  const issueCount = filteredCategories.filter(
-    (c) => c.type === 'issue'
-  ).length
+  const issueCount = filteredCategories.filter((c) => c.type === 'issue').length
   const policyCount = filteredCategories.filter(
     (c) => c.type === 'policy'
   ).length
@@ -138,9 +136,7 @@ function updateStats() {
 
 // Filter categories
 function filterCategories() {
-  const searchTerm = document
-    .getElementById('searchInput')
-    .value.toLowerCase()
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase()
   const typeFilter = document.getElementById('typeFilter').value
   const spectrumFilter = document.getElementById('spectrumFilter').value
 
@@ -153,8 +149,7 @@ function filterCategories() {
     const matchesType = !typeFilter || cat.type === typeFilter
 
     const matchesSpectrum =
-      !spectrumFilter ||
-      cat.metadata?.political_spectrum === spectrumFilter
+      !spectrumFilter || cat.metadata?.political_spectrum === spectrumFilter
 
     return matchesSearch && matchesType && matchesSpectrum
   })
@@ -185,18 +180,14 @@ function createCategoryCard(cat) {
 
   return `
         <div class="category-card" data-id="${cat.id}">
-            <div class="category-header" onclick="toggleCategory(${
-              cat.id
-            })">
+            <div class="category-header" onclick="toggleCategory(${cat.id})">
                 <div class="category-info">
                     <div class="category-title">
                         <span>${cat.name}</span>
                         <span class="category-id">id: ${cat.id}</span>
                     </div>
                     <div class="category-meta">
-                        <span class="badge badge-${cat.type}">${
-    cat.type
-  }</span>
+                        <span class="badge badge-${cat.type}">${cat.type}</span>
                         <span class="keyword-count">${
                           cat.keywords?.length || 0
                         } keywords</span>
@@ -226,14 +217,9 @@ function createCategoryCard(cat) {
                           cat.keywords?.length || 0
                         })</div>
                     </div>
-                    <div class="keywords-container" id="keywords-${
-                      cat.id
-                    }">
+                    <div class="keywords-container" id="keywords-${cat.id}">
                         ${(cat.keywords || [])
-                          .map(
-                            (kw) =>
-                              `<span class="keyword-tag">${kw}</span>`
-                          )
+                          .map((kw) => `<span class="keyword-tag">${kw}</span>`)
                           .join('')}
                     </div>
                 </div>
@@ -253,6 +239,11 @@ function createCategoryCard(cat) {
                       cat.id
                     }, event)">
                         🔀 Transform Category
+                    </button>
+                    <button class="btn-small btn-delete" onclick="deleteCategory(${
+                      cat.id
+                    }, event)">
+                        🗑️ Delete
                     </button>
                 </div>
 
@@ -365,7 +356,7 @@ async function addKeyword(catId, event) {
 
 async function saveKeywords(id) {
   const category = allCategories.find((c) => c.id === id)
-  
+
   // Check if there's text in the input field and add it first
   const input = document.getElementById(`new-keyword-${id}`)
   if (input) {
@@ -437,7 +428,7 @@ function renderKeywordsInEditMode(id) {
       .join('') +
     `<input type="text" class="keyword-input" id="new-keyword-${id}"
         placeholder="Add keyword...">`
-  
+
   // Attach event listener to the input field
   setTimeout(() => {
     const input = document.getElementById(`new-keyword-${id}`)
@@ -468,9 +459,7 @@ function hideEnhanceForm(id, event) {
 async function enhanceCategory(id, event) {
   event.stopPropagation()
 
-  const context = document
-    .getElementById(`enhance-context-${id}`)
-    .value.trim()
+  const context = document.getElementById(`enhance-context-${id}`).value.trim()
   if (!context) {
     alert('Please describe what keywords are missing')
     return
@@ -495,7 +484,9 @@ async function enhanceCategory(id, event) {
     const result = await response.json()
 
     showToast(
-      `Added ${result.added_keywords.length} new keywords: ${result.added_keywords.join(', ')}`,
+      `Added ${
+        result.added_keywords.length
+      } new keywords: ${result.added_keywords.join(', ')}`,
       'success'
     )
 
@@ -515,14 +506,15 @@ async function enhanceCategory(id, event) {
 function showTransformModal(categoryId, event) {
   event.stopPropagation()
   currentTransformSourceId = categoryId
-  
+
   // Find and display the source category
-  const category = allCategories.find(c => c.id === categoryId)
+  const category = allCategories.find((c) => c.id === categoryId)
   if (category) {
     document.getElementById('sourceCategoryName').textContent = category.name
-    document.getElementById('sourceCategoryDescription').textContent = category.description
+    document.getElementById('sourceCategoryDescription').textContent =
+      category.description
   }
-  
+
   document.getElementById('transformModal').classList.add('active')
   document.getElementById('transformStep1').style.display = 'block'
   document.getElementById('transformStep2').style.display = 'none'
@@ -541,8 +533,10 @@ function backToTransformStep1() {
 }
 
 async function generateTransform() {
-  const instructions = document.getElementById('transformInstructions').value.trim()
-  
+  const instructions = document
+    .getElementById('transformInstructions')
+    .value.trim()
+
   if (!instructions) {
     showToast('Please provide transformation instructions', 'error')
     return
@@ -589,7 +583,11 @@ function displayTransformPreview(data) {
           `<div class="warning">
             <span class="warning-icon">⚠️</span>
             <strong>${w.category_name}:</strong> ${w.message}
-            ${w.similar_to ? `<br><small>Similar to: ${w.similar_to.join(', ')}</small>` : ''}
+            ${
+              w.similar_to
+                ? `<br><small>Similar to: ${w.similar_to.join(', ')}</small>`
+                : ''
+            }
           </div>`
       )
       .join('')
@@ -622,32 +620,54 @@ function createTransformCard(cat, idx) {
         </div>
         <div class="editable-field">
           <label>Description</label>
-          <textarea rows="3" id="transform-desc-${idx}">${cat.description}</textarea>
+          <textarea rows="3" id="transform-desc-${idx}">${
+    cat.description
+  }</textarea>
         </div>
         <div class="editable-field">
           <label>Type</label>
           <select id="transform-type-${idx}">
-            <option value="issue" ${cat.type === 'issue' ? 'selected' : ''}>Issue</option>
-            <option value="policy" ${cat.type === 'policy' ? 'selected' : ''}>Policy</option>
+            <option value="issue" ${
+              cat.type === 'issue' ? 'selected' : ''
+            }>Issue</option>
+            <option value="policy" ${
+              cat.type === 'policy' ? 'selected' : ''
+            }>Policy</option>
           </select>
         </div>
         <div class="editable-field">
           <label>Political Spectrum</label>
           <select id="transform-spectrum-${idx}">
-            <option value="liberal" ${cat.political_spectrum === 'liberal' ? 'selected' : ''}>Liberal</option>
-            <option value="leans_left" ${cat.political_spectrum === 'leans_left' ? 'selected' : ''}>Leans Left</option>
-            <option value="bipartisan" ${cat.political_spectrum === 'bipartisan' ? 'selected' : ''}>Bipartisan</option>
-            <option value="leans_right" ${cat.political_spectrum === 'leans_right' ? 'selected' : ''}>Leans Right</option>
-            <option value="conservative" ${cat.political_spectrum === 'conservative' ? 'selected' : ''}>Conservative</option>
+            <option value="liberal" ${
+              cat.political_spectrum === 'liberal' ? 'selected' : ''
+            }>Liberal</option>
+            <option value="leans_left" ${
+              cat.political_spectrum === 'leans_left' ? 'selected' : ''
+            }>Leans Left</option>
+            <option value="bipartisan" ${
+              cat.political_spectrum === 'bipartisan' ? 'selected' : ''
+            }>Bipartisan</option>
+            <option value="leans_right" ${
+              cat.political_spectrum === 'leans_right' ? 'selected' : ''
+            }>Leans Right</option>
+            <option value="conservative" ${
+              cat.political_spectrum === 'conservative' ? 'selected' : ''
+            }>Conservative</option>
           </select>
         </div>
         <div class="editable-field">
           <label>Keywords (${cat.keywords.length})</label>
           <div class="keywords">
-            ${cat.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}
+            ${cat.keywords
+              .map((k) => `<span class="keyword">${k}</span>`)
+              .join('')}
           </div>
         </div>
-        ${cat.keyword_source_notes ? `<p style="color: #666; font-size: 13px; margin-top: 10px;"><em>Note: ${cat.keyword_source_notes}</em></p>` : ''}
+        ${
+          cat.keyword_source_notes
+            ? `<p style="color: #666; font-size: 13px; margin-top: 10px;"><em>Note: ${cat.keyword_source_notes}</em></p>`
+            : ''
+        }
       </div>
     </div>
   `
@@ -662,14 +682,17 @@ async function approveTransform() {
   if (!currentTransformData) return
 
   // Collect edited data from form fields
-  const editedCategories = currentTransformData.new_categories.map((cat, idx) => ({
-    name: document.getElementById(`transform-name-${idx}`).value,
-    description: document.getElementById(`transform-desc-${idx}`).value,
-    type: document.getElementById(`transform-type-${idx}`).value,
-    political_spectrum: document.getElementById(`transform-spectrum-${idx}`).value,
-    keywords: cat.keywords, // Keywords aren't editable in this UI (could add later)
-    policy_areas: cat.policy_areas
-  }))
+  const editedCategories = currentTransformData.new_categories.map(
+    (cat, idx) => ({
+      name: document.getElementById(`transform-name-${idx}`).value,
+      description: document.getElementById(`transform-desc-${idx}`).value,
+      type: document.getElementById(`transform-type-${idx}`).value,
+      political_spectrum: document.getElementById(`transform-spectrum-${idx}`)
+        .value,
+      keywords: cat.keywords, // Keywords aren't editable in this UI (could add later)
+      policy_areas: cat.policy_areas
+    })
+  )
 
   try {
     const response = await fetch(
@@ -757,14 +780,10 @@ function displayPreview(preview) {
   keywordsDiv.innerHTML = preview.keywords
     .map((k) => `<span class="keyword">${k}</span>`)
     .join('')
-  document.getElementById('keywordCount').textContent =
-    preview.keywords.length
+  document.getElementById('keywordCount').textContent = preview.keywords.length
 
   const warningsDiv = document.getElementById('warnings')
-  if (
-    preview.similarity_warnings &&
-    preview.similarity_warnings.length > 0
-  ) {
+  if (preview.similarity_warnings && preview.similarity_warnings.length > 0) {
     warningsDiv.innerHTML = preview.similarity_warnings
       .map(
         (w) =>
@@ -793,14 +812,11 @@ async function approveCategory() {
   btn.textContent = 'Saving...'
 
   try {
-    const response = await fetch(
-      `${API_BASE}/category-admin/create-category`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentPreview)
-      }
-    )
+    const response = await fetch(`${API_BASE}/category-admin/create-category`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentPreview)
+    })
 
     if (!response.ok) {
       const error = await response.json()
@@ -834,4 +850,57 @@ function resetForm() {
   document.getElementById('preview').style.display = 'none'
   document.getElementById('successMessage').style.display = 'none'
   currentPreview = null
+}
+
+// DELETE CATEGORY FUNCTIONS
+let categoryToDelete = null
+
+function deleteCategory(id, event) {
+  event.stopPropagation()
+
+  const category = allCategories.find((c) => c.id === id)
+  if (!category) return
+
+  // Store the category to delete and show modal
+  categoryToDelete = category
+  document.getElementById('deleteCategoryName').textContent = `"${category.name}"`
+  document.getElementById('deleteModal').classList.add('active')
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active')
+  categoryToDelete = null
+}
+
+async function confirmDelete() {
+  if (!categoryToDelete) return
+
+  const categoryId = categoryToDelete.id
+  const categoryName = categoryToDelete.name
+
+  // Close modal immediately
+  closeDeleteModal()
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/category-admin/categories/${categoryId}`,
+      {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.detail || 'Failed to delete category')
+    }
+
+    showToast(`Category "${categoryName}" deleted successfully`, 'success')
+
+    // Reload categories to update the list and stats
+    await loadCategories()
+  } catch (error) {
+    console.error('Error deleting category:', error)
+    showToast('Failed to delete category: ' + error.message, 'error')
+  }
 }

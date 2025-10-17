@@ -4,11 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Category Admin - VoterPrime</title>
-    <link rel="stylesheet" href="/static/css/category_admin.css">
+    <link rel="stylesheet" href="/static/css/category_admin.css" />
   </head>
   <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+      <div class="modal modal-small">
+        <div class="modal-header">
+          <h2 class="modal-title">🗑️ Delete Category</h2>
+          <button class="modal-close" onclick="closeDeleteModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <p style="margin-bottom: 20px; color: #333; font-size: 16px">
+            Are you sure you want to delete the category
+            <strong id="deleteCategoryName"></strong>?
+          </p>
+          <div class="button-group">
+            <button class="btn-secondary" onclick="closeDeleteModal()">
+              Cancel
+            </button>
+            <button class="btn-delete" onclick="confirmDelete()">
+              🗑️ Delete Category
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Transform Modal -->
     <div class="modal-overlay" id="transformModal">
@@ -19,12 +43,29 @@
         </div>
         <div class="modal-body">
           <div id="transformStep1">
-            <div id="sourceCategoryDisplay" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
-              <h3 id="sourceCategoryName" style="margin: 0 0 8px 0; color: #333; font-size: 18px;"></h3>
-              <p id="sourceCategoryDescription" style="margin: 0; color: #666; font-size: 14px;"></p>
+            <div
+              id="sourceCategoryDisplay"
+              style="
+                margin-bottom: 20px;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border-left: 4px solid #667eea;
+              "
+            >
+              <h3
+                id="sourceCategoryName"
+                style="margin: 0 0 8px 0; color: #333; font-size: 18px"
+              ></h3>
+              <p
+                id="sourceCategoryDescription"
+                style="margin: 0; color: #666; font-size: 14px"
+              ></p>
             </div>
-            <p style="margin-bottom: 15px; color: #666;">
-              Describe how you want to transform this category. You can split it into multiple categories, merge it with others, or refine its scope.
+            <p style="margin-bottom: 15px; color: #666">
+              Describe how you want to transform this category. You can split it
+              into multiple categories, merge it with others, or refine its
+              scope.
             </p>
             <div class="input-section">
               <label>✨ Transform Instructions (AI-Powered):</label>
@@ -48,10 +89,13 @@
             </div>
           </div>
 
-          <div id="transformStep2" style="display: none;">
+          <div id="transformStep2" style="display: none">
             <div id="transformWarnings"></div>
-            <div class="transform-preview-cards" id="transformPreviewCards"></div>
-            <div class="button-group" style="margin-top: 20px;">
+            <div
+              class="transform-preview-cards"
+              id="transformPreviewCards"
+            ></div>
+            <div class="button-group" style="margin-top: 20px">
               <button class="btn-success" onclick="approveTransform()">
                 ✓ Approve & Create Categories
               </button>
@@ -78,7 +122,9 @@
         <button class="tab active" onclick="switchTab('browse', event)">
           📋 Browse Categories
         </button>
-        <button class="tab" onclick="switchTab('create', event)">✨ Create New</button>
+        <button class="tab" onclick="switchTab('create', event)">
+          ✨ Create New
+        </button>
       </div>
 
       <!-- Tab 1: Browse Categories -->
