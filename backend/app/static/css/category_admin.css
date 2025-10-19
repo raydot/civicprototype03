@@ -643,6 +643,118 @@ button {
   display: none;
 }
 
+/* Editable Preview Form Styles */
+.preview-card.editable {
+  background: #f8f9fa;
+  border: 2px solid #667eea;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.form-field input[type="text"],
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.3s;
+}
+
+.form-field input[type="text"]:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-field .helper-text {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.form-field .error-text {
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 4px;
+  display: none;
+}
+
+.form-field.has-error input,
+.form-field.has-error textarea,
+.form-field.has-error select {
+  border-color: #dc3545;
+}
+
+.form-field.has-error .error-text {
+  display: block;
+}
+
+/* Editable Keywords */
+.editable-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  min-height: 60px;
+  background: white;
+}
+
+.editable-keywords:focus-within {
+  border-color: #667eea;
+}
+
+.keyword-tag-editable {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyword-tag-editable .remove-keyword {
+  cursor: pointer;
+  font-weight: bold;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.keyword-tag-editable .remove-keyword:hover {
+  opacity: 1;
+}
+
+.keyword-input-field {
+  border: none;
+  outline: none;
+  padding: 6px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 120px;
+}
+
 .example-section {
   background: #f8f9fa;
   padding: 20px;

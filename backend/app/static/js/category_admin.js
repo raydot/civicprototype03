@@ -767,21 +767,7 @@ async function generatePreview() {
 }
 
 function displayPreview(preview) {
-  document.getElementById('categoryName').textContent = preview.name
-  document.getElementById('categoryDescription').textContent =
-    preview.description
-  document.getElementById('categoryType').textContent = preview.type
-  document.getElementById('categorySpectrum').textContent =
-    preview.political_spectrum
-  document.getElementById('categoryAreas').textContent =
-    preview.policy_areas.join(', ')
-
-  const keywordsDiv = document.getElementById('keywords')
-  keywordsDiv.innerHTML = preview.keywords
-    .map((k) => `<span class="keyword">${k}</span>`)
-    .join('')
-  document.getElementById('keywordCount').textContent = preview.keywords.length
-
+  // Display warnings first
   const warningsDiv = document.getElementById('warnings')
   if (preview.similarity_warnings && preview.similarity_warnings.length > 0) {
     warningsDiv.innerHTML = preview.similarity_warnings
@@ -798,16 +784,179 @@ function displayPreview(preview) {
     warningsDiv.innerHTML = ''
   }
 
+  // Generate editable form HTML
+  const previewCard = document.querySelector('#preview .preview-card')
+  previewCard.classList.add('editable')
+  
+  previewCard.innerHTML = `
+    <div class="form-field">
+      <label for="edit-name">Category Name *</label>
+      <input type="text" id="edit-name" value="${preview.name}" />
+      <div class="error-text">Category name is required</div>
+    </div>
+
+    <div class="form-field">
+      <label for="edit-description">Description *</label>
+      <textarea id="edit-description" rows="3">${preview.description}</textarea>
+      <div class="error-text">Description is required</div>
+    </div>
+
+    <div class="form-field">
+      <label for="edit-type">Type *</label>
+      <select id="edit-type">
+        <option value="issue" ${preview.type === 'issue' ? 'selected' : ''}>Issue</option>
+        <option value="policy" ${preview.type === 'policy' ? 'selected' : ''}>Policy</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label for="edit-spectrum">Political Spectrum *</label>
+      <select id="edit-spectrum">
+        <option value="progressive" ${preview.political_spectrum === 'progressive' ? 'selected' : ''}>Progressive</option>
+        <option value="leans_left" ${preview.political_spectrum === 'leans_left' ? 'selected' : ''}>Leans Left</option>
+        <option value="bipartisan" ${preview.political_spectrum === 'bipartisan' ? 'selected' : ''}>Bipartisan</option>
+        <option value="leans_right" ${preview.political_spectrum === 'leans_right' ? 'selected' : ''}>Leans Right</option>
+        <option value="conservative" ${preview.political_spectrum === 'conservative' ? 'selected' : ''}>Conservative</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label for="edit-policy-areas">Policy Areas *</label>
+      <textarea id="edit-policy-areas" rows="2">${preview.policy_areas.join(', ')}</textarea>
+      <div class="helper-text">Comma-separated values (e.g., healthcare, economy, education)</div>
+      <div class="error-text">Policy areas must be comma-separated values</div>
+    </div>
+
+    <div class="form-field">
+      <label>Keywords * (minimum 3)</label>
+      <div class="editable-keywords" id="edit-keywords">
+        ${preview.keywords.map(k => `
+          <span class="keyword-tag-editable">
+            ${k}
+            <span class="remove-keyword" onclick="removeKeyword('${k.replace(/'/g, "\\'")}')">×</span>
+          </span>
+        `).join('')}
+        <input type="text" class="keyword-input-field" id="keyword-input" placeholder="Add keyword..." onkeypress="handleKeywordInput(event)" />
+      </div>
+      <div class="helper-text">Press Enter to add a keyword</div>
+      <div class="error-text">At least 3 keywords are required</div>
+    </div>
+
+    <div class="actions">
+      <div class="button-group">
+        <button class="btn-success" onclick="approveCategory()">
+          ✓ Approve & Save Category
+        </button>
+        <button class="btn-secondary" onclick="resetForm()">
+          ✗ Cancel
+        </button>
+      </div>
+    </div>
+  `
+
   document.getElementById('preview').style.display = 'block'
   document
     .getElementById('preview')
     .scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 
+// Keyword editing helper functions
+function removeKeyword(keyword) {
+  const keywordsContainer = document.getElementById('edit-keywords')
+  const tags = keywordsContainer.querySelectorAll('.keyword-tag-editable')
+  
+  tags.forEach((tag) => {
+    if (tag.textContent.trim().replace('×', '').trim() === keyword) {
+      tag.remove()
+    }
+  })
+}
+
+function handleKeywordInput(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    const input = event.target
+    const keyword = input.value.trim()
+    
+    if (keyword) {
+      // Add new keyword tag before the input
+      const tag = document.createElement('span')
+      tag.className = 'keyword-tag-editable'
+      tag.innerHTML = `
+        ${keyword}
+        <span class="remove-keyword" onclick="removeKeyword('${keyword.replace(/'/g, "\\'")}')">×</span>
+      `
+      input.parentElement.insertBefore(tag, input)
+      input.value = ''
+    }
+  }
+}
+
 async function approveCategory() {
   if (!currentPreview) return
 
   const btn = event.target
+  
+  // Read form values
+  const name = document.getElementById('edit-name').value.trim()
+  const description = document.getElementById('edit-description').value.trim()
+  const type = document.getElementById('edit-type').value
+  const spectrum = document.getElementById('edit-spectrum').value
+  const policyAreasText = document.getElementById('edit-policy-areas').value.trim()
+  
+  // Get keywords from tags
+  const keywordTags = document.querySelectorAll('#edit-keywords .keyword-tag-editable')
+  const keywords = Array.from(keywordTags).map((tag) =>
+    tag.textContent.trim().replace('×', '').trim()
+  )
+  
+  // Validate
+  let hasError = false
+  
+  // Clear previous errors
+  document.querySelectorAll('.form-field').forEach((field) => {
+    field.classList.remove('has-error')
+  })
+  
+  if (!name) {
+    document.querySelector('#edit-name').closest('.form-field').classList.add('has-error')
+    hasError = true
+  }
+  
+  if (!description) {
+    document.querySelector('#edit-description').closest('.form-field').classList.add('has-error')
+    hasError = true
+  }
+  
+  if (keywords.length < 3) {
+    document.querySelector('#edit-keywords').closest('.form-field').classList.add('has-error')
+    hasError = true
+  }
+  
+  // Parse policy areas as CSV
+  const policyAreas = policyAreasText
+    .split(',')
+    .map((area) => area.trim())
+    .filter((area) => area.length > 0)
+  
+  if (policyAreas.length === 0) {
+    document.querySelector('#edit-policy-areas').closest('.form-field').classList.add('has-error')
+    hasError = true
+  }
+  
+  if (hasError) {
+    showToast('Please fix the validation errors', 'error')
+    return
+  }
+  
+  // Update currentPreview with edited values
+  currentPreview.name = name
+  currentPreview.description = description
+  currentPreview.type = type
+  currentPreview.political_spectrum = spectrum
+  currentPreview.policy_areas = policyAreas
+  currentPreview.keywords = keywords
+  
   btn.disabled = true
   btn.textContent = 'Saving...'
 
@@ -849,6 +998,13 @@ function resetForm() {
   document.getElementById('description').value = ''
   document.getElementById('preview').style.display = 'none'
   document.getElementById('successMessage').style.display = 'none'
+  
+  // Remove editable class from preview card
+  const previewCard = document.querySelector('#preview .preview-card')
+  if (previewCard) {
+    previewCard.classList.remove('editable')
+  }
+  
   currentPreview = null
 }
 
