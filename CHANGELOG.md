@@ -1,3 +1,9 @@
+## v1.4.0 (2025-10-19)
+
+### Feat
+
+- **category-admin**: add editable preview form for AI-generated categories
+
 ## v1.3.1 (2025-10-17)
 
 ### Refactor
