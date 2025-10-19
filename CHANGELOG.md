@@ -1,3 +1,10 @@
+## v1.5.0 (2025-10-19)
+
+### Feat
+
+- **category-admin**: add Excel template generator for bulk category creation
+- **category-admin**: add sortable category list with persistent preferences
+
 ## v1.4.0 (2025-10-19)
 
 ### Feat
