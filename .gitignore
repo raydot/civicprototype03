@@ -105,3 +105,6 @@ temp/
 
 # Project documentation
 docs/
+
+# Stuff that doesn't help the app
+category_upload_template.xlsx
