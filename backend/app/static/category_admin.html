@@ -175,6 +175,17 @@
               <option value="conservative">Conservative</option>
             </select>
           </div>
+          <div class="filter-group">
+            <label>Sort By</label>
+            <select id="sortFilter" onchange="handleSortChange()">
+              <option value="created_at_desc">Newest First</option>
+              <option value="created_at_asc">Oldest First</option>
+              <option value="name_asc">A-Z</option>
+              <option value="name_desc">Z-A</option>
+              <option value="id_asc">ID (Low-High)</option>
+              <option value="id_desc">ID (High-Low)</option>
+            </select>
+          </div>
         </div>
 
         <!-- Categories List -->

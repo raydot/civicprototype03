@@ -10,6 +10,9 @@ let currentTransformSourceId = null
 const API_BASE = window.location.origin
 const DEBUG = false
 
+// Sort preference key for localStorage
+const SORT_PREFERENCE_KEY = 'categoryAdminSortPreference'
+
 // Toast notification system
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer')
@@ -35,6 +38,15 @@ function showToast(message, type = 'success') {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+  // Restore sort preference from localStorage
+  const savedSort = localStorage.getItem(SORT_PREFERENCE_KEY)
+  if (savedSort) {
+    const sortFilter = document.getElementById('sortFilter')
+    if (sortFilter) {
+      sortFilter.value = savedSort
+    }
+  }
+  
   loadCategories()
 
   // Add keyboard shortcut for create tab
@@ -84,14 +96,31 @@ function switchTab(tabName, event) {
 }
 
 // Load all categories
-async function loadCategories() {
+async function loadCategories(sortBy = null, sortOrder = null) {
   const loadingEl = document.getElementById('loadingCategories')
   const listEl = document.getElementById('categoriesList')
 
   if (loadingEl) loadingEl.style.display = 'block'
 
   try {
-    const response = await fetch(`${API_BASE}/category-admin/categories`)
+    // Get sort parameters from dropdown if not provided
+    if (!sortBy || !sortOrder) {
+      const sortFilter = document.getElementById('sortFilter')
+      if (sortFilter) {
+        const sortValue = sortFilter.value
+        const [field, order] = sortValue.split('_')
+        sortBy = field
+        sortOrder = order
+      } else {
+        // Default to newest first
+        sortBy = 'created_at'
+        sortOrder = 'desc'
+      }
+    }
+    
+    const response = await fetch(
+      `${API_BASE}/category-admin/categories?sort_by=${sortBy}&sort_order=${sortOrder}`
+    )
     if (!response.ok) throw new Error('Failed to load categories')
 
     const data = await response.json()
@@ -119,6 +148,18 @@ async function loadCategories() {
     const loadingElFinal = document.getElementById('loadingCategories')
     if (loadingElFinal) loadingElFinal.style.display = 'none'
   }
+}
+
+// Handle sort change
+function handleSortChange() {
+  const sortFilter = document.getElementById('sortFilter')
+  const sortValue = sortFilter.value
+  
+  // Save preference to localStorage
+  localStorage.setItem(SORT_PREFERENCE_KEY, sortValue)
+  
+  // Reload categories with new sort
+  loadCategories()
 }
 
 // Update stats bar

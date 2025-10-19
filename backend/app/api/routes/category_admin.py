@@ -72,17 +72,32 @@ class TransformRequest(BaseModel):
     source_category_ids: List[int]  # Can be one (split) or multiple (merge)
 
 
-async def load_categories():
-    """Load categories from database"""
+async def load_categories(sort_by: str = "created_at", sort_order: str = "desc"):
+    """Load categories from database with sorting options
+    
+    Args:
+        sort_by: Field to sort by (id, name, created_at)
+        sort_order: Sort direction (asc, desc)
+    """
     if database is None:
         raise HTTPException(status_code=503, detail="Database not available")
     
-    query = """
+    # Validate sort parameters
+    valid_sort_fields = ["id", "name", "created_at"]
+    valid_sort_orders = ["asc", "desc"]
+    
+    if sort_by not in valid_sort_fields:
+        sort_by = "created_at"
+    if sort_order not in valid_sort_orders:
+        sort_order = "desc"
+    
+    query = f"""
         SELECT id, name, type, description, keywords, success_count, 
-               total_usage_count, terminology_source, terminology_sections, metadata
+               total_usage_count, terminology_source, terminology_sections, metadata,
+               created_at, updated_at
         FROM political_categories
         WHERE is_active = true
-        ORDER BY id
+        ORDER BY {sort_by} {sort_order.upper()}
     """
     rows = await database.fetch_all(query)
     
@@ -98,7 +113,9 @@ async def load_categories():
                 "total_usage_count": row["total_usage_count"],
                 "terminology_source": row["terminology_source"],
                 "terminology_sections": json.loads(row["terminology_sections"]) if isinstance(row["terminology_sections"], str) else (row["terminology_sections"] or []),
-                "metadata": json.loads(row["metadata"]) if isinstance(row["metadata"], str) else (row["metadata"] or {})
+                "metadata": json.loads(row["metadata"]) if isinstance(row["metadata"], str) else (row["metadata"] or {}),
+                "created_at": row["created_at"].isoformat() if row["created_at"] else None,
+                "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None
             }
             for row in rows
         ]
@@ -292,10 +309,19 @@ async def create_category(preview: CategoryPreview, admin: str = Depends(verify_
 
 
 @router.get("/categories")
-async def list_categories(admin: str = Depends(verify_admin)):
-    """Get all categories for review"""
+async def list_categories(
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
+    admin: str = Depends(verify_admin)
+):
+    """Get all categories for review with sorting options
+    
+    Args:
+        sort_by: Field to sort by (id, name, created_at). Default: created_at
+        sort_order: Sort direction (asc, desc). Default: desc
+    """
     try:
-        data = await load_categories()
+        data = await load_categories(sort_by=sort_by, sort_order=sort_order)
         return {
             "total": len(data["categories"]),
             "categories": data["categories"]
