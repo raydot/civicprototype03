@@ -1,3 +1,9 @@
+## v1.6.1 (2025-11-05)
+
+### Fix
+
+- allow guest users to view categories (read-only endpoints)
+
 ## v1.6.0 (2025-11-05)
 
 ### Feat
