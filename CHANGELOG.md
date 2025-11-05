@@ -1,3 +1,9 @@
+## v1.6.2 (2025-11-05)
+
+### Refactor
+
+- modularize category admin JS into 10 focused modules + add guest permission toasts
+
 ## v1.6.1 (2025-11-05)
 
 ### Fix
