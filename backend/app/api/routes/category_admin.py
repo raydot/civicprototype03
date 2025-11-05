@@ -24,20 +24,76 @@ security = HTTPBasic()
 # Admin credentials - in production, use environment variables
 ADMIN_USERNAME = settings.admin_username if hasattr(settings, 'admin_username') else "admin"
 ADMIN_PASSWORD = settings.admin_password if hasattr(settings, 'admin_password') else "meatspace"
+GUEST_USERNAME = settings.guest_username if hasattr(settings, 'guest_username') else "guest"
+GUEST_PASSWORD = settings.guest_password if hasattr(settings, 'guest_password') else "viewonly"
 
 
-def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
-    """Verify admin credentials using HTTP Basic Auth"""
-    correct_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
-    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+class AuthenticatedUser:
+    """Represents an authenticated user with role information"""
+    def __init__(self, username: str, role: str):
+        self.username = username
+        self.role = role  # "admin" or "guest"
     
-    if not (correct_username and correct_password):
+    def is_admin(self) -> bool:
+        return self.role == "admin"
+    
+    def can_write(self) -> bool:
+        return self.is_admin()
+
+
+def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)) -> AuthenticatedUser:
+    """Verify user credentials and return authenticated user with role"""
+    # Check admin credentials
+    is_admin = (
+        secrets.compare_digest(credentials.username, ADMIN_USERNAME) and
+        secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    )
+    
+    if is_admin:
+        return AuthenticatedUser(username=credentials.username, role="admin")
+    
+    # Check guest credentials
+    is_guest = (
+        secrets.compare_digest(credentials.username, GUEST_USERNAME) and
+        secrets.compare_digest(credentials.password, GUEST_PASSWORD)
+    )
+    
+    if is_guest:
+        return AuthenticatedUser(username=credentials.username, role="guest")
+    
+    # Invalid credentials
+    raise HTTPException(
+        status_code=401,
+        detail="Invalid credentials",
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+def require_admin(user: AuthenticatedUser = Depends(verify_credentials)) -> AuthenticatedUser:
+    """Require admin role (write access)"""
+    if not user.is_admin():
         raise HTTPException(
-            status_code=401,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Basic"},
+            status_code=403,
+            detail="Admin privileges required. Guest users have read-only access."
         )
-    return credentials.username
+    return user
+
+
+def require_auth(user: AuthenticatedUser = Depends(verify_credentials)) -> AuthenticatedUser:
+    """Require any authenticated user (read-only OK)"""
+    return user
+
+
+# Legacy compatibility - maps to require_admin
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    """Legacy admin verification - use require_admin instead"""
+    user = verify_credentials(credentials)
+    if not user.is_admin():
+        raise HTTPException(
+            status_code=403,
+            detail="Admin privileges required"
+        )
+    return user.username
 
 # Keep JSON file path for backward compatibility / export
 CATEGORIES_FILE = Path(__file__).parent.parent.parent / "data" / "political_categories.json"

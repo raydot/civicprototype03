@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     secret_key: Optional[str] = None
     admin_username: str = os.getenv("ADMIN_USERNAME", "admin")
     admin_password: str = os.getenv("ADMIN_PASSWORD", "changeme123")
+    guest_username: str = os.getenv("GUEST_USERNAME", "guest")
+    guest_password: str = os.getenv("GUEST_PASSWORD", "viewonly")
     
     # External API settings
     openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
