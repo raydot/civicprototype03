@@ -368,7 +368,7 @@ async def create_category(preview: CategoryPreview, admin: str = Depends(verify_
 async def list_categories(
     sort_by: str = "created_at",
     sort_order: str = "desc",
-    admin: str = Depends(verify_admin)
+    user: AuthenticatedUser = Depends(require_auth)
 ):
     """Get all categories for review with sorting options
     
