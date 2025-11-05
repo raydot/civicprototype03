@@ -1,3 +1,9 @@
+## v1.6.0 (2025-11-05)
+
+### Feat
+
+- add guest/read-only admin access with role-based auth
+
 ## v1.5.0 (2025-10-19)
 
 ### Feat
