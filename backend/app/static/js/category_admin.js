@@ -36,6 +36,23 @@ function showToast(message, type = 'success') {
   }, 3000)
 }
 
+// Helper function to handle API responses with permission checking
+async function handleApiResponse(response) {
+  if (response.status === 403) {
+    const data = await response.json()
+    showToast(
+      data.detail ||
+        "You don't have permission to perform this action. Guest users have read-only access.",
+      'error'
+    )
+    throw new Error('Permission denied')
+  }
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`)
+  }
+  return response
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   // Restore sort preference from localStorage
@@ -46,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sortFilter.value = savedSort
     }
   }
-  
+
   loadCategories()
 
   // Add keyboard shortcut for create tab
@@ -117,7 +134,7 @@ async function loadCategories(sortBy = null, sortOrder = null) {
         sortOrder = 'desc'
       }
     }
-    
+
     const response = await fetch(
       `${API_BASE}/category-admin/categories?sort_by=${sortBy}&sort_order=${sortOrder}`
     )
@@ -154,10 +171,10 @@ async function loadCategories(sortBy = null, sortOrder = null) {
 function handleSortChange() {
   const sortFilter = document.getElementById('sortFilter')
   const sortValue = sortFilter.value
-  
+
   // Save preference to localStorage
   localStorage.setItem(SORT_PREFERENCE_KEY, sortValue)
-  
+
   // Reload categories with new sort
   loadCategories()
 }
@@ -418,7 +435,7 @@ async function saveKeywords(id) {
       }
     )
 
-    if (!response.ok) throw new Error('Failed to save keywords')
+    await handleApiResponse(response)
 
     // Stay in edit mode and keep category expanded
     showToast('Keywords saved successfully!', 'success')
@@ -444,7 +461,7 @@ async function saveKeywordsQuietly(id) {
       }
     )
 
-    if (!response.ok) throw new Error('Failed to save keywords')
+    await handleApiResponse(response)
     // Silent save - no toast
   } catch (error) {
     console.error('Error auto-saving keywords:', error)
@@ -520,8 +537,7 @@ async function enhanceCategory(id, event) {
       }
     )
 
-    if (!response.ok) throw new Error('Failed to enhance category')
-
+    await handleApiResponse(response)
     const result = await response.json()
 
     showToast(
@@ -792,11 +808,7 @@ async function generatePreview() {
       }
     )
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.detail || 'Failed to generate preview')
-    }
-
+    await handleApiResponse(response)
     currentPreview = await response.json()
     displayPreview(currentPreview)
   } catch (error) {
@@ -828,7 +840,7 @@ function displayPreview(preview) {
   // Generate editable form HTML
   const previewCard = document.querySelector('#preview .preview-card')
   previewCard.classList.add('editable')
-  
+
   previewCard.innerHTML = `
     <div class="form-field">
       <label for="edit-name">Category Name *</label>
@@ -845,25 +857,41 @@ function displayPreview(preview) {
     <div class="form-field">
       <label for="edit-type">Type *</label>
       <select id="edit-type">
-        <option value="issue" ${preview.type === 'issue' ? 'selected' : ''}>Issue</option>
-        <option value="policy" ${preview.type === 'policy' ? 'selected' : ''}>Policy</option>
+        <option value="issue" ${
+          preview.type === 'issue' ? 'selected' : ''
+        }>Issue</option>
+        <option value="policy" ${
+          preview.type === 'policy' ? 'selected' : ''
+        }>Policy</option>
       </select>
     </div>
 
     <div class="form-field">
       <label for="edit-spectrum">Political Spectrum *</label>
       <select id="edit-spectrum">
-        <option value="progressive" ${preview.political_spectrum === 'progressive' ? 'selected' : ''}>Progressive</option>
-        <option value="leans_left" ${preview.political_spectrum === 'leans_left' ? 'selected' : ''}>Leans Left</option>
-        <option value="bipartisan" ${preview.political_spectrum === 'bipartisan' ? 'selected' : ''}>Bipartisan</option>
-        <option value="leans_right" ${preview.political_spectrum === 'leans_right' ? 'selected' : ''}>Leans Right</option>
-        <option value="conservative" ${preview.political_spectrum === 'conservative' ? 'selected' : ''}>Conservative</option>
+        <option value="progressive" ${
+          preview.political_spectrum === 'progressive' ? 'selected' : ''
+        }>Progressive</option>
+        <option value="leans_left" ${
+          preview.political_spectrum === 'leans_left' ? 'selected' : ''
+        }>Leans Left</option>
+        <option value="bipartisan" ${
+          preview.political_spectrum === 'bipartisan' ? 'selected' : ''
+        }>Bipartisan</option>
+        <option value="leans_right" ${
+          preview.political_spectrum === 'leans_right' ? 'selected' : ''
+        }>Leans Right</option>
+        <option value="conservative" ${
+          preview.political_spectrum === 'conservative' ? 'selected' : ''
+        }>Conservative</option>
       </select>
     </div>
 
     <div class="form-field">
       <label for="edit-policy-areas">Policy Areas *</label>
-      <textarea id="edit-policy-areas" rows="2">${preview.policy_areas.join(', ')}</textarea>
+      <textarea id="edit-policy-areas" rows="2">${preview.policy_areas.join(
+        ', '
+      )}</textarea>
       <div class="helper-text">Comma-separated values (e.g., healthcare, economy, education)</div>
       <div class="error-text">Policy areas must be comma-separated values</div>
     </div>
@@ -871,12 +899,19 @@ function displayPreview(preview) {
     <div class="form-field">
       <label>Keywords * (minimum 3)</label>
       <div class="editable-keywords" id="edit-keywords">
-        ${preview.keywords.map(k => `
+        ${preview.keywords
+          .map(
+            (k) => `
           <span class="keyword-tag-editable">
             ${k}
-            <span class="remove-keyword" onclick="removeKeyword('${k.replace(/'/g, "\\'")}')">×</span>
+            <span class="remove-keyword" onclick="removeKeyword('${k.replace(
+              /'/g,
+              "\\'"
+            )}')">×</span>
           </span>
-        `).join('')}
+        `
+          )
+          .join('')}
         <input type="text" class="keyword-input-field" id="keyword-input" placeholder="Add keyword..." onkeypress="handleKeywordInput(event)" />
       </div>
       <div class="helper-text">Press Enter to add a keyword</div>
@@ -905,7 +940,7 @@ function displayPreview(preview) {
 function removeKeyword(keyword) {
   const keywordsContainer = document.getElementById('edit-keywords')
   const tags = keywordsContainer.querySelectorAll('.keyword-tag-editable')
-  
+
   tags.forEach((tag) => {
     if (tag.textContent.trim().replace('×', '').trim() === keyword) {
       tag.remove()
@@ -918,14 +953,17 @@ function handleKeywordInput(event) {
     event.preventDefault()
     const input = event.target
     const keyword = input.value.trim()
-    
+
     if (keyword) {
       // Add new keyword tag before the input
       const tag = document.createElement('span')
       tag.className = 'keyword-tag-editable'
       tag.innerHTML = `
         ${keyword}
-        <span class="remove-keyword" onclick="removeKeyword('${keyword.replace(/'/g, "\\'")}')">×</span>
+        <span class="remove-keyword" onclick="removeKeyword('${keyword.replace(
+          /'/g,
+          "\\'"
+        )}')">×</span>
       `
       input.parentElement.insertBefore(tag, input)
       input.value = ''
@@ -937,59 +975,75 @@ async function approveCategory() {
   if (!currentPreview) return
 
   const btn = event.target
-  
+
   // Read form values
   const name = document.getElementById('edit-name').value.trim()
   const description = document.getElementById('edit-description').value.trim()
   const type = document.getElementById('edit-type').value
   const spectrum = document.getElementById('edit-spectrum').value
-  const policyAreasText = document.getElementById('edit-policy-areas').value.trim()
-  
+  const policyAreasText = document
+    .getElementById('edit-policy-areas')
+    .value.trim()
+
   // Get keywords from tags
-  const keywordTags = document.querySelectorAll('#edit-keywords .keyword-tag-editable')
+  const keywordTags = document.querySelectorAll(
+    '#edit-keywords .keyword-tag-editable'
+  )
   const keywords = Array.from(keywordTags).map((tag) =>
     tag.textContent.trim().replace('×', '').trim()
   )
-  
+
   // Validate
   let hasError = false
-  
+
   // Clear previous errors
   document.querySelectorAll('.form-field').forEach((field) => {
     field.classList.remove('has-error')
   })
-  
+
   if (!name) {
-    document.querySelector('#edit-name').closest('.form-field').classList.add('has-error')
+    document
+      .querySelector('#edit-name')
+      .closest('.form-field')
+      .classList.add('has-error')
     hasError = true
   }
-  
+
   if (!description) {
-    document.querySelector('#edit-description').closest('.form-field').classList.add('has-error')
+    document
+      .querySelector('#edit-description')
+      .closest('.form-field')
+      .classList.add('has-error')
     hasError = true
   }
-  
+
   if (keywords.length < 3) {
-    document.querySelector('#edit-keywords').closest('.form-field').classList.add('has-error')
+    document
+      .querySelector('#edit-keywords')
+      .closest('.form-field')
+      .classList.add('has-error')
     hasError = true
   }
-  
+
   // Parse policy areas as CSV
   const policyAreas = policyAreasText
     .split(',')
     .map((area) => area.trim())
     .filter((area) => area.length > 0)
-  
+
   if (policyAreas.length === 0) {
-    document.querySelector('#edit-policy-areas').closest('.form-field').classList.add('has-error')
+    document
+      .querySelector('#edit-policy-areas')
+      .closest('.form-field')
+      .classList.add('has-error')
     hasError = true
   }
-  
+
   if (hasError) {
     showToast('Please fix the validation errors', 'error')
     return
   }
-  
+
   // Update currentPreview with edited values
   currentPreview.name = name
   currentPreview.description = description
@@ -997,7 +1051,7 @@ async function approveCategory() {
   currentPreview.political_spectrum = spectrum
   currentPreview.policy_areas = policyAreas
   currentPreview.keywords = keywords
-  
+
   btn.disabled = true
   btn.textContent = 'Saving...'
 
@@ -1039,13 +1093,13 @@ function resetForm() {
   document.getElementById('description').value = ''
   document.getElementById('preview').style.display = 'none'
   document.getElementById('successMessage').style.display = 'none'
-  
+
   // Remove editable class from preview card
   const previewCard = document.querySelector('#preview .preview-card')
   if (previewCard) {
     previewCard.classList.remove('editable')
   }
-  
+
   currentPreview = null
 }
 
@@ -1060,7 +1114,9 @@ function deleteCategory(id, event) {
 
   // Store the category to delete and show modal
   categoryToDelete = category
-  document.getElementById('deleteCategoryName').textContent = `"${category.name}"`
+  document.getElementById(
+    'deleteCategoryName'
+  ).textContent = `"${category.name}"`
   document.getElementById('deleteModal').classList.add('active')
 }
 
@@ -1087,11 +1143,7 @@ async function confirmDelete() {
       }
     )
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.detail || 'Failed to delete category')
-    }
-
+    await handleApiResponse(response)
     showToast(`Category "${categoryName}" deleted successfully`, 'success')
 
     // Reload categories to update the list and stats
