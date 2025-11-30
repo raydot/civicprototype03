@@ -7,7 +7,7 @@ from openai import OpenAI
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
 import asyncio
-from .text_encoder import get_text_encoder
+from ..config import settings
 from ..utils.logging import structured_logger
 from ..services.openai_cost_tracker import get_cost_tracker
 
