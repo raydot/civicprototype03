@@ -1,3 +1,9 @@
+## v1.7.1 (2025-11-30)
+
+### Fix
+
+- remove circular import in text_encoder
+
 ## v1.7.0 (2025-11-30)
 
 ### Feat
