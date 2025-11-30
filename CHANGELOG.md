@@ -1,3 +1,9 @@
+## v1.6.3 (2025-11-30)
+
+### Fix
+
+- use database as single source of truth for categories, remove JSON dependency
+
 ## v1.6.2 (2025-11-05)
 
 ### Refactor
