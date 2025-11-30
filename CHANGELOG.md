@@ -1,3 +1,9 @@
+## v1.7.0 (2025-11-30)
+
+### Feat
+
+- add comprehensive OpenAI cost tracking system
+
 ## v1.6.3 (2025-11-30)
 
 ### Fix

@@ -1,3 +1,76 @@
+## v1.7.0 (2025-11-30)
+
+### Feat
+
+- add comprehensive OpenAI cost tracking system
+
+## v1.6.3 (2025-11-30)
+
+### Fix
+
+- use database as single source of truth for categories, remove JSON dependency
+
+## v1.6.2 (2025-11-05)
+
+### Refactor
+
+- modularize category admin JS into 10 focused modules + add guest permission toasts
+
+## v1.6.1 (2025-11-05)
+
+### Fix
+
+- allow guest users to view categories (read-only endpoints)
+
+## v1.6.0 (2025-11-05)
+
+### Feat
+
+- add guest/read-only admin access with role-based auth
+
+## v1.5.0 (2025-10-19)
+
+### Feat
+
+- **category-admin**: add Excel template generator for bulk category creation
+- **category-admin**: add sortable category list with persistent preferences
+
+## v1.4.0 (2025-10-19)
+
+### Feat
+
+- **category-admin**: add editable preview form for AI-generated categories
+
+## v1.3.1 (2025-10-17)
+
+### Refactor
+
+- **political-spectrum**: migrate to 5-point spectrum system
+
+## v1.3.0 (2025-10-17)
+
+### Feat
+
+- **category-admin**: add delete category functionality with custom modal
+
+## v1.2.1 (2025-10-17)
+
+### Refactor
+
+- **category-admin**: separate concerns into CSS and JS files
+
+## v1.2.0 (2025-10-17)
+
+### Feat
+
+- **category-admin**: add transform category feature with split/merge capabilities
+
+## v1.1.0 (2025-10-17)
+
+### Feat
+
+- **category-admin**: improve keyword editing UX and add toast notifications
+
 ## v1.0.1 (2025-10-15)
 
 ### Fix
