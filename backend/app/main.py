@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import settings
 from .utils.logging import setup_logging, structured_logger
 from .utils.exceptions import AIRecommendationException
-from .api.routes import health, text_analysis, category_matching, sentiment_analysis, admin, feedback, category_admin
+from .api.routes import health, text_analysis, category_matching, sentiment_analysis, admin, feedback, category_admin, openai_costs
 
 
 # Set up logging before anything else
@@ -156,6 +156,7 @@ app.include_router(sentiment_analysis.router)
 app.include_router(admin.router)
 app.include_router(feedback.router)
 app.include_router(category_admin.router)
+app.include_router(openai_costs.router)
 
 # Import and include learning router
 from .api.routes import learning

@@ -5,6 +5,7 @@ Detects emotional intensity, urgency, and sentiment in political text
 import json
 import time
 import hashlib
+import asyncio
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from functools import lru_cache
@@ -12,6 +13,7 @@ from openai import OpenAI
 
 from ..config import settings
 from ..utils.logging import structured_logger
+from ..services.openai_cost_tracker import get_cost_tracker
 
 
 @dataclass
@@ -92,6 +94,20 @@ class SentimentAnalyzer:
                 max_tokens=300,
                 response_format={"type": "json_object"}
             )
+            
+            # Track cost (non-blocking)
+            try:
+                cost_tracker = get_cost_tracker()
+                asyncio.create_task(cost_tracker.track_usage(
+                    model="gpt-3.5-turbo",
+                    operation="chat",
+                    total_tokens=response.usage.total_tokens,
+                    prompt_tokens=response.usage.prompt_tokens,
+                    completion_tokens=response.usage.completion_tokens,
+                    endpoint="sentiment_analyzer.analyze_priority_intensity"
+                ))
+            except Exception as track_error:
+                self.logger.warning(f"Failed to track cost: {track_error}")
             
             result_data = json.loads(response.choices[0].message.content)
             processing_time = int((time.time() - start_time) * 1000)
@@ -201,6 +217,20 @@ class SentimentAnalyzer:
                 max_tokens=300,
                 response_format={"type": "json_object"}
             )
+            
+            # Track cost (non-blocking)
+            try:
+                cost_tracker = get_cost_tracker()
+                asyncio.create_task(cost_tracker.track_usage(
+                    model="gpt-3.5-turbo",
+                    operation="chat",
+                    total_tokens=response.usage.total_tokens,
+                    prompt_tokens=response.usage.prompt_tokens,
+                    completion_tokens=response.usage.completion_tokens,
+                    endpoint="sentiment_analyzer.analyze_feedback_sentiment"
+                ))
+            except Exception as track_error:
+                self.logger.warning(f"Failed to track cost: {track_error}")
             
             result_data = json.loads(response.choices[0].message.content)
             processing_time = int((time.time() - start_time) * 1000)

@@ -6,8 +6,10 @@ from typing import List, Optional, Dict, Any
 from openai import OpenAI
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
-from ..config import settings
+import asyncio
+from .text_encoder import get_text_encoder
 from ..utils.logging import structured_logger
+from ..services.openai_cost_tracker import get_cost_tracker
 
 
 class TextEncoder:
@@ -67,6 +69,19 @@ class TextEncoder:
             # Extract embeddings from response
             embeddings = np.array(response.data[0].embedding)
             
+            # Track cost (non-blocking)
+            try:
+                cost_tracker = get_cost_tracker()
+                # Create task without awaiting to avoid blocking
+                asyncio.create_task(cost_tracker.track_usage(
+                    model=self.model_name,
+                    operation="embedding",
+                    total_tokens=response.usage.total_tokens,
+                    endpoint="text_encoder.encode_text"
+                ))
+            except Exception as track_error:
+                self.logger.warning(f"Failed to track cost: {track_error}")
+            
             self.logger.info(f"Encoded text -> {embeddings.shape}")
             
             return embeddings
@@ -108,6 +123,19 @@ class TextEncoder:
             
             # Extract embeddings from response
             embeddings = np.array([item.embedding for item in response.data])
+            
+            # Track cost (non-blocking)
+            try:
+                cost_tracker = get_cost_tracker()
+                # Create task without awaiting to avoid blocking
+                asyncio.create_task(cost_tracker.track_usage(
+                    model=self.model_name,
+                    operation="embedding",
+                    total_tokens=response.usage.total_tokens,
+                    endpoint="text_encoder.encode_batch"
+                ))
+            except Exception as track_error:
+                self.logger.warning(f"Failed to track cost: {track_error}")
             
             self.logger.info(f"Encoded {len(cleaned_texts)} texts -> {embeddings.shape}")
             
