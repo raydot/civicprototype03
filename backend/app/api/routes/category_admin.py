@@ -16,6 +16,7 @@ from datetime import datetime
 from ...config import settings
 from ...utils.logging import structured_logger
 from ...db.database import database
+from ...models.category_matcher import get_category_matcher
 
 logger = structured_logger
 router = APIRouter(prefix="/category-admin", tags=["category-admin"])
@@ -210,6 +211,27 @@ async def save_category(category_data: dict, created_by: str = "ai_admin"):
     return result["id"]
 
 
+async def reload_category_matcher():
+    """Reload all active categories from database into the category matcher
+    
+    This ensures the live site sees updated categories immediately without server restart.
+    """
+    try:
+        # Load all active categories from database
+        data = await load_categories()
+        categories = data["categories"]
+        
+        # Reload into category matcher
+        category_matcher = get_category_matcher()
+        category_matcher.load_categories(categories)
+        
+        logger.info(f"Reloaded {len(categories)} categories into category matcher")
+        
+    except Exception as e:
+        logger.error(f"Failed to reload category matcher: {str(e)}")
+        # Don't raise - this is a background operation
+
+
 @router.post("/generate-preview", response_model=CategoryPreview)
 async def generate_category_preview(request: CategoryRequest, admin: str = Depends(verify_admin)):
     """
@@ -351,6 +373,9 @@ async def create_category(preview: CategoryPreview, admin: str = Depends(verify_
         
         await save_category(new_category, created_by="ai_admin")
         
+        # Reload category matcher so live site sees the new category immediately
+        await reload_category_matcher()
+        
         logger.info(f"Created new category in database: ID {next_id} - {preview.name}")
         
         return {
@@ -451,6 +476,9 @@ async def update_category_keywords(category_id: int, request: dict, admin: str =
         if not result:
             raise HTTPException(status_code=404, detail=f"Category {category_id} not found")
         
+        # Reload category matcher so live site sees the updated keywords immediately
+        await reload_category_matcher()
+        
         logger.info(f"Updated keywords for category {category_id}")
         
         return {
@@ -537,6 +565,9 @@ Return JSON: {{"new_keywords": ["keyword1", "keyword2", ...]}}
             "keywords": json.dumps(updated_keywords),
             "category_id": category_id
         })
+        
+        # Reload category matcher so live site sees the enhanced keywords immediately
+        await reload_category_matcher()
         
         logger.info(f"Enhanced category {category_id} with {len(added_keywords)} new keywords")
         
@@ -751,6 +782,9 @@ async def approve_transform(request: dict, admin: str = Depends(verify_admin)):
             await database.execute(deactivate_query, {"category_id": cat_id})
             logger.info(f"Deactivated source category: ID {cat_id}")
         
+        # Reload category matcher so live site sees the transformed categories immediately
+        await reload_category_matcher()
+        
         return {
             "status": "success",
             "created_category_ids": created_ids,
@@ -783,6 +817,9 @@ async def delete_category(category_id: int, admin: str = Depends(verify_admin)):
         
         if not result:
             raise HTTPException(status_code=404, detail=f"Category {category_id} not found")
+        
+        # Reload category matcher so live site no longer shows the deleted category
+        await reload_category_matcher()
         
         logger.warning(f"Soft deleted category {category_id}")
         
