@@ -1,3 +1,10 @@
+## v1.7.2 (2025-11-30)
+
+### Fix
+
+- set correct down_revision for cost tracking migration
+- add migration script
+
 ## v1.7.1 (2025-11-30)
 
 ### Fix
