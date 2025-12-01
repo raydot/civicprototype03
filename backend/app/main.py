@@ -199,6 +199,16 @@ async def root():
     return response
 
 
+@app.get("/admin/cost-dashboard")
+async def cost_dashboard():
+    """Serve the cost tracking dashboard"""
+    from fastapi.responses import FileResponse
+    import os
+    
+    dashboard_path = os.path.join(os.path.dirname(__file__), "static", "cost_dashboard.html")
+    return FileResponse(dashboard_path)
+
+
 def handle_shutdown_signal(signum, frame):
     """Handle shutdown signals gracefully"""
     logger.info(f"Received signal {signum}, shutting down gracefully...")
