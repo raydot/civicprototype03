@@ -1,3 +1,9 @@
+## v1.8.1 (2025-11-30)
+
+### Fix
+
+- correct API URL query params in cost dashboard
+
 ## v1.8.0 (2025-11-30)
 
 ### Feat
