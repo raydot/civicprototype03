@@ -333,7 +333,9 @@
                 .map(
                   (model) => `
                             <div class="breakdown-item">
-                                <h4>${model.model}</h4>
+                                <h4 style="word-break: break-word;">${
+                                  model.model
+                                }</h4>
                                 <div class="breakdown-stats">
                                     <div>Calls: <span>${
                                       model.call_count
@@ -372,7 +374,7 @@
       async function loadEndpointBreakdown() {
         try {
           const data = await fetchAPI(
-            '/admin/openai-costs/summary&days=7&group_by=endpoint'
+            '/admin/openai-costs/summary?days=7&group_by=endpoint'
           )
           const endpointDiv = document.getElementById('endpointBreakdown')
 
@@ -418,8 +420,9 @@
           event.target.classList.add('active')
 
           const data = await fetchAPI(
-            `/admin/openai-costs/summary&days=${days}&group_by=day`
+            `/admin/openai-costs/summary?days=${days}&group_by=day`
           )
+
           const trendDiv = document.getElementById('trendData')
 
           if (data.summary && data.summary.length > 0) {
