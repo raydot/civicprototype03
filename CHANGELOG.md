@@ -1,3 +1,9 @@
+## v1.7.4 (2025-11-30)
+
+### Fix
+
+- split SQL statements to avoid prepared statement error
+
 ## v1.7.3 (2025-11-30)
 
 ### Fix
