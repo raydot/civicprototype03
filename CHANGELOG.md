@@ -1,3 +1,9 @@
+## v1.8.0 (2025-11-30)
+
+### Feat
+
+- add OpenAI cost tracking dashboard
+
 ## v1.7.4 (2025-11-30)
 
 ### Fix
