@@ -1,3 +1,9 @@
+## v1.8.2 (2025-11-30)
+
+### Fix
+
+- correct query parameter handling in cost dashboard
+
 ## v1.8.1 (2025-11-30)
 
 ### Fix
