@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'openai_usage_001'
-down_revision = None  # Update this to your latest migration
+down_revision = 'f76cbde70f0b'  # Points to create_political_categories_table
 branch_labels = None
 depends_on = None
 
