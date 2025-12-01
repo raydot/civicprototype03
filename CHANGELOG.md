@@ -1,3 +1,9 @@
+## v1.7.3 (2025-11-30)
+
+### Fix
+
+- add admin endpoint to manually run cost tracking migration
+
 ## v1.7.2 (2025-11-30)
 
 ### Fix
