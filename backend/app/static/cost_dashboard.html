@@ -289,10 +289,12 @@
       <div class="chart-section">
         <h2>📈 7-Day Cost Trend</h2>
         <div class="period-selector">
-          <button class="period-btn active" onclick="loadTrend(7)">
+          <button class="period-btn active" onclick="loadTrend(7, this)">
             7 Days
           </button>
-          <button class="period-btn" onclick="loadTrend(30)">30 Days</button>
+          <button class="period-btn" onclick="loadTrend(30, this)">
+            30 Days
+          </button>
         </div>
         <div id="trendData" class="loading">Loading trend data</div>
       </div>
@@ -303,8 +305,9 @@
       const ADMIN_TOKEN = 'voterPrime_admin_2024' // TODO: Make this configurable
 
       async function fetchAPI(endpoint) {
+        const separator = endpoint.includes('?') ? '&' : '?'
         const response = await fetch(
-          `${API_BASE}${endpoint}?token=${ADMIN_TOKEN}`
+          `${API_BASE}${endpoint}${separator}token=${ADMIN_TOKEN}`
         )
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`)
@@ -411,13 +414,15 @@
         }
       }
 
-      async function loadTrend(days) {
+      async function loadTrend(days, buttonElement) {
         try {
           // Update active button
           document
             .querySelectorAll('.period-btn')
             .forEach((btn) => btn.classList.remove('active'))
-          event.target.classList.add('active')
+          if (buttonElement) {
+            buttonElement.classList.add('active')
+          }
 
           const data = await fetchAPI(
             `/admin/openai-costs/summary?days=${days}&group_by=day`
@@ -460,7 +465,7 @@
 
       async function checkAlerts() {
         try {
-          const data = await fetchAPI('/admin/openai-costs/alerts&threshold=50')
+          const data = await fetchAPI('/admin/openai-costs/alerts?threshold=50')
 
           if (data.alerts && data.alerts.length > 0) {
             const alertBanner = document.getElementById('alertBanner')
