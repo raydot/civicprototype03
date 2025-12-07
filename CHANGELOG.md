@@ -1,3 +1,9 @@
+## v1.9.0 (2025-12-06)
+
+### Feat
+
+- **migration**: add endpoint to load categories from JSON to database
+
 ## v1.8.3 (2025-12-06)
 
 ### Fix
