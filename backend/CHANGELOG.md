@@ -1,3 +1,52 @@
+## v1.8.3 (2025-12-06)
+
+### Fix
+
+- trying to migrate json to db.
+
+## v1.8.2 (2025-11-30)
+
+### Fix
+
+- correct query parameter handling in cost dashboard
+
+## v1.8.1 (2025-11-30)
+
+### Fix
+
+- correct API URL query params in cost dashboard
+
+## v1.8.0 (2025-11-30)
+
+### Feat
+
+- add OpenAI cost tracking dashboard
+
+## v1.7.4 (2025-11-30)
+
+### Fix
+
+- split SQL statements to avoid prepared statement error
+
+## v1.7.3 (2025-11-30)
+
+### Fix
+
+- add admin endpoint to manually run cost tracking migration
+
+## v1.7.2 (2025-11-30)
+
+### Fix
+
+- set correct down_revision for cost tracking migration
+- add migration script
+
+## v1.7.1 (2025-11-30)
+
+### Fix
+
+- remove circular import in text_encoder
+
 ## v1.7.0 (2025-11-30)
 
 ### Feat
