@@ -1,3 +1,9 @@
+## v1.10.0 (2025-12-06)
+
+### Feat
+
+- **migration**: add debug endpoint to check all categories including inactive
+
 ## v1.9.0 (2025-12-06)
 
 ### Feat
