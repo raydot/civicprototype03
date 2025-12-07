@@ -140,7 +140,7 @@ async def load_categories_from_json(admin_auth: bool = Query(default=verify_admi
         
         for category in categories:
             try:
-                await database.execute(text(insert_query), {
+                await database.execute(insert_query, {
                     "id": category["id"],
                     "name": category["name"],
                     "type": category["type"],
