@@ -1,3 +1,10 @@
+## v1.8.3 (2025-12-06)
+
+### Fix
+
+- migrating db
+- trying to migrate json to db.
+
 ## v1.8.2 (2025-11-30)
 
 ### Fix
