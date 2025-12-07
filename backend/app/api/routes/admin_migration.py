@@ -173,3 +173,55 @@ async def load_categories_from_json(admin_auth: bool = Query(default=verify_admi
     except Exception as e:
         logger.error(f"Failed to load categories: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Migration failed: {str(e)}")
+
+
+@router.get("/check-categories")
+async def check_all_categories(admin_auth: bool = Query(default=verify_admin_token)):
+    """
+    Debug endpoint to check ALL categories in database (including inactive)
+    
+    Example:
+    GET /admin/migration/check-categories?token=voterPrime_admin_2024
+    """
+    if database is None:
+        raise HTTPException(status_code=500, detail="Database not available")
+    
+    try:
+        # Get counts by active status
+        count_query = """
+            SELECT is_active, COUNT(*) as count 
+            FROM political_categories 
+            GROUP BY is_active
+        """
+        counts = await database.fetch_all(count_query)
+        
+        # Get all categories (including inactive)
+        all_query = """
+            SELECT id, name, is_active, created_at, updated_at, created_by, updated_by
+            FROM political_categories
+            ORDER BY id
+        """
+        all_categories = await database.fetch_all(all_query)
+        
+        return {
+            "status": "success",
+            "counts_by_status": [
+                {"is_active": row["is_active"], "count": row["count"]}
+                for row in counts
+            ],
+            "total_categories": len(all_categories),
+            "categories": [
+                {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "is_active": row["is_active"],
+                    "created_by": row["created_by"],
+                    "updated_by": row["updated_by"]
+                }
+                for row in all_categories
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to check categories: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Check failed: {str(e)}")
