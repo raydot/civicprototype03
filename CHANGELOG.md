@@ -1,3 +1,9 @@
+## v1.12.5 (2026-01-19)
+
+### Fix
+
+- make add_original_query and add_category_id migrations idempotent
+
 ## v1.12.4 (2026-01-19)
 
 ### Fix
