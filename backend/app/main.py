@@ -52,48 +52,50 @@ async def Lifecycle(app: FastAPI):
         logger.error(f"Failed to initialize feedback system database: {str(e)}")
         # Don't raise here - let the app start but feedback endpoints may not work
     
-    # Initialize political categories for matching from database
+    # Initialize policy terms for matching from database
     try:
         from .models.category_matcher import get_category_matcher
         from .db.database import database
         import json
         
         if database is not None:
-            # Load categories from database
+            # Load policy terms from database (Congress.gov taxonomy)
             query = """
-                SELECT id, name, type, description, keywords, success_count, 
-                       total_usage_count, terminology_source, terminology_sections, metadata
-                FROM political_categories
+                SELECT id, term as name, policy_area, description, keywords, 
+                       embedding, success_count, total_usage_count, is_active
+                FROM policy_terms
                 WHERE is_active = true
-                ORDER BY created_at DESC
+                ORDER BY id
             """
             rows = await database.fetch_all(query)
             
-            categories = [
+            policy_terms = [
                 {
                     "id": row["id"],
                     "name": row["name"],
-                    "type": row["type"],
+                    "type": "policy_term",
+                    "policy_area": row["policy_area"],
                     "description": row["description"],
-                    "keywords": json.loads(row["keywords"]) if isinstance(row["keywords"], str) else (row["keywords"] or []),
-                    "success_count": row["success_count"],
-                    "total_usage_count": row["total_usage_count"],
-                    "terminology_source": row["terminology_source"],
-                    "terminology_sections": json.loads(row["terminology_sections"]) if isinstance(row["terminology_sections"], str) else (row["terminology_sections"] or []),
-                    "metadata": json.loads(row["metadata"]) if isinstance(row["metadata"], str) else (row["metadata"] or {})
+                    "keywords": json.loads(row["keywords"]) if isinstance(row["keywords"], str) else (row["keywords"] if row["keywords"] else []),
+                    "embedding": list(row["embedding"]) if row["embedding"] else None,
+                    "success_count": row["success_count"] or 0,
+                    "total_usage_count": row["total_usage_count"] or 0,
+                    "metadata": {
+                        "policy_area": row["policy_area"]
+                    }
                 }
                 for row in rows
             ]
             
             category_matcher = get_category_matcher()
-            category_matcher.load_categories(categories)
+            category_matcher.load_categories(policy_terms)
             
-            logger.info(f"Loaded {len(categories)} political categories from database for matching")
+            logger.info(f"Loaded {len(policy_terms)} policy terms from database for matching")
         else:
-            logger.warning("Database not available, skipping category initialization")
+            logger.warning("Database not available, skipping policy term initialization")
         
     except Exception as e:
-        logger.error(f"Failed to load political categories: {str(e)}")
+        logger.error(f"Failed to load policy terms: {str(e)}")
         # Don't raise here - let the app start but category endpoints will fail gracefully
     
     logger.info(f"{settings.app_name} v{settings.version} starting up...")

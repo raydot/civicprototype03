@@ -33,7 +33,9 @@ class CategoryMatchResponse(BaseModel):
     category_type: str
     similarity_score: float
     confidence_score: float
+    confidence_label: str
     keywords: List[str]
+    description: str
     metadata: Dict[str, Any]
 
 
@@ -84,17 +86,41 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
         logger.info(f"Finding category matches for: '{request.user_input[:50]}...'")
         
         # Create or update user session for feedback tracking
-        user_session = UserSession(http_request)
-        session_id = await user_session.create_or_update_session()
+        session_id = None
+        try:
+            user_session = UserSession(http_request)
+            session_id = await user_session.create_or_update_session()
+            logger.info(f"Session created/retrieved: {session_id}")
+        except Exception as session_error:
+            logger.error(f"Session creation failed (non-fatal): {str(session_error)}", exc_info=True)
+            # Continue without session tracking
+            session_id = "no-session"
         
-        category_matcher = get_category_matcher()
+        # Get category matcher
+        try:
+            category_matcher = get_category_matcher()
+            logger.info(f"CategoryMatcher loaded with {len(category_matcher.categories)} categories")
+        except Exception as matcher_error:
+            logger.error(f"Failed to get category matcher: {str(matcher_error)}", exc_info=True)
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Category matcher initialization failed: {str(matcher_error)}"
+            )
         
         # Find matches
-        matches = category_matcher.find_matches(
-            user_input=request.user_input,
-            category_types=request.category_types,
-            top_k=request.top_k
-        )
+        try:
+            matches = await category_matcher.find_matches(
+                user_input=request.user_input,
+                category_types=request.category_types,
+                top_k=request.top_k
+            )
+            logger.info(f"Found {len(matches)} matches")
+        except Exception as match_error:
+            logger.error(f"Matching failed: {str(match_error)}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Category matching failed: {str(match_error)}"
+            )
         
         # Convert to response format
         match_responses = [
@@ -104,7 +130,9 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
                 category_type=match.category_type,
                 similarity_score=match.similarity_score,
                 confidence_score=match.confidence_score,
+                confidence_label=match.confidence_label,
                 keywords=match.keywords,
+                description=match.description,
                 metadata=match.metadata
             )
             for match in matches
@@ -153,9 +181,15 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
         
         return result
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
-        logger.error(f"Category matching failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Category matching failed: {str(e)}")
+        logger.error(f"Unexpected error in category matching: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Unexpected error in category matching: {type(e).__name__}: {str(e)}"
+        )
 
 
 @router.post("/refine-matches", response_model=CategoryMatchingResult)
@@ -173,7 +207,7 @@ async def refine_category_matches(request: CategoryRefinementRequest):
         category_matcher = get_category_matcher()
         
         # Get refined matches
-        matches = category_matcher.refine_matches(
+        matches = await category_matcher.refine_matches(
             user_input=request.user_input,
             rejected_category_ids=request.rejected_category_ids,
             category_types=request.category_types,
@@ -188,7 +222,9 @@ async def refine_category_matches(request: CategoryRefinementRequest):
                 category_type=match.category_type,
                 similarity_score=match.similarity_score,
                 confidence_score=match.confidence_score,
+                confidence_label=match.confidence_label,
                 keywords=match.keywords,
+                description=match.description,
                 metadata=match.metadata
             )
             for match in matches

@@ -215,9 +215,21 @@ export default function MappingResultsScreen({
 
           {/* AI Loading State */}
           {isLoading && (
-            <div className="flex items-center justify-center py-3 mb-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
-              <span className="ml-2 text-sm text-gray-600">Analyzing your priorities...</span>
+            <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200 mb-3">
+              <div className="flex flex-col items-center justify-center gap-3">
+                <div className="relative">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-200"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-orange-500 absolute top-0 left-0"></div>
+                </div>
+                <div className="text-center">
+                  <p className="text-base font-medium text-orange-900 mb-1">
+                    🤖 AI is analyzing your priorities...
+                  </p>
+                  <p className="text-sm text-orange-700">
+                    Matching your concerns to policy terms
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -313,8 +325,8 @@ export default function MappingResultsScreen({
                         <div className="flex items-center gap-1">
                           <span className="text-sm">✅</span>
                           <span className="text-xs font-medium text-gray-600">
-                            {/* Use AI confidence if available, fallback to 92% */}
-                            {aiMatches[index] ? `${aiMatches[index].confidence}% match` : '92% match'}
+                            {/* Display confidence label if available, otherwise show percentage */}
+                            {aiMatches[index]?.confidenceLabel || (aiMatches[index] ? `${aiMatches[index].confidence}% match` : '92% match')}
                           </span>
                         </div>
                       </div>

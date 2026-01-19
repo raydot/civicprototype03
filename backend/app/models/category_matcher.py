@@ -21,7 +21,9 @@ class CategoryMatch:
     category_type: str  # 'issue', 'candidate', 'policy', 'attribute'
     similarity_score: float
     confidence_score: float
+    confidence_label: str  # 'Strong Match', 'Good Match', 'Moderate Match'
     keywords: List[str]
+    description: str  # Enriched description to help users feel heard
     metadata: Dict[str, Any]
 
 
@@ -38,9 +40,10 @@ class CategoryMatcher:
         self.logger = structured_logger
         
         # Confidence scoring weights
-        self.similarity_weight = 0.6
-        self.keyword_weight = 0.2
-        self.success_rate_weight = 0.2
+        # Prioritize similarity since all terms are new with no historical data
+        self.similarity_weight = 0.85
+        self.keyword_weight = 0.10
+        self.success_rate_weight = 0.05
         
         # Minimum thresholds
         self.min_similarity_threshold = 0.15
@@ -48,7 +51,7 @@ class CategoryMatcher:
     
     def load_categories(self, categories: List[Dict[str, Any]]) -> None:
         """
-        Load political categories and pre-compute their embeddings
+        Load political categories and use their pre-computed embeddings
         
         Args:
             categories: List of category dictionaries with structure:
@@ -58,6 +61,7 @@ class CategoryMatcher:
                     "type": str,  # 'issue', 'candidate', 'policy', 'attribute'
                     "description": str,
                     "keywords": List[str],
+                    "embedding": List[float],  # Pre-computed embedding from database
                     "success_count": int,
                     "total_usage_count": int,
                     "metadata": Dict[str, Any]
@@ -67,29 +71,39 @@ class CategoryMatcher:
             self.categories = categories
             self.logger.info(f"Loading {len(categories)} political categories")
             
-            # Create text representations for embedding
-            category_texts = []
-            for category in categories:
-                # Combine name, description, and keywords for rich semantic representation
-                text_parts = [
-                    category['name'],
-                    category.get('description', ''),
-                    ' '.join(category.get('keywords', []))
-                ]
-                category_text = ' '.join(filter(None, text_parts))
-                category_texts.append(category_text)
+            # Check if categories have pre-computed embeddings
+            has_embeddings = all(cat.get('embedding') is not None for cat in categories)
             
-            # Generate embeddings for all categories
-            self.logger.info("Generating OpenAI embeddings for categories")
-            self.category_embeddings = self.text_encoder.encode_batch(category_texts)
-            
-            self.logger.info(f"Category embeddings shape: {self.category_embeddings.shape}")
+            if has_embeddings:
+                # Use pre-computed embeddings from database
+                self.logger.info("Using pre-computed embeddings from database")
+                embeddings_list = [np.array(cat['embedding']) for cat in categories]
+                self.category_embeddings = np.array(embeddings_list)
+                self.logger.info(f"Loaded embeddings shape: {self.category_embeddings.shape}")
+            else:
+                # Fallback: Generate embeddings if not in database
+                self.logger.warning("No pre-computed embeddings found, generating new ones")
+                category_texts = []
+                for category in categories:
+                    # Combine name, description, and keywords for rich semantic representation
+                    text_parts = [
+                        category['name'],
+                        category.get('description', ''),
+                        ' '.join(category.get('keywords', []))
+                    ]
+                    category_text = ' '.join(filter(None, text_parts))
+                    category_texts.append(category_text)
+                
+                # Generate embeddings for all categories
+                self.logger.info("Generating OpenAI embeddings for categories")
+                self.category_embeddings = self.text_encoder.encode_batch(category_texts)
+                self.logger.info(f"Category embeddings shape: {self.category_embeddings.shape}")
             
         except Exception as e:
             self.logger.error(f"Failed to load categories: {str(e)}")
             raise RuntimeError(f"Category loading failed: {str(e)}")
     
-    def find_matches(
+    async def find_matches(
         self, 
         user_input: str, 
         category_types: Optional[List[str]] = None,
@@ -114,12 +128,21 @@ class CategoryMatcher:
             
             # Encode user input
             user_embedding = self.text_encoder.encode_text(user_input)
+            self.logger.info(f"User embedding shape: {user_embedding.shape}, norm: {np.linalg.norm(user_embedding):.4f}")
             
             # Calculate similarities with all categories
             similarities = cosine_similarity(
                 user_embedding.reshape(1, -1), 
                 self.category_embeddings
             )[0]
+            
+            # Log similarity statistics
+            self.logger.info(f"Similarity stats - min: {similarities.min():.4f}, max: {similarities.max():.4f}, mean: {similarities.mean():.4f}, std: {similarities.std():.4f}")
+            
+            # Log top 5 raw similarities for debugging
+            top_indices = np.argsort(similarities)[-5:][::-1]
+            for idx in top_indices:
+                self.logger.info(f"  Top match: {self.categories[idx]['name'][:40]:40s} - similarity: {similarities[idx]:.4f}")
             
             # Create matches with confidence scoring
             matches = []
@@ -134,7 +157,7 @@ class CategoryMatcher:
                 if similarity < self.min_similarity_threshold:
                     continue
                 
-                # Calculate confidence score
+                # Calculate base confidence score
                 confidence = self._calculate_confidence(similarity, category, user_input)
                 
                 # Skip if below minimum confidence threshold
@@ -147,12 +170,21 @@ class CategoryMatcher:
                     category_type=category.get('type', 'unknown'),
                     similarity_score=float(similarity),
                     confidence_score=confidence,
+                    confidence_label=self._get_confidence_label(confidence),
                     keywords=category.get('keywords', []),
+                    description=category.get('description', ''),
                     metadata=category.get('metadata', {})
                 )
                 matches.append(match)
             
-            # Sort by confidence score (highest first)
+            # Apply pattern learning enhancements
+            matches = await self._apply_pattern_learning(matches, user_input)
+            
+            # Recalculate confidence labels after pattern learning adjustments
+            for match in matches:
+                match.confidence_label = self._get_confidence_label(match.confidence_score)
+            
+            # Sort by enhanced confidence score (highest first)
             matches.sort(key=lambda x: x.confidence_score, reverse=True)
             
             # Return top_k matches
@@ -166,7 +198,7 @@ class CategoryMatcher:
             self.logger.error(f"Failed to find matches: {str(e)}")
             raise RuntimeError(f"Category matching failed: {str(e)}")
     
-    def refine_matches(
+    async def refine_matches(
         self, 
         user_input: str, 
         rejected_category_ids: List[int],
@@ -189,7 +221,7 @@ class CategoryMatcher:
             self.logger.info(f"Refining matches, excluding {len(rejected_category_ids)} rejected categories")
             
             # Get all matches
-            all_matches = self.find_matches(user_input, category_types, top_k * 3)
+            all_matches = await self.find_matches(user_input, category_types, top_k * 3)
             
             # Filter out rejected categories
             refined_matches = [
@@ -260,6 +292,23 @@ class CategoryMatcher:
         # Normalize by number of keywords
         return min(1.0, matches / len(keywords))
     
+    def _get_confidence_label(self, confidence_score: float) -> str:
+        """
+        Convert confidence score to human-readable label
+        
+        Args:
+            confidence_score: Confidence score between 0 and 1
+            
+        Returns:
+            Confidence label: 'Strong Match', 'Good Match', or 'Weak Match'
+        """
+        if confidence_score >= 0.70:
+            return "Strong Match"
+        elif confidence_score >= 0.50:
+            return "Good Match"
+        else:
+            return "Weak Match"
+    
     def _calculate_success_rate(self, category: Dict[str, Any]) -> float:
         """Calculate historical success rate for the category"""
         success_count = category.get('success_count', 0)
@@ -310,6 +359,58 @@ class CategoryMatcher:
             if category['id'] == category_id:
                 return category
         return None
+    
+    async def _apply_pattern_learning(
+        self,
+        matches: List[CategoryMatch],
+        user_input: str
+    ) -> List[CategoryMatch]:
+        """
+        Apply pattern learning enhancements to matches
+        
+        Uses learned patterns to:
+        1. Apply feedback adjustments (boost/penalize based on historical feedback)
+        2. Boost terms that co-occur with previously accepted terms
+        3. Penalize terms with rejection patterns for similar queries
+        
+        Args:
+            matches: Initial matches from similarity search
+            user_input: User's query text
+            
+        Returns:
+            Enhanced matches with adjusted confidence scores
+        """
+        try:
+            from ..services.pattern_learning_service import get_pattern_learning_service
+            pattern_service = get_pattern_learning_service()
+            
+            for match in matches:
+                # 1. Apply feedback adjustment factor (0.7 to 1.3)
+                adjustment_factor = await pattern_service.get_feedback_adjustment(match.category_id)
+                match.confidence_score *= adjustment_factor
+                
+                # 2. Check for rejection patterns
+                rejection_score = await pattern_service.get_rejection_score(
+                    match.category_id,
+                    user_input
+                )
+                # Penalize if this term has been rejected for similar queries
+                if rejection_score > 0:
+                    match.confidence_score *= (1.0 - (rejection_score * 0.2))  # Up to 20% penalty
+                
+                # 3. Boost based on co-occurrences (future enhancement)
+                # This would check if user has accepted related terms in this session
+                # and boost terms that frequently co-occur with those
+                
+                # Ensure confidence stays in valid range
+                match.confidence_score = max(0.0, min(1.0, match.confidence_score))
+            
+            return matches
+            
+        except Exception as e:
+            self.logger.warning(f"Pattern learning enhancement failed (non-critical): {str(e)}")
+            # Return original matches if pattern learning fails
+            return matches
     
     def get_categories_by_type(self, category_type: str) -> List[Dict[str, Any]]:
         """Get all categories of a specific type"""

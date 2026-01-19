@@ -53,6 +53,7 @@ export class FastApiProvider implements PolicyMatchingProvider {
         description: this.generateDescription(match),
         category: match.category_type,
         confidence: Math.round(match.confidence_score * 100),
+        confidenceLabel: match.confidence_label,
         reasoning: this.generateReasoning(match, sentimentData),
         tags: match.keywords.slice(0, 3), // Top 3 keywords as tags
         priority: this.calculatePriority(match.confidence_score, sentimentData),
@@ -128,6 +129,7 @@ export class FastApiProvider implements PolicyMatchingProvider {
         description: this.generateDescription(match),
         category: match.category_type,
         confidence: Math.round(match.confidence_score * 100),
+        confidenceLabel: match.confidence_label,
         reasoning: `Refined match based on your feedback: ${match.category_name}`,
         tags: match.keywords.slice(0, 3),
         priority: this.calculatePriority(match.confidence_score),
@@ -158,6 +160,12 @@ export class FastApiProvider implements PolicyMatchingProvider {
   }
 
   private generateDescription(match: any): string {
+    // Use the enriched description from the backend if available
+    if (match.description && match.description.trim().length > 0) {
+      return match.description;
+    }
+    
+    // Fallback to generated description if backend description is missing
     const { category_name, category_type, keywords } = match;
     
     switch (category_type) {

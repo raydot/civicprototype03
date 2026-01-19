@@ -38,21 +38,24 @@ class UserSession:
             return self.session_id
             
         try:
+            # Match actual user_sessions table schema: id, first_seen, last_seen, interaction_count, session_metadata
             query = """
-            INSERT INTO user_sessions (session_id, user_ip, user_agent, last_activity)
-            VALUES (:session_id, :user_ip, :user_agent, NOW())
-            ON CONFLICT (session_id) 
+            INSERT INTO user_sessions (id, first_seen, last_seen, interaction_count, session_metadata)
+            VALUES (:id, NOW(), NOW(), 1, :metadata)
+            ON CONFLICT (id) 
             DO UPDATE SET 
-                last_activity = NOW(),
-                total_interactions = user_sessions.total_interactions + 1
-            RETURNING id, session_id
+                last_seen = NOW(),
+                interaction_count = user_sessions.interaction_count + 1
+            RETURNING id
             """
             
             # Use dictionary mapping for parameters (SQLAlchemy requirement)
             values = {
-                "session_id": self.session_id,
-                "user_ip": self.user_ip, 
-                "user_agent": self.user_agent
+                "id": self.session_id,
+                "metadata": json.dumps({
+                    "user_ip": self.user_ip,
+                    "user_agent": self.user_agent
+                })
             }
             
             result = await database.fetch_one(query, values)
@@ -377,14 +380,21 @@ class FeedbackCollector:
         - Success rates
         - Confidence scores
         - User satisfaction ratings
+        - Pattern learning (co-occurrences, rejections, adjustments)
         """
         try:
             from .learning_service import get_learning_service
+            from .pattern_learning_service import get_pattern_learning_service
             
             learning_service = get_learning_service()
+            pattern_service = get_pattern_learning_service()
             
-            # Update metrics for each category that received feedback
+            # Separate accepted and rejected terms
+            accepted_term_ids = []
+            rejected_feedbacks = []
+            
             for feedback in category_feedbacks:
+                # Update traditional metrics
                 await learning_service.update_category_metrics(
                     category_id=feedback['category_id'],
                     feedback_type=feedback['feedback_type'],
@@ -392,7 +402,39 @@ class FeedbackCollector:
                     user_rating=feedback.get('user_rating')
                 )
                 
-            logger.info(f"Learning updates triggered for {len(category_feedbacks)} categories")
+                # Track for pattern learning
+                if feedback['feedback_type'] == 'accept':
+                    accepted_term_ids.append(feedback['category_id'])
+                    # Update positive feedback adjustment
+                    await pattern_service.update_feedback_adjustment(
+                        term_id=feedback['category_id'],
+                        is_positive=True
+                    )
+                elif feedback['feedback_type'] == 'reject':
+                    rejected_feedbacks.append(feedback)
+                    # Update negative feedback adjustment
+                    await pattern_service.update_feedback_adjustment(
+                        term_id=feedback['category_id'],
+                        is_positive=False
+                    )
+            
+            # Track co-occurrences for accepted terms
+            if len(accepted_term_ids) >= 2:
+                session_id = category_feedbacks[0].get('session_id', 'unknown')
+                await pattern_service.track_co_occurrence(
+                    accepted_term_ids=accepted_term_ids,
+                    session_id=session_id
+                )
+            
+            # Track rejection patterns
+            for feedback in rejected_feedbacks:
+                if 'user_input' in feedback:
+                    await pattern_service.track_rejection(
+                        term_id=feedback['category_id'],
+                        query_text=feedback['user_input']
+                    )
+                
+            logger.info(f"Learning updates triggered for {len(category_feedbacks)} categories (pattern learning enabled)")
             
         except Exception as e:
             # Don't fail the feedback submission if learning update fails

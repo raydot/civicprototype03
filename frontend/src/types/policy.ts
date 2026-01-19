@@ -4,6 +4,7 @@ export interface PolicyMatch {
   description: string;
   category: string; // Added category field
   confidence: number; // 0-100
+  confidenceLabel?: string; // 'Strong Match', 'Good Match', 'Moderate Match'
   reasoning: string; // Changed from 'matchReason' to 'reasoning'
   tags: string[]; // Changed from 'civicTags' to 'tags'
   priority: 'high' | 'medium' | 'low'; // Added priority field

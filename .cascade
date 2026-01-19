@@ -1,0 +1,93 @@
+# VoterPrime03 Project Instructions for AI
+
+## Local Development Environment
+
+**CRITICAL:** This project uses Docker Compose for local development, NOT Homebrew PostgreSQL.
+
+### Setup Commands
+
+```bash
+# 1. Activate conda environment
+conda activate ai-recommendation-service
+
+# 2. Stop any Homebrew PostgreSQL
+brew services stop postgresql@14
+
+# 3. Start Docker services
+docker-compose up -d postgres
+
+# 4. Run migrations
+env $(grep -v '^#' backend/.env.local | xargs) alembic upgrade head
+```
+
+### Key Configuration
+
+- **Database:** PostgreSQL in Docker container `voterprime-postgres`
+- **Credentials:** user=voterprime, password=voterprime_dev, database=voterprime_dev
+- **Port:** 5432 (mapped to localhost)
+- **Environment Files:**
+  - `backend/.env` - Railway production credentials (DO NOT MODIFY)
+  - `backend/.env.local` - Local development configuration (USE THIS)
+
+### Technology Stack
+
+- **Backend Framework:** FastAPI (Python)
+- **Dependency Management:** Conda (environment.yml) - NOT pip/requirements.txt
+- **Database:** PostgreSQL 15 (Docker)
+- **AI/ML:** OpenAI embeddings (text-embedding-3-small, 1536 dimensions)
+- **Migrations:** Alembic
+- **Deployment:** Railway (production)
+
+### Important Notes
+
+1. **Always use conda** for dependency management - update `environment.yml`, not `requirements.txt`
+2. **Docker Compose** manages local services (postgres, redis, api)
+3. **Conda environment name:** `ai-recommendation-service`
+4. **Migration commands** must load `.env.local` variables
+5. **Port conflicts:** Stop Homebrew PostgreSQL before starting Docker
+
+### Project Structure
+
+```
+voterPrime03/
+├── backend/
+│   ├── alembic/              # Database migrations
+│   ├── app/                  # FastAPI application
+│   ├── docs/                 # Documentation
+│   ├── scripts/              # Utility scripts
+│   ├── docker-compose.yml    # Local services
+│   ├── environment.yml       # Conda dependencies
+│   ├── .env                  # Production config (Railway)
+│   └── .env.local           # Local development config
+└── frontend/                 # React/TypeScript frontend
+```
+
+### Common Issues
+
+**"Multiple head revisions" error:**
+- Run `alembic heads` to see conflicting migrations
+- May need to merge heads: `alembic merge heads -m "merge migrations"`
+
+**Port 5432 already in use:**
+- Stop Homebrew PostgreSQL: `brew services stop postgresql@14`
+- Check what's using port: `lsof -i :5432`
+
+**Conda environment issues:**
+- Recreate: `conda env remove -n ai-recommendation-service && conda env create -f backend/environment.yml`
+
+### Current Work
+
+**Taxonomy Migration (In Progress):**
+- Migrating from 20 broad categories to 1,085 Congress.gov policy terms
+- Source data: `voterprime-fresh/ULTIMATE-policy-database.json`
+- New table: `policy_terms` with embeddings stored as ARRAY(Float)
+- Migration file: `backend/alembic/versions/create_policy_terms_table.py`
+- Import script: `backend/scripts/import_congress_taxonomy.py`
+- Embedding script: `backend/scripts/generate_embeddings.py`
+
+### Documentation
+
+- Local setup: `backend/docs/LOCAL_DEVELOPMENT_SETUP.md`
+- AI architecture: `backend/docs/AI_ARCHITECTURE.md`
+- Cost tracking: `backend/docs/OPENAI_COST_TRACKING.md`
+- Deployment: `backend/docs/ADMIN_DEPLOYMENT.md`
