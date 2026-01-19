@@ -9,7 +9,42 @@ export class FastApiProvider implements PolicyMatchingProvider {
     this.baseUrl = config.BACKEND_URL || 'http://localhost:8000';
   }
 
+  async checkHealth(): Promise<{ available: boolean; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      
+      if (response.ok) {
+        return { available: true };
+      }
+      
+      return { 
+        available: false, 
+        error: `Backend returned status ${response.status}` 
+      };
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        return { 
+          available: false, 
+          error: 'Backend connection timeout - is the server running?' 
+        };
+      }
+      return { 
+        available: false, 
+        error: `Cannot connect to backend at ${this.baseUrl}` 
+      };
+    }
+  }
+
   async matchPolicies(request: PolicyMatchingRequest): Promise<PolicyMatchingResponse> {
+    // Check backend health first
+    const healthCheck = await this.checkHealth();
+    if (!healthCheck.available) {
+      throw new Error(healthCheck.error || 'Backend is unavailable');
+    }
+
     try {
       // Call your VoterPrime AI backend for category matching
       const categoryResponse = await fetch(`${this.baseUrl}/category-matching/find-matches`, {

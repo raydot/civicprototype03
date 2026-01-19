@@ -157,10 +157,13 @@ export default function MappingResultsScreen({
           preselected: Object.keys(initialSelections).length
         });
         
-      } catch (err) {
+      } catch (err: any) {
         console.error('AI matching failed:', err);
-        setError('Failed to analyze priorities');
-        // Keep existing hardcoded behavior as fallback
+        
+        // Simple user-friendly error message
+        setError('The server is temporarily unavailable. Please try again later.');
+        
+        // Don't show hardcoded fallback - user needs to know backend is required
       } finally {
         // Ensure loading animation shows for at least minLoadingTime
         const elapsedTime = Date.now() - startTime;
@@ -281,10 +284,15 @@ export default function MappingResultsScreen({
 
           {/* AI Error State */}
           {error && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-3">
-              <p className="text-sm text-yellow-800">
-                {error} - Using demo data for now.
-              </p>
+            <div className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg mb-3">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 text-2xl">⚠️</div>
+                <div className="flex-1">
+                  <p className="text-sm text-yellow-900 font-medium">
+                    {error}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

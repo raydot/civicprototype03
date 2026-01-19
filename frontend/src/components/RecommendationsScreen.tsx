@@ -51,7 +51,7 @@ const recommendations = [
   },
   {
     id: 'civic-ed',
-    title: 'Civics Ed',
+    title: 'Get informed',
     image: civicEdImage
   }
 ];
