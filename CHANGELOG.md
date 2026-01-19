@@ -1,3 +1,9 @@
+## v1.12.4 (2026-01-19)
+
+### Fix
+
+- make openai_usage migration idempotent to handle existing table
+
 ## v1.12.3 (2026-01-19)
 
 ### Fix
