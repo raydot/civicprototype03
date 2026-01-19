@@ -107,12 +107,13 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
                 detail=f"Category matcher initialization failed: {str(matcher_error)}"
             )
         
-        # Find matches
+        # Find matches with session tracking for collaborative filtering
         try:
             matches = await category_matcher.find_matches(
                 user_input=request.user_input,
                 category_types=request.category_types,
-                top_k=request.top_k
+                top_k=request.top_k,
+                session_id=session_id
             )
             logger.info(f"Found {len(matches)} matches")
         except Exception as match_error:

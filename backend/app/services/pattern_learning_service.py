@@ -328,6 +328,69 @@ class PatternLearningService:
         except Exception as e:
             logger.error(f"Failed to get feedback adjustment: {str(e)}")
             return 1.0
+    
+    async def get_co_occurrence_boost(
+        self,
+        term_id: int,
+        accepted_term_ids: List[int],
+        max_boost: float = 0.15
+    ) -> float:
+        """
+        Calculate collaborative filtering boost based on co-occurrences
+        
+        "People who selected X also selected Y" - if user has already accepted
+        terms that frequently co-occur with this term, boost its confidence.
+        
+        Args:
+            term_id: ID of the term to check
+            accepted_term_ids: IDs of terms user has already accepted
+            max_boost: Maximum boost factor (default 15%)
+            
+        Returns:
+            Boost factor between 0.0 and max_boost
+        """
+        if not accepted_term_ids:
+            return 0.0
+        
+        try:
+            # Find co-occurrences between this term and any accepted terms
+            query = """
+            SELECT co_occurrence_count
+            FROM term_co_occurrences
+            WHERE (
+                (term_id_1 = :term_id AND term_id_2 = ANY(:accepted_ids))
+                OR
+                (term_id_2 = :term_id AND term_id_1 = ANY(:accepted_ids))
+            )
+            ORDER BY co_occurrence_count DESC
+            LIMIT 1
+            """
+            
+            result = await database.fetch_one(
+                query,
+                {
+                    "term_id": term_id,
+                    "accepted_ids": accepted_term_ids
+                }
+            )
+            
+            if not result:
+                return 0.0
+            
+            co_occurrence_count = result["co_occurrence_count"]
+            
+            # Scale boost based on co-occurrence strength
+            # 2 co-occurrences = 5% boost
+            # 5+ co-occurrences = max_boost (15%)
+            boost = min(max_boost, (co_occurrence_count / 5.0) * max_boost)
+            
+            logger.info(f"Co-occurrence boost for term {term_id}: {boost:.2%} (count: {co_occurrence_count})")
+            
+            return boost
+            
+        except Exception as e:
+            logger.error(f"Failed to calculate co-occurrence boost: {str(e)}")
+            return 0.0
 
 
 # Singleton instance

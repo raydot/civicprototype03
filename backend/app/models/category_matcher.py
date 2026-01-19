@@ -34,18 +34,19 @@ class CategoryMatcher:
     """
     
     def __init__(self):
+        """Initialize the category matcher with text encoder"""
         self.text_encoder = get_text_encoder()
         self.categories: List[Dict[str, Any]] = []
         self.category_embeddings: Optional[np.ndarray] = None
         self.logger = structured_logger
+        self.session_id = None  # Track current session for collaborative filtering
         
         # Confidence scoring weights
-        # Prioritize similarity since all terms are new with no historical data
-        self.similarity_weight = 0.85
-        self.keyword_weight = 0.10
-        self.success_rate_weight = 0.05
+        self.similarity_weight = 0.6
+        self.keyword_weight = 0.2
+        self.success_rate_weight = 0.2
         
-        # Minimum thresholds
+        # Thresholds
         self.min_similarity_threshold = 0.15
         self.min_confidence_threshold = 0.25
     
@@ -107,7 +108,8 @@ class CategoryMatcher:
         self, 
         user_input: str, 
         category_types: Optional[List[str]] = None,
-        top_k: int = 5
+        top_k: int = 5,
+        session_id: Optional[str] = None
     ) -> List[CategoryMatch]:
         """
         Find matching categories for user political priorities
@@ -116,10 +118,14 @@ class CategoryMatcher:
             user_input: User's political priority text (e.g., "I care about climate change")
             category_types: Filter by category types ['issue', 'candidate', 'policy']
             top_k: Number of top matches to return
+            session_id: Optional session ID for collaborative filtering
             
         Returns:
             List of CategoryMatch objects sorted by confidence score
         """
+        # Store session ID for collaborative filtering
+        self.session_id = session_id
+        
         if not self.categories or self.category_embeddings is None:
             raise RuntimeError("Categories not loaded. Call load_categories() first.")
         
@@ -300,14 +306,14 @@ class CategoryMatcher:
             confidence_score: Confidence score between 0 and 1
             
         Returns:
-            Confidence label: 'Strong Match', 'Good Match', or 'Weak Match'
+            Confidence label: 'High Confidence', 'Medium Confidence', or 'Low Confidence'
         """
         if confidence_score >= 0.70:
-            return "Strong Match"
+            return "High Confidence"
         elif confidence_score >= 0.50:
-            return "Good Match"
+            return "Medium Confidence"
         else:
-            return "Weak Match"
+            return "Low Confidence"
     
     def _calculate_success_rate(self, category: Dict[str, Any]) -> float:
         """Calculate historical success rate for the category"""
@@ -398,9 +404,22 @@ class CategoryMatcher:
                 if rejection_score > 0:
                     match.confidence_score *= (1.0 - (rejection_score * 0.2))  # Up to 20% penalty
                 
-                # 3. Boost based on co-occurrences (future enhancement)
-                # This would check if user has accepted related terms in this session
-                # and boost terms that frequently co-occur with those
+                # 3. Collaborative filtering: Boost based on co-occurrences
+                # "People who selected X also selected Y"
+                # Get previously accepted terms from current session (if available)
+                if self.session_id:
+                    accepted_term_ids = await self._get_session_accepted_terms(self.session_id)
+                    if accepted_term_ids:
+                        co_occurrence_boost = await pattern_service.get_co_occurrence_boost(
+                            match.category_id,
+                            accepted_term_ids
+                        )
+                        if co_occurrence_boost > 0:
+                            match.confidence_score += co_occurrence_boost
+                            self.logger.info(
+                                f"Applied collaborative filtering boost: {co_occurrence_boost:.2%} "
+                                f"to '{match.category_name}' (new score: {match.confidence_score:.2f})"
+                            )
                 
                 # Ensure confidence stays in valid range
                 match.confidence_score = max(0.0, min(1.0, match.confidence_score))
@@ -411,6 +430,44 @@ class CategoryMatcher:
             self.logger.warning(f"Pattern learning enhancement failed (non-critical): {str(e)}")
             # Return original matches if pattern learning fails
             return matches
+    
+    async def _get_session_accepted_terms(self, session_id: str) -> List[int]:
+        """
+        Get list of term IDs that user has accepted in this session
+        Used for collaborative filtering
+        
+        Args:
+            session_id: Session identifier
+            
+        Returns:
+            List of accepted category IDs
+        """
+        try:
+            from ..db.database import database
+            
+            # Query user interactions to find accepted terms in this session
+            query = """
+            SELECT DISTINCT category_id
+            FROM user_interactions
+            WHERE session_id = :session_id
+                AND feedback_type = 'accept'
+                AND created_at > NOW() - INTERVAL '1 hour'
+            ORDER BY created_at DESC
+            LIMIT 10
+            """
+            
+            results = await database.fetch_all(query, {"session_id": session_id})
+            
+            accepted_ids = [row["category_id"] for row in results]
+            
+            if accepted_ids:
+                self.logger.info(f"Found {len(accepted_ids)} accepted terms in session for collaborative filtering")
+            
+            return accepted_ids
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to get session accepted terms: {str(e)}")
+            return []
     
     def get_categories_by_type(self, category_type: str) -> List[Dict[str, Any]]:
         """Get all categories of a specific type"""

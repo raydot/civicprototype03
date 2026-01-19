@@ -93,8 +93,9 @@ export default function MappingResultsScreen({
   onPriorityReject
 }: MappingResultsScreenProps) {
   
-  // AI Policy Matching State
-  const [aiMatches, setAiMatches] = useState<PolicyMatch[]>([]);
+  // AI Policy Matching State - now stores ALL matches per priority
+  const [aiMatchesByPriority, setAiMatchesByPriority] = useState<PolicyMatch[][]>([]);
+  const [selectedMatches, setSelectedMatches] = useState<{[index: number]: PolicyMatch[]}>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -109,8 +110,13 @@ export default function MappingResultsScreen({
       setIsLoading(true);
       setError(null);
       
+      // Track start time to ensure minimum loading display time
+      const startTime = Date.now();
+      const minLoadingTime = 800; // Minimum 800ms to show loading animation
+      
       try {
-        const matches: PolicyMatch[] = [];
+        const allMatches: PolicyMatch[][] = [];
+        const initialSelections: {[index: number]: PolicyMatch[]} = {};
         
         // Process each priority individually
         for (let i = 0; i < priorities.length; i++) {
@@ -123,11 +129,16 @@ export default function MappingResultsScreen({
             zipCode
           });
           
-          matches.push(response.matches[0]);
+          // Store ALL matches for this priority (top 5)
+          allMatches.push(response.matches);
+          
+          // Pre-select the top match (as array for multi-select)
+          initialSelections[i] = [response.matches[0]];
           
           console.log(`✅ Priority ${i + 1} result:`, {
             input: priority,
-            match: response.matches[0].name,
+            topMatch: response.matches[0].name,
+            totalMatches: response.matches.length,
             confidence: response.matches[0].confidence
           });
           
@@ -137,11 +148,13 @@ export default function MappingResultsScreen({
           }
         }
         
-        setAiMatches(matches);
+        setAiMatchesByPriority(allMatches);
+        setSelectedMatches(initialSelections);
         
         console.log('🎉 All priorities processed:', {
-          total: matches.length,
-          matches: matches.map(m => ({ name: m.name, confidence: m.confidence }))
+          total: allMatches.length,
+          matchesPerPriority: allMatches.map(matches => matches.length),
+          preselected: Object.keys(initialSelections).length
         });
         
       } catch (err) {
@@ -149,6 +162,14 @@ export default function MappingResultsScreen({
         setError('Failed to analyze priorities');
         // Keep existing hardcoded behavior as fallback
       } finally {
+        // Ensure loading animation shows for at least minLoadingTime
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        if (remainingTime > 0) {
+          await new Promise(resolve => setTimeout(resolve, remainingTime));
+        }
+        
         setIsLoading(false);
       }
     };
@@ -156,23 +177,51 @@ export default function MappingResultsScreen({
     fetchMatches();
   }, [priorities, zipCode]);
   
+  const handleMatchSelection = (priorityIndex: number, match: PolicyMatch) => {
+    setSelectedMatches(prev => {
+      const currentSelections = prev[priorityIndex] || [];
+      const isAlreadySelected = currentSelections.some(m => m.id === match.id);
+      
+      if (isAlreadySelected) {
+        // Deselect if already selected
+        const newSelections = currentSelections.filter(m => m.id !== match.id);
+        console.log(`❌ Deselected match for priority ${priorityIndex + 1}:`, match.title);
+        return {
+          ...prev,
+          [priorityIndex]: newSelections
+        };
+      } else {
+        // Add to selections
+        console.log(`✅ Selected match for priority ${priorityIndex + 1}:`, match.title);
+        return {
+          ...prev,
+          [priorityIndex]: [...currentSelections, match]
+        };
+      }
+    });
+  };
+  
   const handlePriorityConfirm = (index: number) => {
+    // Require at least one match to be selected before confirming
+    if (!selectedMatches[index] || selectedMatches[index].length === 0) {
+      alert('Please select at least one policy match before confirming');
+      return;
+    }
+    
     // Mark this priority as confirmed
     setPriorityConfirmations(prev => ({
       ...prev,
       [index]: true
     }));
     
-    console.log(`✅ Priority ${index + 1} confirmed:`, aiMatches[index]?.name);
-    
-    // Call parent handler if provided
     if (onPriorityConfirm) {
       onPriorityConfirm(index);
     }
   };
 
   const handlePriorityReject = (index: number) => {
-    console.log(`👎 Priority ${index + 1} rejected:`, aiMatches[index]?.name);
+    const selections = selectedMatches[index] || [];
+    console.log(`👎 Priority ${index + 1} rejected:`, selections.map(m => m.title).join(', '));
     
     // Call parent handler if provided (this would navigate to PolicyEditScreen)
     if (onPriorityReject) {
@@ -217,13 +266,10 @@ export default function MappingResultsScreen({
           {isLoading && (
             <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200 mb-3">
               <div className="flex flex-col items-center justify-center gap-3">
-                <div className="relative">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-200"></div>
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-orange-500 absolute top-0 left-0"></div>
-                </div>
+                <div className="custom-loader"></div>
                 <div className="text-center">
                   <p className="text-base font-medium text-orange-900 mb-1">
-                    🤖 AI is analyzing your priorities...
+                    Analyzing your priorities...
                   </p>
                   <p className="text-sm text-orange-700">
                     Matching your concerns to policy terms
@@ -314,33 +360,72 @@ export default function MappingResultsScreen({
                     </div>
                   </div>
 
-                  {/* Policy mapping section */}
+                  {/* Policy mapping section - Multiple match cards */}
                   <div className="p-3">
-                    <div className="mb-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-base font-medium text-black">
-                          {/* Use AI policy name if available, fallback to hardcoded */}
-                          {aiMatches[index] ? aiMatches[index].name : policyName}
-                        </h3>
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">✅</span>
-                          <span className="text-xs font-medium text-gray-600">
-                            {/* Display confidence label if available, otherwise show percentage */}
-                            {aiMatches[index]?.confidenceLabel || (aiMatches[index] ? `${aiMatches[index].confidence}% match` : '92% match')}
-                          </span>
-                        </div>
+                    {aiMatchesByPriority[index] && aiMatchesByPriority[index].length > 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-gray-700 mb-3">
+                          Select the best match for your concern:
+                        </p>
+                        {aiMatchesByPriority[index].map((match, matchIdx) => {
+                          const currentSelections = selectedMatches[index] || [];
+                          const isSelected = currentSelections.some(m => m.id === match.id);
+                          return (
+                            <div
+                              key={match.id}
+                              onClick={() => handleMatchSelection(index, match)}
+                              className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                                isSelected
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/50'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  {matchIdx === 0 && (
+                                    <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded">
+                                      TOP MATCH
+                                    </span>
+                                  )}
+                                  <h4 className="text-sm font-semibold text-black">
+                                    {match.title}
+                                  </h4>
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                                  {isSelected && <span className="text-sm">✓</span>}
+                                  <span className="text-xs font-medium text-gray-600">
+                                    {match.confidenceLabel || `${match.confidence}%`}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600 leading-relaxed">
+                                {match.description}
+                              </p>
+                            </div>
+                          );
+                        })}
                       </div>
-                      
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {/* Use AI description if available, fallback to hardcoded */}
-                        {aiMatches[index] ? aiMatches[index].description : definition}
-                      </p>
-                    </div>
+                    ) : (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-base font-medium text-black">
+                            {policyName}
+                          </h3>
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm">✅</span>
+                            <span className="text-xs font-medium text-gray-600">92% match</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {definition}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Action buttons - only show for items that need review */}
                     {needsReview && (
                       <div>
-                        <p className="text-sm font-medium text-black mb-3">Does this match your concern?</p>
+                        <p className="text-sm font-medium text-black mb-3">Pick one or more to match your concern</p>
                         <div className="flex gap-3">
                           <Button 
                             onClick={() => handlePriorityConfirm(index)}
