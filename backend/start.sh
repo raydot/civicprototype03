@@ -10,4 +10,4 @@ echo "🗄️ Running database migrations..."
 
 echo "✅ Migrations complete!"
 echo "🚀 Starting web server..."
-/opt/conda/envs/ai-recommendation-service/bin/python -m uvicorn app.main:app --host 0.0.0.0
+/opt/conda/envs/ai-recommendation-service/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
