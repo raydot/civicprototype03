@@ -1,3 +1,9 @@
+## v1.12.2 (2026-01-19)
+
+### Fix
+
+- run migrations in web command since Railway ignores release command
+
 ## v1.12.1 (2026-01-19)
 
 ### Fix
