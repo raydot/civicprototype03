@@ -59,11 +59,11 @@ async def Lifecycle(app: FastAPI):
         import json
         
         if database is not None:
-            # Load policy terms from database (Congress.gov taxonomy)
+            # Load political categories from database
             query = """
-                SELECT id, term as name, policy_area, description, keywords, 
+                SELECT id, name, type, description, keywords, 
                        embedding, success_count, total_usage_count, is_active
-                FROM policy_terms
+                FROM political_categories
                 WHERE is_active = true
                 ORDER BY id
             """
@@ -73,15 +73,15 @@ async def Lifecycle(app: FastAPI):
                 {
                     "id": row["id"],
                     "name": row["name"],
-                    "type": "policy_term",
-                    "policy_area": row["policy_area"],
+                    "type": row["type"],
+                    "policy_area": row["type"],
                     "description": row["description"],
                     "keywords": json.loads(row["keywords"]) if isinstance(row["keywords"], str) else (row["keywords"] if row["keywords"] else []),
                     "embedding": list(row["embedding"]) if row["embedding"] else None,
                     "success_count": row["success_count"] or 0,
                     "total_usage_count": row["total_usage_count"] or 0,
                     "metadata": {
-                        "policy_area": row["policy_area"]
+                        "policy_area": row["type"]
                     }
                 }
                 for row in rows
