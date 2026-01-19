@@ -16,11 +16,16 @@ depends_on = None
 
 
 def upgrade():
-    # Add original_query column to user_interactions table
-    op.add_column(
-        'user_interactions',
-        sa.Column('original_query', sa.Text(), nullable=True)
-    )
+    # Add original_query column to user_interactions table (if it doesn't exist)
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    
+    columns = [col['name'] for col in inspector.get_columns('user_interactions')]
+    if 'original_query' not in columns:
+        op.add_column(
+            'user_interactions',
+            sa.Column('original_query', sa.Text(), nullable=True)
+        )
 
 
 def downgrade():

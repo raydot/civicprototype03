@@ -16,26 +16,40 @@ depends_on = None
 
 
 def upgrade():
-    # Add category_id column to user_interactions
-    op.add_column('user_interactions', 
-        sa.Column('category_id', sa.Integer(), nullable=True)
-    )
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
     
-    # Add feedback_type column to user_interactions
-    op.add_column('user_interactions',
-        sa.Column('feedback_type', sa.String(20), nullable=True)
-    )
+    # Get existing columns
+    columns = [col['name'] for col in inspector.get_columns('user_interactions')]
     
-    # Add processing_time_ms column to user_interactions
-    op.add_column('user_interactions',
-        sa.Column('processing_time_ms', sa.Integer(), nullable=True)
-    )
+    # Add category_id column to user_interactions (if it doesn't exist)
+    if 'category_id' not in columns:
+        op.add_column('user_interactions', 
+            sa.Column('category_id', sa.Integer(), nullable=True)
+        )
     
-    # Create index on category_id for faster lookups
-    op.create_index('idx_user_interactions_category', 'user_interactions', ['category_id'])
+    # Add feedback_type column to user_interactions (if it doesn't exist)
+    if 'feedback_type' not in columns:
+        op.add_column('user_interactions',
+            sa.Column('feedback_type', sa.String(20), nullable=True)
+        )
     
-    # Create index on feedback_type
-    op.create_index('idx_user_interactions_feedback_type', 'user_interactions', ['feedback_type'])
+    # Add processing_time_ms column to user_interactions (if it doesn't exist)
+    if 'processing_time_ms' not in columns:
+        op.add_column('user_interactions',
+            sa.Column('processing_time_ms', sa.Integer(), nullable=True)
+        )
+    
+    # Get existing indexes
+    indexes = [idx['name'] for idx in inspector.get_indexes('user_interactions')]
+    
+    # Create index on category_id for faster lookups (if it doesn't exist)
+    if 'idx_user_interactions_category' not in indexes:
+        op.create_index('idx_user_interactions_category', 'user_interactions', ['category_id'])
+    
+    # Create index on feedback_type (if it doesn't exist)
+    if 'idx_user_interactions_feedback_type' not in indexes:
+        op.create_index('idx_user_interactions_feedback_type', 'user_interactions', ['feedback_type'])
 
 
 def downgrade():
