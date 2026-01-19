@@ -1,3 +1,9 @@
+## v1.12.0 (2026-01-18)
+
+### Feat
+
+- implement multi-select matching and collaborative filtering
+
 ## v1.11.0 (2026-01-18)
 
 ### Feat
