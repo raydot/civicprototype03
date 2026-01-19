@@ -62,7 +62,7 @@ async def Lifecycle(app: FastAPI):
             # Load political categories from database
             query = """
                 SELECT id, name, type, description, keywords, 
-                       embedding, success_count, total_usage_count, is_active
+                       success_count, total_usage_count, is_active
                 FROM political_categories
                 WHERE is_active = true
                 ORDER BY id
@@ -77,7 +77,7 @@ async def Lifecycle(app: FastAPI):
                     "policy_area": row["type"],
                     "description": row["description"],
                     "keywords": json.loads(row["keywords"]) if isinstance(row["keywords"], str) else (row["keywords"] if row["keywords"] else []),
-                    "embedding": list(row["embedding"]) if row["embedding"] else None,
+                    "embedding": None,
                     "success_count": row["success_count"] or 0,
                     "total_usage_count": row["total_usage_count"] or 0,
                     "metadata": {
