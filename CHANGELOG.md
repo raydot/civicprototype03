@@ -1,3 +1,9 @@
+## v1.12.3 (2026-01-19)
+
+### Fix
+
+- add startup script with migration logging for Railway debugging
+
 ## v1.12.2 (2026-01-19)
 
 ### Fix
