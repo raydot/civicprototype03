@@ -1,3 +1,9 @@
+## v1.12.7 (2026-01-19)
+
+### Fix
+
+- remove embedding column from political_categories query
+
 ## v1.12.6 (2026-01-19)
 
 ### Fix
