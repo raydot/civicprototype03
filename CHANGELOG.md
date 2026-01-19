@@ -1,3 +1,9 @@
+## v1.11.0 (2026-01-18)
+
+### Feat
+
+- implement Phase 1 learning system, confidence labels, and UX improvements
+
 ## v1.10.0 (2025-12-06)
 
 ### Feat
