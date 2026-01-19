@@ -1,3 +1,10 @@
+## v1.12.1 (2026-01-19)
+
+### Fix
+
+- add missing database columns for collaborative filtering
+- tidied some things up.
+
 ## v1.12.0 (2026-01-18)
 
 ### Feat
