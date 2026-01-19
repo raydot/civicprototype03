@@ -1,3 +1,10 @@
+## v1.12.6 (2026-01-19)
+
+### Fix
+
+- query political_categories instead of policy_terms table
+- add PORT variable to uvicorn command in start.sh
+
 ## v1.12.5 (2026-01-19)
 
 ### Fix
