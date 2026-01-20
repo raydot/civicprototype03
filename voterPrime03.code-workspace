@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../voterprime-fresh"
+		}
+	],
+	"settings": {
+		"liveServer.settings.CustomBrowser": "chrome"
+	}
+}

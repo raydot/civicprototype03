@@ -13,6 +13,7 @@ interface CivicEducationScreenProps {
   onNavToRecommendations: () => void;
   onNavToSaveShare: () => void;
   onCategoryClick: (categoryId: string) => void;
+  onTestCategoryClick?: (categoryId: number) => void;
   onToggleSave?: (recommendation: SavedRecommendation) => void;
   isRecommendationSaved?: (id: string) => boolean;
   savedItemsCount?: number;
@@ -59,6 +60,7 @@ export default function CivicEducationScreen({
   onNavToRecommendations,
   onNavToSaveShare,
   onCategoryClick,
+  onTestCategoryClick,
   onToggleSave,
   isRecommendationSaved,
   savedItemsCount
@@ -86,6 +88,16 @@ export default function CivicEducationScreen({
           <p className="text-gray-600 mb-6 text-center">
             Learn about the issues that matter to you with trusted educational resources
           </p>
+
+          {/* TEST: Live Category Detail */}
+          {onTestCategoryClick && (
+            <button
+              onClick={() => onTestCategoryClick(1)}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg mb-4 font-medium hover:bg-blue-700 transition-colors"
+            >
+              🧪 Test Live Category Detail (Category 1)
+            </button>
+          )}
 
           {/* Education Categories List */}
           <div className="space-y-4">

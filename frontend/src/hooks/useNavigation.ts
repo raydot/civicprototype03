@@ -202,6 +202,11 @@ export const useNavigation = ({ state, actions }: NavigationProps) => {
     navigateToScreen('civic-education-detail');
   };
 
+  const handleCategoryClick = (categoryId: number) => {
+    actions.setSelectedCategoryId(categoryId);
+    navigateToScreen('category-detail');
+  };
+
   const handleResourceClick = (resourceId: string) => {
     actions.setSelectedResourceId(resourceId);
     navigateToScreen('educational-resource-view');
@@ -213,6 +218,10 @@ export const useNavigation = ({ state, actions }: NavigationProps) => {
 
   const handleBackToCivicEducationDetail = () => {
     navigateToScreen('civic-education-detail');
+  };
+
+  const handleBackToCategoryDetail = () => {
+    navigateToScreen('category-detail');
   };
 
   // Save/Share navigation
@@ -301,9 +310,11 @@ export const useNavigation = ({ state, actions }: NavigationProps) => {
     // Civic education handlers
     handleOpenCivicEducation,
     handleEducationCategoryClick,
+    handleCategoryClick,
     handleResourceClick,
     handleBackToCivicEducation,
     handleBackToCivicEducationDetail,
+    handleBackToCategoryDetail,
     
     // Save/Share handlers
     handleOpenSaveShare,

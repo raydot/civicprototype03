@@ -28,6 +28,7 @@ export type Screen =
   | 'organization-view' 
   | 'civic-education' 
   | 'civic-education-detail' 
+  | 'category-detail'
   | 'educational-resource-view' 
   | 'save-share';
 
@@ -55,6 +56,7 @@ export interface AppState {
   selectedPetitionId: string;
   selectedInterestGroupId: string;
   selectedEducationCategoryId: string;
+  selectedCategoryId: number;
   selectedResourceId: string;
   savedRecommendations: SavedRecommendation[];
 }

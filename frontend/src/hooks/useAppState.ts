@@ -13,6 +13,7 @@ export const useAppState = () => {
   const [selectedPetitionId, setSelectedPetitionId] = useState<string>('');
   const [selectedInterestGroupId, setSelectedInterestGroupId] = useState<string>('');
   const [selectedEducationCategoryId, setSelectedEducationCategoryId] = useState<string>('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
   const [selectedResourceId, setSelectedResourceId] = useState<string>('');
   const [savedRecommendations, setSavedRecommendations] = useState<SavedRecommendation[]>([]);
 
@@ -45,6 +46,7 @@ export const useAppState = () => {
     selectedPetitionId,
     selectedInterestGroupId,
     selectedEducationCategoryId,
+    selectedCategoryId,
     selectedResourceId,
     savedRecommendations,
   };
@@ -62,6 +64,7 @@ export const useAppState = () => {
     setSelectedPetitionId,
     setSelectedInterestGroupId,
     setSelectedEducationCategoryId,
+    setSelectedCategoryId,
     setSelectedResourceId,
     setSavedRecommendations,
     toggleSaveRecommendation,
