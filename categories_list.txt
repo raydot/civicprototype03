@@ -1,0 +1,74 @@
+ id  |                   name                    |  type  
+-----+-------------------------------------------+--------
+ 334 | Academic Freedom and Speech               | issue
+ 339 | Academic Freedom and Speech               | issue
+ 315 | AI Ethics & Governance                    | issue
+ 355 | Animal Welfare & Factory Farming          | issue
+   7 | Civil Rights & Social Justice             | issue
+   1 | Climate & Environment                     | issue
+ 335 | Content Debates and Speech Regulation     | issue
+ 321 | Criminal Justice Reform                   | issue
+ 313 | Disability Justice & Rights               | issue
+ 328 | Drug Addiction                            | issue
+   3 | Economy & Jobs                            | issue
+   4 | Education & Research                      | issue
+ 303 | Entertainment Industry Regulation         | issue
+ 310 | Faith-Based Humanitarian Work             | issue
+   9 | Foreign Policy & Defense                  | issue
+ 318 | Freedom of Expression                     | issue
+ 211 | Government Efficiency                     | issue
+ 314 | Government Overreach                      | issue
+ 324 | Gun Safety and Regulation                 | issue
+   2 | Healthcare & Social Services              | issue
+ 326 | Homelessness & Urban Safety               | issue
+ 204 | Housing & Homelessness                    | issue
+   5 | Immigration & Border Security             | issue
+ 205 | Income Inequality                         | issue
+ 351 | Indigenous Rights & Tribal Sovereignty    | issue
+   8 | Infrastructure & Transportation           | issue
+ 346 | Labor Rights & Unions                     | issue
+ 320 | Law & Order                               | issue
+ 336 | Legal and Constitutional Speech Rights    | issue
+ 209 | LGBTQ+ Rights                             | issue
+ 357 | Media & Journalism                        | issue
+ 343 | Money in Politics                         | issue
+ 308 | Online Safety for Minors                  | issue
+ 306 | Parental Rights in Education              | issue
+ 304 | Pesticide Regulation & Safety             | issue
+ 332 | Platform and Technology Speech Regulation | issue
+ 212 | Political Division & Governance           | issue
+ 329 | Political Violence & Extremism            | issue
+ 348 | Presidential Powers & Conflicts           | issue
+ 322 | Prison Conditions & Rehabilitation        | issue
+ 208 | Pro-Life Values                           | issue
+ 325 | Public Safety Infrastructure              | issue
+ 207 | Reproductive Rights                       | issue
+ 352 | Rural vs Urban Issues                     | issue
+ 323 | Second Amendment Rights                   | issue
+ 333 | Social Consequences of Speech             | issue
+  10 | Technology & Privacy                      | issue
+ 210 | Traditional Values & Culture              | issue
+ 302 | Vehicle Safety & Regulations              | issue
+ 301 | Voting Rights & Election Integrity        | issue
+ 206 | Women's Rights & Gender Equality          | issue
+ 311 | Civic Service & National Unity            | policy
+ 341 | Consumer Protection Policies              | policy
+ 300 | Contraception Access                      | policy
+ 347 | Corporate Regulation & Antitrust          | policy
+ 359 | Democratic Socialism Policies             | policy
+ 312 | Digital Device Policies in Schools        | policy
+ 316 | Domestic Animals and Housepets            | policy
+ 353 | Drug Classification & Legalization        | policy
+ 349 | Financial Regulation & Oversight          | policy
+ 358 | Government Shutdowns & Fiscal Policy      | policy
+ 307 | Marriage & Family Policy                  | policy
+ 356 | Plant-Based Food Policies                 | policy
+ 309 | School Choice & Education Alternatives    | policy
+ 354 | Space Policy & Science Funding            | policy
+ 203 | Tax Policy - Business Tax Relief          | policy
+ 201 | Tax Policy - Middle Class Relief          | policy
+ 202 | Tax Policy - Progressive Taxation         | policy
+ 360 | Teacher Training & Accountability         | policy
+ 350 | Trade Policy & Globalization              | policy
+(70 rows)
+
