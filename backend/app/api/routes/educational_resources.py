@@ -3,13 +3,43 @@ Educational Resources API Routes
 Provides CRUD operations for managing educational resources
 """
 from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.responses import FileResponse
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime
+import secrets
 
 from ...db.database import database
+from ...config import settings
 
 router = APIRouter(prefix="/educational-resources", tags=["educational-resources"])
+security = HTTPBasic()
+
+# Admin credentials
+ADMIN_USERNAME = settings.admin_username if hasattr(settings, 'admin_username') else "admin"
+ADMIN_PASSWORD = settings.admin_password if hasattr(settings, 'admin_password') else "meatspace"
+
+
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    """Verify admin credentials"""
+    is_valid = (
+        secrets.compare_digest(credentials.username, ADMIN_USERNAME) and
+        secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    )
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+
+@router.get("/admin")
+async def admin_page(username: str = Depends(verify_admin)):
+    """Serve the admin interface for managing educational resources"""
+    return FileResponse("app/static/educational_resources_admin.html")
 
 
 class EducationalResourceCreate(BaseModel):
