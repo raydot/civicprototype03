@@ -1,0 +1,502 @@
+[
+  {
+    "title": "Academic Freedom and Free Speech on College Campuses",
+    "source": "American Association of University Professors",
+    "type": "article",
+    "duration": "12 min read",
+    "description": "This article explores the principles of academic freedom and the implications of free speech policies on college campuses, including the challenges faced in balancing these rights.",
+    "url": "https://www.aaup.org/article/academic-freedom-and-free-speech-college-campuses",
+    "category_id": 334,
+    "category_name": "Academic Freedom and Speech"
+  },
+  {
+    "title": "The First Amendment: Free Speech and Academic Freedom",
+    "source": "Constitution Center",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This resource provides an overview of the First Amendment and its impact on academic freedom, detailing how it shapes the discourse in educational institutions.",
+    "url": "https://constitutioncenter.org/blog/the-first-amendment-free-speech-and-academic-freedom",
+    "category_id": 334,
+    "category_name": "Academic Freedom and Speech"
+  },
+  {
+    "title": "Free Speech on Campus",
+    "source": "Brookings Institution",
+    "type": "article",
+    "duration": "10 min read",
+    "description": "This article discusses the current debate surrounding free speech on college campuses, examining various viewpoints and the role of policy in shaping campus culture.",
+    "url": "https://www.brookings.edu/research/free-speech-on-campus/",
+    "category_id": 334,
+    "category_name": "Academic Freedom and Speech"
+  },
+  {
+    "title": "Campus Speech: The Role of Students and Administrators",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "1 hr 30 min",
+    "description": "This C-SPAN video features a panel discussion on campus speech issues, including the influence of students and administrators in promoting or restricting free expression.",
+    "url": "https://www.c-span.org/video/?463956-1/campus-speech-role-students-administrators",
+    "category_id": 334,
+    "category_name": "Academic Freedom and Speech"
+  },
+  {
+    "title": "The Importance of Academic Freedom in Higher Education",
+    "source": "National Education Association",
+    "type": "article",
+    "duration": "8 min read",
+    "description": "This article outlines the significance of academic freedom in higher education, focusing on its essential role in fostering innovation, critical thinking, and diverse perspectives.",
+    "url": "https://www.nea.org/advocating-for-change/new-from-nea/importance-academic-freedom-higher-education",
+    "category_id": 334,
+    "category_name": "Academic Freedom and Speech"
+  },
+  {
+    "title": "Climate Change and Its Impact on Policy",
+    "source": "Khan Academy",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This article provides an overview of climate change, its effects on the environment, and how it shapes political policies and decisions at various levels.",
+    "url": "https://www.khanacademy.org/science/ap-environmental-science/global-change/climate-change/a/climate-change-overview",
+    "category_id": 1,
+    "category_name": "Climate & Environment"
+  },
+  {
+    "title": "Understanding Climate Change Policy",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "20 min read",
+    "description": "This detailed report examines U.S. climate change policy, including legislative efforts, international agreements, and the roles of various stakeholders.",
+    "url": "https://crsreports.congress.gov/product/pdf/R/R45980",
+    "category_id": 1,
+    "category_name": "Climate & Environment"
+  },
+  {
+    "title": "The Politics of Climate Change",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "1 hr 30 min video",
+    "description": "This panel discussion features experts discussing the intersection of climate change and politics, covering policy responses and public perception.",
+    "url": "https://www.c-span.org/video/?456789-1/politics-climate-change",
+    "category_id": 1,
+    "category_name": "Climate & Environment"
+  },
+  {
+    "title": "The Role of Government in Environmental Policy",
+    "source": "Annenberg Classroom",
+    "type": "lesson",
+    "duration": "30 min lesson",
+    "description": "This lesson explores how government entities create environmental policies, focusing on the balance between economic growth and environmental protection.",
+    "url": "https://www.annenbergclassroom.org/resource/the-role-of-government-in-environmental-policy/",
+    "category_id": 1,
+    "category_name": "Climate & Environment"
+  },
+  {
+    "title": "Climate Change: The Policy Debate",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "10 min read",
+    "description": "This article outlines the current political debate surrounding climate change, highlighting key issues, stakeholders, and legislative proposals.",
+    "url": "https://ballotpedia.org/Climate_change",
+    "category_id": 1,
+    "category_name": "Climate & Environment"
+  },
+  {
+    "title": "The Importance of Education in Economic Growth",
+    "source": "Khan Academy",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This article explores the critical role that education plays in driving economic development and innovative capacity in society.",
+    "url": "https://www.khanacademy.org/economics-finance-domain/microeconomics/marketfailure/education-and-economic-growth/a/the-importance-of-education-in-economic-growth",
+    "category_id": 4,
+    "category_name": "Education & Research"
+  },
+  {
+    "title": "Investing in Education: A Political Perspective",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "10 min read",
+    "description": "This resource examines how education policy impacts political agendas and the implications of funding decisions on educational access.",
+    "url": "https://ballotpedia.org/Investing_in_Education:_A_Political_Perspective",
+    "category_id": 4,
+    "category_name": "Education & Research"
+  },
+  {
+    "title": "Science and Research Funding: The Political Landscape",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "20 min read",
+    "description": "This report analyzes the current state of science and research funding in the U.S., highlighting political debates and funding trends.",
+    "url": "https://crsreports.congress.gov/product/details?prodcode=R46580",
+    "category_id": 4,
+    "category_name": "Education & Research"
+  },
+  {
+    "title": "The Role of Federal Policies in Education and Research",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "1 hr 20 min",
+    "description": "This panel discussion features experts discussing the impact of federal policies on education and research funding.",
+    "url": "https://www.c-span.org/video/?c4901235/the-role-federal-policies-education-research",
+    "category_id": 4,
+    "category_name": "Education & Research"
+  },
+  {
+    "title": "Access to Education and Research in the 21st Century",
+    "source": "Annenberg Classroom",
+    "type": "lesson",
+    "duration": "30 min lesson",
+    "description": "This lesson plan provides educators with tools to discuss the challenges and opportunities in making education and research accessible to all.",
+    "url": "https://www.annenbergclassroom.org/resource/access-to-education-and-research-in-the-21st-century/",
+    "category_id": 4,
+    "category_name": "Education & Research"
+  },
+  {
+    "title": "Freedom of Speech: A Fundamental Right",
+    "source": "Constitution Center",
+    "type": "article",
+    "duration": "5 min read",
+    "description": "This article explores the First Amendment's guarantee of freedom of speech, its historical context, and its implications in today's society.",
+    "url": "https://constitutioncenter.org/blog/freedom-of-speech-a-fundamental-right",
+    "category_id": 318,
+    "category_name": "Freedom of Expression"
+  },
+  {
+    "title": "The First Amendment: Freedom of Speech",
+    "source": "Khan Academy",
+    "type": "lesson",
+    "duration": "20 min read",
+    "description": "This lesson provides an overview of the First Amendment rights, focusing on freedom of speech, its limitations, and significant Supreme Court cases.",
+    "url": "https://www.khanacademy.org/humanities/us-history/postwarera/1950s-1960s-civil-rights-movement/first-amendment/a/the-first-amendment-freedom-of-speech",
+    "category_id": 318,
+    "category_name": "Freedom of Expression"
+  },
+  {
+    "title": "Freedom of Expression in a Digital Age",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "30 min read",
+    "description": "This report examines the challenges and policies surrounding freedom of expression in the context of the internet and social media.",
+    "url": "https://crsreports.congress.gov/product/pdf/R/R46741",
+    "category_id": 318,
+    "category_name": "Freedom of Expression"
+  },
+  {
+    "title": "Podcast: Free Speech in the Age of Misinformation",
+    "source": "C-SPAN",
+    "type": "podcast",
+    "duration": "50 min",
+    "description": "This podcast discusses the balance between protecting free speech and combating misinformation in today's digital landscape.",
+    "url": "https://www.c-span.org/video/?527083-1/free-speech-age-misinformation",
+    "category_id": 318,
+    "category_name": "Freedom of Expression"
+  },
+  {
+    "title": "Understanding Freedom of Expression",
+    "source": "Annenberg Classroom",
+    "type": "video",
+    "duration": "15 min",
+    "description": "This video provides an interactive overview of freedom of expression and its significance in American democracy.",
+    "url": "https://www.annenbergclassroom.org/resource/understanding-freedom-of-expression/",
+    "category_id": 318,
+    "category_name": "Freedom of Expression"
+  },
+  {
+    "title": "The Health Care Debate",
+    "source": "Khan Academy",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This article discusses the key components of the health care debate in the United States, exploring different perspectives on access, affordability, and policy implications.",
+    "url": "https://www.khanacademy.org/humanities/us-history/postwarera/1960s-america/health-care-debate/a/the-health-care-debate",
+    "category_id": 2,
+    "category_name": "Healthcare & Social Services"
+  },
+  {
+    "title": "Understanding Health Care Policy",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "30 min read",
+    "description": "This comprehensive report provides an overview of health care policy in the U.S., including challenges related to access, costs, and the role of government in providing social services.",
+    "url": "https://crsreports.congress.gov/product/pdf/R/R45352",
+    "category_id": 2,
+    "category_name": "Healthcare & Social Services"
+  },
+  {
+    "title": "The Social Safety Net: A Policy Perspective",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "20 min read",
+    "description": "This article examines the various social safety net programs in place in the U.S., discussing their significance for vulnerable populations and the political implications of reforms.",
+    "url": "https://ballotpedia.org/Social_safety_net",
+    "category_id": 2,
+    "category_name": "Healthcare & Social Services"
+  },
+  {
+    "title": "Access to Healthcare and Equity",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "45 min video",
+    "description": "This video features a panel discussion on healthcare access and equity, highlighting the political challenges and potential solutions to improve services for underserved communities.",
+    "url": "https://www.c-span.org/video/?517123-1/access-healthcare-equity",
+    "category_id": 2,
+    "category_name": "Healthcare & Social Services"
+  },
+  {
+    "title": "The Affordable Care Act: A Legislative History",
+    "source": "Library of Congress",
+    "type": "article",
+    "duration": "25 min read",
+    "description": "This resource provides a detailed history of the Affordable Care Act, discussing its origins, key provisions, and the ongoing political debates surrounding healthcare coverage in America.",
+    "url": "https://www.loc.gov/law/help/affordable-care-act.php",
+    "category_id": 2,
+    "category_name": "Healthcare & Social Services"
+  },
+  {
+    "title": "Immigration Policy: An Overview",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "20 min read",
+    "description": "This article provides a comprehensive overview of U.S. immigration policy, including historical context, current laws, and key issues surrounding immigration and border security.",
+    "url": "https://crsreports.congress.gov/product/pdf/IF/IF11116",
+    "category_id": 5,
+    "category_name": "Immigration & Border Security"
+  },
+  {
+    "title": "The Immigration Debate",
+    "source": "Khan Academy",
+    "type": "video",
+    "duration": "10 min video",
+    "description": "This video explores the complexities of the immigration debate in the U.S., highlighting arguments for and against various immigration policies.",
+    "url": "https://www.khanacademy.org/humanities/us-history/postwarera/1960s-america/1960s-immigration/v/the-immigration-debate",
+    "category_id": 5,
+    "category_name": "Immigration & Border Security"
+  },
+  {
+    "title": "Border Security and Immigration Reform",
+    "source": "C-SPAN",
+    "type": "podcast",
+    "duration": "50 min podcast",
+    "description": "This podcast episode features discussions with experts and policymakers regarding border security measures and the challenges of immigration reform in the U.S.",
+    "url": "https://www.c-span.org/video/?c5027833/user-clip-border-security-immigration-reform",
+    "category_id": 5,
+    "category_name": "Immigration & Border Security"
+  },
+  {
+    "title": "Immigration and the U.S. Economy",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This article examines the economic implications of immigration policies, discussing both the benefits and challenges that immigration presents to the U.S. economy.",
+    "url": "https://ballotpedia.org/Immigration_and_the_U.S._economy",
+    "category_id": 5,
+    "category_name": "Immigration & Border Security"
+  },
+  {
+    "title": "Immigration and Border Security",
+    "source": "Library of Congress",
+    "type": "lesson",
+    "duration": "1 hour lesson",
+    "description": "This lesson plan guides educators in exploring immigration and border security through primary sources, encouraging critical thinking about policy and its impacts on communities.",
+    "url": "https://www.loc.gov/teachers/classroommaterials/lessons/immigration-border-security/",
+    "category_id": 5,
+    "category_name": "Immigration & Border Security"
+  },
+  {
+    "title": "The Importance of a Free Press",
+    "source": "Annenberg Classroom",
+    "type": "lesson",
+    "duration": "30 min read",
+    "description": "This lesson explores the role of a free press in a democratic society, discussing its importance for accountability and transparency in governance.",
+    "url": "https://www.annenbergclassroom.org/resource/the-importance-of-a-free-press/",
+    "category_id": 357,
+    "category_name": "Media & Journalism"
+  },
+  {
+    "title": "Media and Politics",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "60 min video",
+    "description": "This video features a panel discussion on the relationship between media and politics, examining how journalism impacts public opinion and policy.",
+    "url": "https://www.c-span.org/video/?c4904022/media-politics",
+    "category_id": 357,
+    "category_name": "Media & Journalism"
+  },
+  {
+    "title": "Misinformation and Democracy",
+    "source": "Library of Congress",
+    "type": "article",
+    "duration": "20 min read",
+    "description": "This article reviews the challenges posed by misinformation in the digital age and discusses strategies to safeguard democratic processes.",
+    "url": "https://www.loc.gov/law/help/misinformation-democracy.php",
+    "category_id": 357,
+    "category_name": "Media & Journalism"
+  },
+  {
+    "title": "Protecting Press Freedom",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This resource outlines various policies aimed at protecting press freedom and promoting accountability in journalism.",
+    "url": "https://ballotpedia.org/Protecting_press_freedom",
+    "category_id": 357,
+    "category_name": "Media & Journalism"
+  },
+  {
+    "title": "The Role of Journalism in Democracy",
+    "source": "Constitution Center",
+    "type": "podcast",
+    "duration": "45 min podcast",
+    "description": "A podcast episode discussing the essential role of journalism in a democracy, including how it can counter misinformation and promote informed citizenry.",
+    "url": "https://constitutioncenter.org/debate/the-role-of-journalism-in-democracy",
+    "category_id": 357,
+    "category_name": "Media & Journalism"
+  },
+  {
+    "title": "Political Violence and Extremism: A Historical Perspective",
+    "source": "Library of Congress",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This article examines the historical context of political violence and extremism in the United States, outlining key events and movements that have shaped the current landscape.",
+    "url": "https://www.loc.gov/item/2019291/overview/",
+    "category_id": 329,
+    "category_name": "Political Violence & Extremism"
+  },
+  {
+    "title": "Understanding Political Extremism",
+    "source": "Annenberg Classroom",
+    "type": "lesson",
+    "duration": "30 min read",
+    "description": "This lesson provides an overview of political extremism, exploring its definitions, causes, and implications for democracy and civil society.",
+    "url": "https://www.annenbergclassroom.org/resource/understanding-political-extremism/",
+    "category_id": 329,
+    "category_name": "Political Violence & Extremism"
+  },
+  {
+    "title": "The Rise of Political Violence in America",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "45 min video",
+    "description": "In this video, experts discuss the increasing incidents of political violence in the U.S. and how it impacts democratic institutions and society at large.",
+    "url": "https://www.c-span.org/video/?c4983775/the-rise-of-political-violence",
+    "category_id": 329,
+    "category_name": "Political Violence & Extremism"
+  },
+  {
+    "title": "Radicalization and Political Violence: A Policy Perspective",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "20 min read",
+    "description": "This report analyzes the factors contributing to radicalization and the strategies that policymakers can employ to combat political violence.",
+    "url": "https://crsreports.congress.gov/product/pdf/R/R46946",
+    "category_id": 329,
+    "category_name": "Political Violence & Extremism"
+  },
+  {
+    "title": "Civic Engagement and the Prevention of Political Violence",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "10 min read",
+    "description": "This article discusses the role of civic engagement in preventing political violence, emphasizing the importance of civil discourse and community involvement.",
+    "url": "https://ballotpedia.org/Civic_Engagement_and_the_Prevention_of_Political_Violence",
+    "category_id": 329,
+    "category_name": "Political Violence & Extremism"
+  },
+  {
+    "title": "Understanding the Second Amendment",
+    "source": "Constitution Center",
+    "type": "article",
+    "duration": "8 min read",
+    "description": "This article provides a thorough exploration of the Second Amendment, its historical context, and its implications for contemporary debates on gun rights and regulations.",
+    "url": "https://constitutioncenter.org/blog/understanding-the-second-amendment",
+    "category_id": 323,
+    "category_name": "Second Amendment Rights"
+  },
+  {
+    "title": "The Second Amendment: A History",
+    "source": "Library of Congress",
+    "type": "article",
+    "duration": "12 min read",
+    "description": "An in-depth look at the history of the Second Amendment, discussing its origins, key Supreme Court cases, and its evolving interpretation in American law.",
+    "url": "https://www.loc.gov/item/mnwp000042/",
+    "category_id": 323,
+    "category_name": "Second Amendment Rights"
+  },
+  {
+    "title": "Second Amendment Overview",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "10 min read",
+    "description": "This resource offers a comprehensive overview of the Second Amendment, outlining its text, historical context, and key issues surrounding gun rights and legislation.",
+    "url": "https://ballotpedia.org/Second_Amendment",
+    "category_id": 323,
+    "category_name": "Second Amendment Rights"
+  },
+  {
+    "title": "Gun Control and Second Amendment Rights",
+    "source": "Annenberg Classroom",
+    "type": "lesson",
+    "duration": "15 min read",
+    "description": "An educational lesson that discusses the ongoing debate between gun control advocates and Second Amendment supporters, providing various perspectives on this contentious issue.",
+    "url": "https://www.annenbergclassroom.org/resource/gun-control-and-the-second-amendment/",
+    "category_id": 323,
+    "category_name": "Second Amendment Rights"
+  },
+  {
+    "title": "The Second Amendment: A Discussion",
+    "source": "C-SPAN",
+    "type": "video",
+    "duration": "45 min video",
+    "description": "A panel discussion featuring experts who explore the Second Amendment, its legal interpretations, and the impact of gun laws on society.",
+    "url": "https://www.c-span.org/video/?326908-1/second-amendment-discussion",
+    "category_id": 323,
+    "category_name": "Second Amendment Rights"
+  },
+  {
+    "title": "Privacy in the Digital Age",
+    "source": "Khan Academy",
+    "type": "lesson",
+    "duration": "20 min read",
+    "description": "This lesson explores the implications of digital technology on personal privacy, discussing key concepts and policies surrounding data protection and individual rights.",
+    "url": "https://www.khanacademy.org/college-careers-more/personal-finance/personal-finance-privacy",
+    "category_id": 10,
+    "category_name": "Technology & Privacy"
+  },
+  {
+    "title": "The Controversy Over Data Privacy",
+    "source": "Congressional Research Service",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This detailed report provides an overview of the ongoing debates in Congress regarding data privacy legislation, addressing the challenges posed by technology companies.",
+    "url": "https://crsreports.congress.gov/product/pdf/R/R45983",
+    "category_id": 10,
+    "category_name": "Technology & Privacy"
+  },
+  {
+    "title": "How Technology Companies Handle Your Data",
+    "source": "Ballotpedia",
+    "type": "article",
+    "duration": "10 min read",
+    "description": "This article examines how various technology companies collect, use, and protect personal data, as well as the legal frameworks governing these practices.",
+    "url": "https://ballotpedia.org/Data_privacy",
+    "category_id": 10,
+    "category_name": "Technology & Privacy"
+  },
+  {
+    "title": "The Ethics of Privacy in Technology",
+    "source": "Annenberg Classroom",
+    "type": "video",
+    "duration": "12 min video",
+    "description": "This video discusses the ethical considerations surrounding privacy in technology and the responsibilities of corporations to safeguard personal information.",
+    "url": "https://www.annenbergclassroom.org/resource/ethics-of-privacy-in-technology/",
+    "category_id": 10,
+    "category_name": "Technology & Privacy"
+  },
+  {
+    "title": "Digital Privacy Rights",
+    "source": "Constitution Center",
+    "type": "article",
+    "duration": "15 min read",
+    "description": "This article outlines the constitutional aspects of digital privacy rights and discusses landmark cases and legislation that have shaped privacy in the digital realm.",
+    "url": "https://constitutioncenter.org/blog/digital-privacy-rights",
+    "category_id": 10,
+    "category_name": "Technology & Privacy"
+  }
+]
