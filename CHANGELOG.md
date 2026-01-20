@@ -1,3 +1,11 @@
+## v1.14.0 (2026-01-19)
+
+### Feat
+
+- add educational resources system with admin interface and user-facing components
+- add educational resources system with admin interface and user-facing components
+- add educational resources admin UI and category detail component
+
 ## v1.13.0 (2026-01-19)
 
 ### Feat
