@@ -1,3 +1,10 @@
+## v1.13.0 (2026-01-19)
+
+### Feat
+
+- add educational resources system with API endpoints
+- add educational resources system with API endpoints
+
 ## v1.12.7 (2026-01-19)
 
 ### Fix
