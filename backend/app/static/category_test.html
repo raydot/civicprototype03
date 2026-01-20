@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category Detail Test - VoterPrime</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="module">
+      const API_BASE = window.location.origin
+
+      function App() {
+        const [categoryId, setCategoryId] = React.useState(1)
+        const [categoryData, setCategoryData] = React.useState(null)
+        const [loading, setLoading] = React.useState(false)
+        const [error, setError] = React.useState(null)
+
+        const fetchCategory = async () => {
+          try {
+            setLoading(true)
+            setError(null)
+
+            const response = await fetch(
+              `${API_BASE}/educational-resources/category/${categoryId}`
+            )
+            if (!response.ok) throw new Error('Failed to load category')
+
+            const data = await response.json()
+            setCategoryData(data)
+          } catch (err) {
+            setError(err.message)
+          } finally {
+            setLoading(false)
+          }
+        }
+
+        const getResourceIcon = (type) => {
+          const icons = {
+            video: '🎥',
+            podcast: '🎧',
+            lesson: '📚',
+            article: '📄'
+          }
+          return icons[type] || '📄'
+        }
+
+        return React.createElement(
+          'div',
+          { className: 'min-h-screen p-8' },
+          React.createElement(
+            'div',
+            { className: 'max-w-4xl mx-auto' },
+            // Header
+            React.createElement(
+              'div',
+              { className: 'bg-white rounded-lg shadow-md p-6 mb-6' },
+              React.createElement(
+                'h1',
+                { className: 'text-3xl font-bold text-gray-900 mb-4' },
+                '📚 Category Detail Test'
+              ),
+              React.createElement(
+                'div',
+                { className: 'flex gap-4 items-end' },
+                React.createElement(
+                  'div',
+                  { className: 'flex-1' },
+                  React.createElement(
+                    'label',
+                    {
+                      className: 'block text-sm font-medium text-gray-700 mb-2'
+                    },
+                    'Category ID'
+                  ),
+                  React.createElement('input', {
+                    type: 'number',
+                    value: categoryId,
+                    onChange: (e) =>
+                      setCategoryId(parseInt(e.target.value) || 1),
+                    className:
+                      'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500',
+                    placeholder: 'Enter category ID'
+                  })
+                ),
+                React.createElement(
+                  'button',
+                  {
+                    onClick: fetchCategory,
+                    className:
+                      'bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700'
+                  },
+                  'Load Category'
+                )
+              )
+            ),
+
+            // Loading State
+            loading &&
+              React.createElement(
+                'div',
+                { className: 'text-center py-12' },
+                React.createElement('div', {
+                  className:
+                    'inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4'
+                }),
+                React.createElement(
+                  'p',
+                  { className: 'text-gray-600' },
+                  'Loading...'
+                )
+              ),
+
+            // Error State
+            error &&
+              React.createElement(
+                'div',
+                {
+                  className:
+                    'bg-red-50 border border-red-200 rounded-lg p-4 mb-6'
+                },
+                React.createElement(
+                  'p',
+                  { className: 'text-red-800' },
+                  '❌ ',
+                  error
+                )
+              ),
+
+            // Category Data
+            categoryData &&
+              !loading &&
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg shadow-md p-6' },
+                // Category Header
+                React.createElement(
+                  'div',
+                  { className: 'mb-6' },
+                  React.createElement(
+                    'span',
+                    {
+                      className:
+                        'inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full mb-3'
+                    },
+                    categoryData.type.toUpperCase()
+                  ),
+                  React.createElement(
+                    'h2',
+                    { className: 'text-2xl font-bold text-gray-900 mb-3' },
+                    categoryData.name
+                  ),
+                  categoryData.description &&
+                    React.createElement(
+                      'p',
+                      { className: 'text-gray-700 leading-relaxed' },
+                      categoryData.description
+                    )
+                ),
+
+                // Resources
+                React.createElement(
+                  'div',
+                  null,
+                  React.createElement(
+                    'h3',
+                    { className: 'font-semibold text-gray-900 mb-4 text-lg' },
+                    `Educational Resources (${categoryData.resources.length})`
+                  ),
+                  categoryData.resources.length === 0
+                    ? React.createElement(
+                        'p',
+                        { className: 'text-gray-500 text-center py-8' },
+                        '📖 No resources available yet'
+                      )
+                    : React.createElement(
+                        'div',
+                        { className: 'space-y-4' },
+                        categoryData.resources
+                          .sort((a, b) => a.display_order - b.display_order)
+                          .map((resource) =>
+                            React.createElement(
+                              'a',
+                              {
+                                key: resource.id,
+                                href: resource.url,
+                                target: '_blank',
+                                rel: 'noopener noreferrer',
+                                className:
+                                  'block p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all'
+                              },
+                              React.createElement(
+                                'div',
+                                { className: 'flex items-start gap-3' },
+                                React.createElement(
+                                  'div',
+                                  { className: 'text-2xl' },
+                                  getResourceIcon(resource.type)
+                                ),
+                                React.createElement(
+                                  'div',
+                                  { className: 'flex-1' },
+                                  React.createElement(
+                                    'h4',
+                                    {
+                                      className:
+                                        'font-semibold text-gray-900 mb-1'
+                                    },
+                                    resource.title
+                                  ),
+                                  React.createElement(
+                                    'div',
+                                    {
+                                      className:
+                                        'flex items-center gap-2 text-sm text-gray-600 mb-2'
+                                    },
+                                    React.createElement(
+                                      'span',
+                                      { className: 'font-medium' },
+                                      resource.source
+                                    ),
+                                    resource.duration &&
+                                      React.createElement(
+                                        React.Fragment,
+                                        null,
+                                        React.createElement('span', null, '•'),
+                                        React.createElement(
+                                          'span',
+                                          null,
+                                          '⏱️ ',
+                                          resource.duration
+                                        )
+                                      )
+                                  ),
+                                  resource.description &&
+                                    React.createElement(
+                                      'p',
+                                      { className: 'text-sm text-gray-600' },
+                                      resource.description
+                                    )
+                                ),
+                                React.createElement(
+                                  'div',
+                                  { className: 'text-gray-400' },
+                                  '🔗'
+                                )
+                              )
+                            )
+                          )
+                      )
+                )
+              ),
+
+            // Tips
+            React.createElement(
+              'div',
+              {
+                className:
+                  'mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4'
+              },
+              React.createElement(
+                'h3',
+                { className: 'font-semibold text-blue-900 mb-2' },
+                '💡 Tips'
+              ),
+              React.createElement(
+                'ul',
+                { className: 'text-sm text-blue-800 space-y-1' },
+                React.createElement(
+                  'li',
+                  null,
+                  '• Category 1 = Climate & Environment'
+                ),
+                React.createElement(
+                  'li',
+                  null,
+                  '• Use the admin to add more resources'
+                ),
+                React.createElement(
+                  'li',
+                  null,
+                  '• Admin: ',
+                  React.createElement(
+                    'a',
+                    {
+                      href: '/educational-resources/admin',
+                      className: 'underline hover:text-blue-900'
+                    },
+                    '/educational-resources/admin'
+                  )
+                )
+              )
+            )
+          )
+        )
+      }
+
+      // Load React from CDN
+      const script1 = document.createElement('script')
+      script1.src = 'https://unpkg.com/react@18/umd/react.production.min.js'
+      script1.crossOrigin = 'anonymous'
+
+      const script2 = document.createElement('script')
+      script2.src =
+        'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'
+      script2.crossOrigin = 'anonymous'
+
+      script2.onload = () => {
+        const root = ReactDOM.createRoot(document.getElementById('root'))
+        root.render(React.createElement(App))
+      }
+
+      document.head.appendChild(script1)
+      document.head.appendChild(script2)
+    </script>
+  </body>
+</html>

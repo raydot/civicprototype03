@@ -60,6 +60,8 @@ class Settings(BaseSettings):
     # CORS settings
     allowed_origins: list = [
         "http://localhost:3000",  # Local frontend
+        "http://localhost:5173",  # Vite dev server
+        "http://localhost:5174",  # Vite dev server (alternate port)
         "https://*.netlify.app",  # Netlify deployments
         "https://*.netlify.com",  # Netlify deployments
     ]
