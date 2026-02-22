@@ -1,3 +1,13 @@
+## v3.0.0 (2026-02-22)
+
+### BREAKING CHANGE
+
+- ADMIN_TOKEN environment variable now required
+
+### Fix
+
+- remove hardcoded admin tokens from backend code
+
 ## v2.0.0 (2026-02-22)
 
 ### BREAKING CHANGE
