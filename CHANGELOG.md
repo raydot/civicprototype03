@@ -1,3 +1,13 @@
+## v2.0.0 (2026-02-22)
+
+### BREAKING CHANGE
+
+- Admin token rotated - update Railway environment variables
+
+### Feat
+
+- implement security hardening and Windsurf workflows with direnv
+
 ## v1.14.0 (2026-01-19)
 
 ### Feat
