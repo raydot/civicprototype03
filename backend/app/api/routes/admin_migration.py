@@ -17,7 +17,7 @@ logger = structured_logger
 
 def verify_admin_token(token: str = Query(..., description="Admin authentication token")):
     """Simple admin authentication"""
-    expected_token = os.getenv("ADMIN_TOKEN", "voterPrime_admin_meNO9Kccs9JNOxVnOdrLdTYJcu8RuQFmgzAwFTX84qs")
+    expected_token = os.getenv("ADMIN_TOKEN", "")
     if token != expected_token:
         raise HTTPException(status_code=401, detail="Invalid admin token")
     return True
