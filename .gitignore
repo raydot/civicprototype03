@@ -108,3 +108,34 @@ docs/
 
 # Stuff that doesn't help the app
 category_upload_template.xlsx
+
+## WINDSURF & MCP SECURITY
+# Windsurf workflows with secrets (local overrides)
+.windsurf/workflows/*.local.md
+.windsurf/workflows/*-private.md
+.windsurf/env.local
+.windsurf/settings.json
+.windsurf/mcp-settings.json
+
+# direnv environment file (contains secrets)
+.envrc
+
+# MCP server secrets
+backend/mcp_server/.env
+backend/mcp_server/.env.*
+!backend/mcp_server/.env.example
+backend/mcp_server/config.local.py
+backend/mcp_server/*.log
+
+# Backup files that might contain secrets
+backend/app/data/*_backup_*.json
+*.backup
+
+# Local testing scripts with credentials
+backend/test_scripts/*_local.py
+backend/test_scripts/.env
+
+# Railway/Netlify local configs
+.railway/
+railway.local.json
+netlify.local.toml

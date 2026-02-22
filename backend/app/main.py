@@ -147,7 +147,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 if settings.environment == "production":
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["*.railway.app", "*.netlify.app"]
+        allowed_hosts=["*.railway.app", "*.netlify.app", "testserver"]
     )
 
 # Include routers

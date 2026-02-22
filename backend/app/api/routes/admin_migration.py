@@ -17,7 +17,7 @@ logger = structured_logger
 
 def verify_admin_token(token: str = Query(..., description="Admin authentication token")):
     """Simple admin authentication"""
-    expected_token = os.getenv("ADMIN_TOKEN", "voterPrime_admin_2024")
+    expected_token = os.getenv("ADMIN_TOKEN", "voterPrime_admin_meNO9Kccs9JNOxVnOdrLdTYJcu8RuQFmgzAwFTX84qs")
     if token != expected_token:
         raise HTTPException(status_code=401, detail="Invalid admin token")
     return True
@@ -29,7 +29,7 @@ async def run_cost_tracking_migration(admin_auth: bool = Query(default=verify_ad
     ONE-TIME migration to create openai_usage table
     
     Example:
-    POST /admin/migration/run-cost-tracking?token=voterPrime_admin_2024
+    POST /admin/migration/run-cost-tracking?token=${ADMIN_TOKEN}
     """
     if database is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -98,7 +98,7 @@ async def load_categories_from_json(admin_auth: bool = Query(default=verify_admi
     Load all categories from political_categories.json into the database
     
     Example:
-    POST /admin/migration/load-categories?token=voterPrime_admin_2024
+    POST /admin/migration/load-categories?token=${ADMIN_TOKEN}
     """
     if database is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -181,7 +181,7 @@ async def check_all_categories(admin_auth: bool = Query(default=verify_admin_tok
     Debug endpoint to check ALL categories in database (including inactive)
     
     Example:
-    GET /admin/migration/check-categories?token=voterPrime_admin_2024
+    GET /admin/migration/check-categories?token=${ADMIN_TOKEN}
     """
     if database is None:
         raise HTTPException(status_code=500, detail="Database not available")

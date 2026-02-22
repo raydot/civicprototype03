@@ -1,0 +1,14 @@
+# VoterPrime Environment Variables
+# Copy this file to .envrc and fill in your actual values
+# Then run: direnv allow
+
+# Admin authentication token
+export ADMIN_TOKEN="your-admin-token-here"
+
+# Backend URLs
+export BACKEND_URL_PROD="https://voter-mambo-production.up.railway.app"
+export BACKEND_URL_LOCAL="http://localhost:8000"
+
+# Frontend URLs
+export FRONTEND_URL_PROD="https://voterprime.netlify.app"
+export FRONTEND_URL_LOCAL="http://localhost:5173"

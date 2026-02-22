@@ -1,0 +1,602 @@
+# VoterPrime AI Recommendation System - Windsurf Rules
+
+## Project Overview
+
+VoterPrime is a political AI recommendation system that matches voter priorities with candidates and policies using semantic analysis, sentiment detection, and OpenAI embeddings. The system consists of a FastAPI backend and React/Vite frontend deployed on Railway and Netlify respectively.
+
+**Current Version**: v0.11.2
+**Production URLs**:
+
+- Backend: https://voter-mambo-production.up.railway.app
+- Cost Dashboard: https://voter-mambo-production.up.railway.app/admin/cost-dashboard
+- Category Admin: https://voter-mambo-production.up.railway.app/static/category_admin.html
+
+## Architecture
+
+### Monorepo Structure
+
+- **Backend**: Python/FastAPI with conda environment (`ai-recommendation-service`)
+- **Frontend**: React 18 + Vite + TypeScript + TailwindCSS
+- **Database**: PostgreSQL (Railway managed) with optional pgvector
+- **Deployment**: Railway (backend), Netlify (frontend)
+- **Version Control**: Unified versioning across frontend/backend with commitizen
+
+### Technology Stack
+
+- **AI/ML**: OpenAI GPT-3.5-turbo and text-embedding-3-small (1536 dimensions)
+- **Vector Search**: In-memory numpy arrays with cosine similarity (no vector DB needed)
+- **Authentication**: NextAuth.js (if implemented)
+- **Monitoring**: Custom admin dashboard with OpenAI cost tracking
+- **Testing**: pytest (backend), Playwright (frontend E2E if implemented)
+
+## Critical Rules
+
+### 1. Dependency Management
+
+**ALWAYS use conda for backend dependencies:**
+
+- Primary dependency file: `backend/environment.yml`
+- Conda environment name: `ai-recommendation-service`
+- Python version: 3.11
+- When adding dependencies, update `environment.yml` first
+- Use pip section in `environment.yml` for packages not in conda-forge
+- Never suggest using `requirements.txt` as primary dependency source
+- This is a conda application, NOT a pip-based application
+
+**Frontend dependencies:**
+
+- Use npm/package.json
+- Current version managed in `frontend/package.json`
+- Vite for build tooling
+- TypeScript strict mode enabled
+
+### 2. AI/ML Components
+
+**OpenAI Integration:**
+
+- Use OpenAI embeddings API (`text-embedding-3-small`, 1536 dimensions)
+- **NEVER suggest sentence-transformers library** - it causes crashes
+- API key stored in environment variables: `OPENAI_API_KEY`
+- Implement caching for embeddings to reduce costs
+- Use GPT-3.5-turbo for sentiment analysis and text generation
+- Monitor costs via admin dashboard
+
+**Political Categories:**
+
+- 32 political categories defined in `backend/app/data/political_categories.json`
+- Categories include terminology from `issueTerminology.json`
+- Each category has: id, name, keywords, terminology_source, terminology_sections
+- Categories cover: issues, policies, candidates, attributes
+- Success rate tracking: average 31.9%, top performer Healthcare (80%)
+
+**Sentiment Analysis:**
+
+- Use OpenAI for political sentiment and intensity analysis
+- Analyze: priority intensity (1-10), emotion, urgency, key phrases
+- Cache results to minimize API calls
+- Integration points: category matching, feedback analysis
+- Processing time: ~1-2 seconds for AI analysis
+
+**Category Quality Guidelines:**
+
+- Keyword count: 5-15 keywords per category (enhanced categories may have up to 20)
+- Avoid geographic specificity (no "California healthcare", use "Healthcare")
+- Prevent category pollution: no over-granular or duplicate categories
+- Semantic uniqueness: >80% difference from existing categories
+- Political spectrum balance: progressive, conservative, bipartisan
+
+### 3. Code Style & Quality
+
+**Backend (Python):**
+
+- Use FastAPI async/await patterns
+- Type hints required (Pydantic models)
+- Structured logging (no print statements in production)
+- Error handling with custom exceptions in `app/utils/exceptions.py`
+- Follow existing patterns in `backend/app/`
+- Service layer pattern: business logic in `app/services/`
+- Dependency injection via FastAPI
+
+**Frontend (TypeScript/React):**
+
+- Functional components with hooks
+- TypeScript strict mode
+- TailwindCSS for styling
+- shadcn/ui for components
+- Lucide icons
+- No inline styles
+- Provider pattern for API integration (FastApiProvider)
+
+**Logging:**
+
+- Backend: Use structured logger from `app/utils/logging.py`
+- Logger methods: `info()`, `warning()`, `error()` (NOT `debug()`)
+- Never use print() statements in production code
+- Structured JSON logging for analytics
+
+**Testing:**
+
+- Component-first development: write tests before implementation
+- pytest with async support for backend
+- Unit tests alongside code files (e.g., `test_text_encoder.py`)
+- Integration tests in `tests/integration/`
+- Mock external APIs (OpenAI, database)
+- Coverage reports with pytest-cov
+
+### 4. Environment Variables
+
+**Backend (.env.local):**
+
+```
+ENVIRONMENT=development|staging|production
+PORT=8000
+DATABASE_URL=postgresql://...
+OPENAI_API_KEY=sk-...
+ADMIN_TOKEN=voterPrime_admin_meNO9Kccs9JNOxVnOdrLdTYJcu8RuQFmgzAwFTX84qs
+LOG_LEVEL=INFO
+```
+
+**Frontend (.env.local):**
+
+```
+VITE_API_MODE=fastapi|mock|claude
+VITE_BACKEND_URL=http://localhost:8000 (local) or https://... (production)
+```
+
+**Shell Environment (for Windsurf workflows):**
+
+```bash
+export ADMIN_TOKEN="voterPrime_admin_meNO9Kccs9JNOxVnOdrLdTYJcu8RuQFmgzAwFTX84qs"
+export BACKEND_URL_PROD="https://voter-mambo-production.up.railway.app"
+export BACKEND_URL_LOCAL="http://localhost:8000"
+```
+
+**Security:**
+
+- **NEVER hardcode secrets in code or workflows**
+- Use `${ADMIN_TOKEN}` syntax in workflows, not literal values
+- All .env files are gitignored
+- Provide .env.example templates only
+- Store production keys in Railway/Netlify dashboards
+- Rotate admin token quarterly
+- See `.windsurf/ENV_SETUP.md` for complete setup instructions
+
+### 5. Database Patterns
+
+**PostgreSQL Schema:**
+
+- Use SQLAlchemy 2.0 async patterns
+- Alembic for migrations
+- Tables: categories, user_feedback, recommendations, knowledge_sources
+- Handle missing DATABASE_URL gracefully (set database = None)
+- Connection pooling for performance
+
+**Database Operations:**
+
+- Always check if database is None before operations
+- Use async database operations
+- Proper transaction management
+- Index frequently queried columns
+
+**Graceful Degradation:**
+
+```python
+# Handle missing database gracefully
+if database is None:
+    logger.warning("Database not available, feedback features disabled")
+    return {"status": "degraded"}
+```
+
+### 6. API Design
+
+**FastAPI Endpoints:**
+
+- RESTful conventions
+- Pydantic request/response models in `app/schemas/`
+- Proper HTTP status codes
+- Error responses with detail messages
+- CORS configuration for frontend
+- Rate limiting on expensive endpoints
+
+**Key Endpoints:**
+
+- `/health` - Health check
+- `/api/analyze` - Category matching
+- `/api/feedback` - User feedback collection
+- `/api/recommendations` - Final recommendations
+- `/admin/*` - Admin endpoints (token-protected)
+
+**Rate Limiting:**
+
+- AI Analysis: 10/minute (high cost - OpenAI API)
+- Category Lookup: 30/minute (low cost - database)
+- Admin Endpoints: 100/minute (authenticated)
+- Health Checks: 60/minute (minimal cost)
+
+**Admin Authentication:**
+
+```python
+def verify_admin_token(token: str = Query(...)):
+    if token != settings.admin_token:
+        raise HTTPException(status_code=401, detail="Invalid admin token")
+    return token
+```
+
+### 7. Deployment
+
+**Railway (Backend):**
+
+- Uses Procfile: `web: /opt/conda/envs/ai-recommendation-service/bin/python -m uvicorn app.main:app --host 0.0.0.0`
+- Conda environment built from environment.yml
+- Environment variables set in Railway dashboard
+- Health checks on `/health` endpoint
+- **Important**: Don't use `--port $PORT` in Procfile (Python handles it via settings)
+
+**Netlify (Frontend):**
+
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Environment variables in Netlify dashboard
+
+**Deployment Troubleshooting:**
+
+- 502 errors: Check Procfile conda path, remove --port argument
+- Module imports: Ensure all deps in environment.yml
+- OpenAI errors: Verify API key and billing
+
+### 8. Version Control & Commits
+
+**Conventional Commits:**
+
+- Use commitizen for commit messages
+- Format: `type(scope): message`
+- Types: feat, fix, docs, style, refactor, test, chore
+- Pre-commit hooks validate commit messages
+- Automated versioning on push to main/master
+
+**Git Workflow:**
+
+- **User prefers to run git commands manually**
+- Provide git commands for user to execute
+- **Don't use run_command for git operations**
+- Don't suggest terminal commands unless explicitly asked
+
+### 9. Performance & Optimization
+
+**Backend:**
+
+- Cache OpenAI embeddings (in-memory or Redis)
+- Batch API calls when possible
+- Async operations for I/O
+- Connection pooling for database
+- Monitor memory usage with AI models
+
+**Frontend:**
+
+- Code splitting
+- Lazy loading components
+- Optimize bundle size
+- Loading states for async operations (use sonner for toasts)
+
+**Cost Monitoring:**
+
+- Real-time OpenAI cost tracking via admin dashboard
+- Alert if daily cost exceeds $25 (warning) or $50 (critical)
+- Track tokens per endpoint
+- Monitor usage patterns for abuse detection
+
+### 10. Security
+
+**API Security:**
+
+- Rate limiting on API routes (slowapi)
+- Input validation with Pydantic
+- CORS configuration
+- Trusted host middleware in production
+- Non-root container user
+- Admin token authentication
+
+**Frontend Security:**
+
+- Content Security Policy headers
+- NextAuth.js for authentication (if implemented)
+- Secure environment variable handling
+- No API keys in client-side code
+
+**Abuse Prevention:**
+
+- Suspicious activity detection (>50 requests/minute)
+- IP flagging and blocking
+- Request pattern monitoring
+- Security event logging
+
+### 11. Domain-Specific Knowledge
+
+**Political Categories (32 total):**
+
+- **Issues**: Healthcare, Climate, Economy, Education, Immigration, Gun Rights
+- **Tax Policy**: Middle Class Relief, Progressive Taxation, Business Tax Relief
+- **Social Issues**: Housing, Women's Rights, Reproductive Rights, LGBTQ+ Rights
+- **Governance**: Traditional Values, Government Efficiency, Political Division
+- **Candidate Attributes**: Leadership, Experience, Values, Integrity
+
+**Category Management:**
+
+- Prevent category pollution (no over-granular categories)
+- Avoid geographic specificity
+- Maintain political spectrum balance
+- Link to vetted terminology sources
+- Monitor performance metrics (success rate, usage)
+
+**Sentiment Analysis Use Cases:**
+
+- User priority intensity ("I REALLY care about X" → intensity: 9)
+- Candidate position sentiment
+- User feedback analysis
+- Policy document analysis
+
+### 12. Common Patterns
+
+**Provider Pattern (Frontend):**
+
+- FastApiProvider for backend integration
+- Supports multiple backend modes (fastapi, mock, claude)
+- Environment-based configuration via VITE_API_MODE
+
+**Service Layer (Backend):**
+
+- Business logic in `app/services/`
+- Separation of concerns
+- Dependency injection via FastAPI
+- Services: nlp_service, learning_service, knowledge_service, feedback_service
+
+**Component-First Development:**
+
+1. Define interface first
+2. Write tests before implementation
+3. Implement to pass tests
+4. Refactor and optimize
+
+### 13. Error Handling
+
+**Backend:**
+
+- Custom exceptions in `app/utils/exceptions.py`
+- Proper HTTP status codes (400, 401, 404, 500)
+- Detailed error messages for debugging
+- Graceful degradation (e.g., database unavailable)
+- Structured error logging
+
+**Frontend:**
+
+- User-friendly error messages
+- Loading states with spinners
+- Fallback UI components
+- Toast notifications (sonner)
+- Error boundaries for React components
+
+### 14. Documentation
+
+**Code Documentation:**
+
+- Docstrings for functions/classes
+- Type hints (Python and TypeScript)
+- README files in backend/ and frontend/
+- Technical specs in docs/ directory
+
+**API Documentation:**
+
+- FastAPI auto-generates docs at `/docs` (Swagger)
+- ReDoc at `/redoc`
+- Admin endpoints documented in security_monitoring.md
+
+**Documentation Files:**
+
+- `docs/README.md` - Documentation index
+- `docs/ai_recommendation_system.md` - Core AI architecture
+- `docs/development_setup.md` - Local development guide
+- `docs/deployment_guide.md` - Production deployment
+- `docs/security_monitoring.md` - Security and monitoring
+- `docs/category_management.md` - Category quality control
+
+## File Naming Conventions
+
+**Backend:**
+
+- Snake_case for Python files: `text_encoder.py`, `category_matcher.py`
+- Test files: `test_*.py` or `*_test.py`
+- Config files: `.env`, `environment.yml`, `alembic.ini`
+
+**Frontend:**
+
+- PascalCase for components: `CategoryCard.tsx`, `ResultsPanel.tsx`
+- camelCase for utilities: `apiClient.ts`, `formatters.ts`
+- kebab-case for CSS: `styles.css`
+
+## Important Communication Guidelines
+
+1. **Ask clarifying questions FIRST** - Don't waste tokens on irrelevant solutions
+2. **User runs terminal commands** - Provide commands, don't execute them
+3. **No acknowledgment phrases** - Don't say "You're absolutely right!" or "Great idea!"
+4. **Be concise** - Minimize output tokens while maintaining quality
+5. **Direct responses** - Jump straight into addressing the request
+
+## Project-Specific Constraints
+
+1. **Conda is primary** - Backend is a conda application, not pip-based
+2. **OpenAI only** - Don't suggest sentence-transformers or other embedding libraries
+3. **Graceful degradation** - Handle missing services (database, APIs) gracefully
+4. **Security first** - Never expose API keys, use environment variables
+5. **Type safety** - Use TypeScript strict mode, Python type hints
+6. **Async patterns** - Use async/await for I/O operations
+7. **Structured logging** - Use proper logging, not print statements
+8. **Test coverage** - Write tests for new features (component-first development)
+9. **Category quality** - Prevent pollution, maintain political balance
+10. **Cost monitoring** - Track OpenAI usage and costs
+
+## Quick Reference Commands
+
+**Start Backend Locally:**
+
+```bash
+cd backend
+conda activate ai-recommendation-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Start Frontend Locally:**
+
+```bash
+cd frontend
+npm run dev
+```
+
+**Run Backend Tests:**
+
+```bash
+conda activate ai-recommendation-service
+pytest
+pytest --cov=app --cov-report=html  # with coverage
+```
+
+**Database Migrations:**
+
+```bash
+cd backend
+env $(grep -v '^#' .env.local | xargs) alembic upgrade head
+```
+
+**Code Quality:**
+
+```bash
+# Backend
+black app/ tests/
+flake8 app/ tests/
+mypy app/
+
+# Frontend
+npm run lint
+npm run format
+```
+
+## Admin Dashboard Access
+
+**Admin Endpoints (require token):**
+
+- Cost Dashboard: `/admin/cost-dashboard`
+- Category Analytics: `/admin/categories/analytics?token=voterPrime_admin_2024`
+- Category Performance: `/admin/categories/performance?token=voterPrime_admin_2024`
+- OpenAI Costs Today: `/admin/openai-costs/today?token=voterPrime_admin_2024`
+- Cost Summary: `/admin/openai-costs/summary?days=7&group_by=endpoint&token=voterPrime_admin_2024`
+
+## Monitoring & Alerts
+
+**Daily Monitoring:**
+
+- Check system health dashboard
+- Review OpenAI cost summary
+- Monitor category success rates
+- Check for security alerts
+
+**Alert Thresholds:**
+
+- Error rate > 10%: High severity
+- Daily cost > $25: Medium severity (warning)
+- Daily cost > $50: High severity (critical)
+- Category success rate < 30%: Low severity (needs attention)
+
+## Performance Metrics
+
+**Current System Status (v0.11.2):**
+
+- Total Categories: 32 (enhanced from 25)
+- Average Success Rate: 31.9%
+- Top Performer: Healthcare & Social Services (80%)
+- Processing Time: 1-2 seconds for AI analysis
+- Categories Loaded: 22/32 active categories
+
+## Development Workflow
+
+1. **Feature Development:**
+
+   - Define interface/API first
+   - Write tests before implementation
+   - Implement to pass tests
+   - Update documentation
+   - Commit with conventional commit message
+
+2. **Testing:**
+
+   - Unit tests alongside code
+   - Integration tests in tests/integration/
+   - Mock external services
+   - Aim for high coverage
+
+3. **Deployment:**
+
+   - Ensure tests pass
+   - Update version in package.json (frontend) and VERSION file
+   - Commit and push to main
+   - Railway/Netlify auto-deploy
+   - Verify health checks
+
+4. **Monitoring:**
+   - Check error logs
+   - Monitor performance metrics
+   - Review cost dashboard
+   - Validate category performance
+
+## Windsurf Workflows
+
+VoterPrime includes pre-configured workflows in `.windsurf/workflows/`:
+
+**Development:**
+
+- `/start-dev-environment` - Start backend + frontend servers
+- `/run-tests` - Run pytest with coverage
+- `/run-migrations` - Apply database migrations
+
+**Monitoring:**
+
+- `/check-openai-costs` - View OpenAI API costs and usage
+- `/check-system-health` - Verify all services are healthy
+- `/check-category-performance` - Query category analytics
+
+**Deployment:**
+
+- `/deploy-backend` - Deploy to Railway
+- `/backup-categories` - Backup political categories JSON
+
+**Environment Setup:**
+
+- See `.windsurf/ENV_SETUP.md` for complete setup instructions
+- Workflows use `${ADMIN_TOKEN}` and `${BACKEND_URL_PROD}` from shell environment
+- Set up once in `~/.zshrc` or `~/.bashrc`
+
+## Common Pitfalls to Avoid
+
+1. ❌ Using sentence-transformers (causes crashes)
+2. ❌ Using print() instead of logger
+3. ❌ Hardcoding API keys or tokens in workflows
+4. ❌ Creating over-granular categories
+5. ❌ Forgetting to update environment.yml for new dependencies
+6. ❌ Using --port in Procfile
+7. ❌ Not handling missing database gracefully
+8. ❌ Suggesting terminal commands (user runs them manually)
+9. ❌ Using requirements.txt as primary dependency file
+10. ❌ Not caching OpenAI embeddings
+11. ❌ Committing .env files or files with secrets
+12. ❌ Using literal token values instead of ${ADMIN_TOKEN}
+
+## Success Criteria
+
+✅ All tests passing
+✅ Type hints and docstrings present
+✅ Structured logging used
+✅ Environment variables for secrets
+✅ Graceful error handling
+✅ Cost monitoring in place
+✅ Category quality maintained
+✅ Performance optimized
+✅ Security measures implemented
+✅ Documentation updated
