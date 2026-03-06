@@ -1,3 +1,9 @@
+## v3.0.3 (2026-03-06)
+
+### Fix
+
+- pin Starlette version in conda environment to resolve middleware unpacking error
+
 ## v3.0.2 (2026-03-06)
 
 ### Fix
