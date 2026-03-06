@@ -36,14 +36,18 @@ class CategoryResources:
     async def _get_all_categories(self) -> str:
         """Get all political categories"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({
                     "error": "Database not available",
                     "categories": []
                 })
             
+            database = get_database()
             query = """
                 SELECT id, name, type, description, keywords,
                        success_count, total_usage_count, is_active
@@ -80,11 +84,15 @@ class CategoryResources:
     async def _get_category_performance(self) -> str:
         """Get category performance metrics"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({"error": "Database not available"})
             
+            database = get_database()
             query = """
                 SELECT id, name, type,
                        success_count, total_usage_count,
@@ -126,11 +134,15 @@ class CategoryResources:
     async def _get_underperforming_categories(self) -> str:
         """Get categories with <30% success rate"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({"error": "Database not available"})
             
+            database = get_database()
             query = """
                 SELECT id, name, type,
                        success_count, total_usage_count,
@@ -172,11 +184,15 @@ class CategoryResources:
     async def _get_category_by_id(self, category_id: str) -> str:
         """Get individual category details"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({"error": "Database not available"})
             
+            database = get_database()
             query = """
                 SELECT id, name, type, description, keywords,
                        success_count, total_usage_count, is_active,
@@ -218,11 +234,15 @@ class CategoryResources:
     ) -> Dict[str, Any]:
         """Query categories with filters"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return {"error": "Database not available"}
             
+            database = get_database()
             # Build dynamic query
             conditions = ["is_active = true"]
             params = {}

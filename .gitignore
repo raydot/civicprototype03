@@ -121,11 +121,11 @@ category_upload_template.xlsx
 .envrc
 
 # MCP server secrets
-backend/mcp_server/.env
-backend/mcp_server/.env.*
-!backend/mcp_server/.env.example
-backend/mcp_server/config.local.py
-backend/mcp_server/*.log
+mcp_server/.env
+mcp_server/.env.*
+!mcp_server/.env.example
+mcp_server/config.local.py
+mcp_server/*.log
 
 # Backup files that might contain secrets
 backend/app/data/*_backup_*.json
@@ -139,3 +139,5 @@ backend/test_scripts/.env
 .railway/
 railway.local.json
 netlify.local.toml
+
+

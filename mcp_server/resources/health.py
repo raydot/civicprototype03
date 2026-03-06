@@ -42,13 +42,18 @@ class HealthResources:
     async def _check_database(self) -> Dict[str, Any]:
         """Check database connectivity"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return {
                     "status": "unavailable",
                     "message": "DATABASE_URL not configured"
                 }
+            
+            database = get_database()
             
             # Try a simple query
             query = "SELECT 1 as test"
@@ -75,13 +80,18 @@ class HealthResources:
     async def _check_categories(self) -> Dict[str, Any]:
         """Check category system status"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return {
                     "status": "unavailable",
                     "message": "Database not available"
                 }
+            
+            database = get_database()
             
             query = """
                 SELECT 

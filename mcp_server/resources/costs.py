@@ -28,11 +28,15 @@ class CostResources:
     async def _get_today_costs(self) -> str:
         """Get today's OpenAI costs"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({"error": "Database not available"})
             
+            database = get_database()
             query = """
                 SELECT 
                     endpoint,
@@ -92,11 +96,15 @@ class CostResources:
     async def _get_week_costs(self) -> str:
         """Get 7-day cost summary"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({"error": "Database not available"})
             
+            database = get_database()
             query = """
                 SELECT 
                     DATE(timestamp) as date,
@@ -142,11 +150,15 @@ class CostResources:
     async def _get_costs_by_model(self) -> str:
         """Get cost breakdown by model"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return json.dumps({"error": "Database not available"})
             
+            database = get_database()
             query = """
                 SELECT 
                     model,
@@ -199,10 +211,15 @@ class CostResources:
     ) -> Dict[str, Any]:
         """Query costs with flexible filters"""
         try:
-            from ...app.db.database import database
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from db_connection import ensure_connected, get_database
             
-            if database is None:
+            if not await ensure_connected():
                 return {"error": "Database not available"}
+            
+            database = get_database()
             
             # Default to last 7 days if no dates provided
             if not start_date:

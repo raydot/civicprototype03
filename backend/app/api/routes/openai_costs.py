@@ -18,7 +18,9 @@ logger = structured_logger
 def verify_admin_token(token: str = Query(..., description="Admin authentication token")):
     """Simple admin authentication"""
     import os
-    expected_token = os.getenv("ADMIN_TOKEN", "")
+    expected_token = os.getenv("ADMIN_TOKEN")
+    if not expected_token:
+        raise ValueError("ADMIN_TOKEN environment variable is required")
     if token != expected_token:
         raise HTTPException(status_code=401, detail="Invalid admin token")
     return True

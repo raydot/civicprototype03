@@ -4,16 +4,21 @@ Main entry point for Model Context Protocol server
 """
 import asyncio
 import logging
+import sys
+from pathlib import Path
 from typing import Any, Dict, List
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Resource, Tool, TextContent
 
-from .config import config
-from .resources.categories import CategoryResources
-from .resources.costs import CostResources
-from .resources.health import HealthResources
+from config import config
+from resources.categories import CategoryResources
+from resources.costs import CostResources
+from resources.health import HealthResources
 
 # Set up logging
 logging.basicConfig(

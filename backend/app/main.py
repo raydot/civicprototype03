@@ -59,6 +59,14 @@ async def Lifecycle(app: FastAPI):
         import json
         
         if database is not None:
+            logger.info("Database is available, attempting to load categories...")
+            
+            # Check if database is connected
+            if not database.is_connected:
+                logger.warning("Database not connected during startup, attempting to connect...")
+                await database.connect()
+                logger.info("Database connected successfully")
+            
             # Load political categories from database
             query = """
                 SELECT id, name, type, description, keywords, 
@@ -67,7 +75,9 @@ async def Lifecycle(app: FastAPI):
                 WHERE is_active = true
                 ORDER BY id
             """
+            logger.info(f"Executing category query: {query[:100]}...")
             rows = await database.fetch_all(query)
+            logger.info(f"Query returned {len(rows)} rows")
             
             policy_terms = [
                 {
@@ -140,15 +150,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-
 # Add trusted host middleware for security
 if settings.environment == "production":
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=["*.railway.app", "*.netlify.app", "testserver"]
     )
+
+# Mount static files after all middleware
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Include routers
 app.include_router(health.router)

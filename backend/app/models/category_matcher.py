@@ -306,14 +306,14 @@ class CategoryMatcher:
             confidence_score: Confidence score between 0 and 1
             
         Returns:
-            Confidence label: 'High Confidence', 'Medium Confidence', or 'Low Confidence'
+            Confidence label: 'Strong Match', 'Good Match', or 'Moderate Match'
         """
-        if confidence_score >= 0.70:
-            return "High Confidence"
-        elif confidence_score >= 0.50:
-            return "Medium Confidence"
+        if confidence_score >= 0.45:
+            return "Strong Match"
+        elif confidence_score >= 0.30:
+            return "Good Match"
         else:
-            return "Low Confidence"
+            return "Moderate Match"
     
     def _calculate_success_rate(self, category: Dict[str, Any]) -> float:
         """Calculate historical success rate for the category"""

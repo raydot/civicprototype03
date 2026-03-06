@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "voterprime": {
+      "command": "/usr/local/Caskroom/miniforge/base/envs/ai-recommendation-service/bin/python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "/Users/davekanter/Documents/Clients/shazseitz/voterPrime03",
+      "env": {
+        "DATABASE_URL": "postgresql://voterprime:voterprime_dev@localhost:5432/voterprime_dev",
+        "LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}

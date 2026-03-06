@@ -17,7 +17,7 @@ Model Context Protocol server providing read-only access to VoterPrime system da
 ```yaml
 dependencies:
   - pip:
-    - mcp>=0.1.0
+      - mcp>=0.1.0
 ```
 
 2. **Update conda environment:**
@@ -53,9 +53,9 @@ Add to your Windsurf MCP configuration:
         "-m",
         "mcp_server.server"
       ],
-      "cwd": "/Users/davekanter/Documents/Clients/shazseitz/voterPrime03/backend",
+      "cwd": "/Users/davekanter/Documents/Clients/shazseitz/voterPrime03",
       "env": {
-        "DATABASE_URL": "${DATABASE_URL}"
+        "DATABASE_URL": "postgresql://voterprime:voterprime_dev@localhost:5432/voterprime_dev"
       }
     }
   }
@@ -226,6 +226,7 @@ If empty, set it in your environment or `.env` file.
 ## Support
 
 For issues or questions:
+
 1. Check `.windsurf/ENV_SETUP.md` for environment setup
 2. Review logs for error messages
 3. Verify database connectivity

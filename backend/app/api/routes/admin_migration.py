@@ -2,7 +2,7 @@
 Admin endpoint to manually run database migrations
 ONE-TIME USE ONLY - for emergency migration execution
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlalchemy import text
 import os
 import json
@@ -17,14 +17,16 @@ logger = structured_logger
 
 def verify_admin_token(token: str = Query(..., description="Admin authentication token")):
     """Simple admin authentication"""
-    expected_token = os.getenv("ADMIN_TOKEN", "")
+    expected_token = os.getenv("ADMIN_TOKEN")
+    if not expected_token:
+        raise ValueError("ADMIN_TOKEN environment variable is required")
     if token != expected_token:
         raise HTTPException(status_code=401, detail="Invalid admin token")
     return True
 
 
 @router.post("/run-cost-tracking")
-async def run_cost_tracking_migration(admin_auth: bool = Query(default=verify_admin_token)):
+async def run_cost_tracking_migration(admin_auth: bool = Depends(verify_admin_token)):
     """
     ONE-TIME migration to create openai_usage table
     
@@ -93,7 +95,7 @@ async def run_cost_tracking_migration(admin_auth: bool = Query(default=verify_ad
 
 
 @router.post("/load-categories")
-async def load_categories_from_json(admin_auth: bool = Query(default=verify_admin_token)):
+async def load_categories_from_json(admin_auth: bool = Depends(verify_admin_token)):
     """
     Load all categories from political_categories.json into the database
     
@@ -102,6 +104,10 @@ async def load_categories_from_json(admin_auth: bool = Query(default=verify_admi
     """
     if database is None:
         raise HTTPException(status_code=500, detail="Database not available")
+    
+    # Ensure database is connected
+    if not database.is_connected:
+        await database.connect()
     
     try:
         # Load JSON file
