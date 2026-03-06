@@ -1,3 +1,9 @@
+## v3.1.0 (2026-03-06)
+
+### Feat
+
+- add CI/CD pipeline with 10 deployment gate tests
+
 ## v3.0.4 (2026-03-06)
 
 ### Fix
