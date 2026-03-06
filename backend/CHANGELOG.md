@@ -1,3 +1,35 @@
+## v3.0.2 (2026-03-06)
+
+### Fix
+
+- pin Starlette version to resolve middleware unpacking error
+
+## v3.0.1 (2026-03-05)
+
+### Fix
+
+- **backend**: resolve category loading and improve secrets management
+
+## v3.0.0 (2026-02-22)
+
+### BREAKING CHANGE
+
+- ADMIN_TOKEN environment variable now required
+
+### Fix
+
+- remove hardcoded admin tokens from backend code
+
+## v2.0.0 (2026-02-22)
+
+### BREAKING CHANGE
+
+- Admin token rotated - update Railway environment variables
+
+### Feat
+
+- implement security hardening and Windsurf workflows with direnv
+
 ## v1.14.0 (2026-01-19)
 
 ### Feat

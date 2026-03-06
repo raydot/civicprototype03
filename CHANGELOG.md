@@ -1,3 +1,9 @@
+## v3.0.2 (2026-03-06)
+
+### Fix
+
+- pin Starlette version to resolve middleware unpacking error
+
 ## v3.0.1 (2026-03-05)
 
 ### Fix
