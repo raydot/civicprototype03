@@ -1,3 +1,9 @@
+## v3.0.1 (2026-03-05)
+
+### Fix
+
+- **backend**: resolve category loading and improve secrets management
+
 ## v3.0.0 (2026-02-22)
 
 ### BREAKING CHANGE
