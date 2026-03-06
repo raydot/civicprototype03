@@ -9,6 +9,7 @@ dependencies:
 
   # FastAPI and server
   - fastapi=0.104.*
+  - starlette=0.27.*
   - uvicorn=0.24.*
   - pydantic=2.5.*
 
