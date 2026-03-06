@@ -1,0 +1,119 @@
+name: Deploy Backend to Railway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  pre-deployment-tests:
+    name: Pre-Deployment Tests (Gate)
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.11
+          environment-file: backend/environment.yml
+          activate-environment: ai-recommendation-service
+      
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+      
+      - name: Run deployment gate tests
+        shell: bash -l {0}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ENVIRONMENT: test
+        run: |
+          echo "🚦 Running 10 critical category matching tests..."
+          pytest tests/integration/test_category_matching_deployment.py -v --tb=short
+          echo "✅ All deployment gate tests passed!"
+      
+      - name: Verify environment variables
+        shell: bash -l {0}
+        run: |
+          echo "🔍 Checking required environment variables..."
+          python -c "
+          import os
+          required = ['DATABASE_URL', 'OPENAI_API_KEY']
+          missing = [var for var in required if not os.getenv(var)]
+          if missing:
+              print(f'❌ Missing: {missing}')
+              exit(1)
+          print('✅ All required environment variables present')
+          "
+  
+  deploy:
+    name: Deploy to Railway
+    needs: pre-deployment-tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🚀 Deploying to Railway..."
+          railway up --service backend
+      
+      - name: Wait for deployment
+        run: sleep 30
+      
+      - name: Health check
+        run: |
+          echo "🏥 Running health check..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://voter-mambo-production.up.railway.app/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ Health check passed!"
+          else
+            echo "❌ Health check failed with status $response"
+            exit 1
+          fi
+      
+      - name: Verify category matching endpoint
+        run: |
+          echo "🧪 Testing category matching endpoint..."
+          response=$(curl -s -X POST https://voter-mambo-production.up.railway.app/api/category-matching/find-matches \
+            -H "Content-Type: application/json" \
+            -d '{"user_input": "Healthcare is important to me", "top_k": 3}')
+          
+          if echo "$response" | grep -q "matches"; then
+            echo "✅ Category matching endpoint working!"
+          else
+            echo "❌ Category matching endpoint failed"
+            echo "$response"
+            exit 1
+          fi
+      
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "Backend URL: https://voter-mambo-production.up.railway.app"
+      
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "💥 Deployment failed! Check logs above."
+          exit 1
