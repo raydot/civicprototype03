@@ -1,3 +1,9 @@
+## v3.0.4 (2026-03-06)
+
+### Fix
+
+- upgrade FastAPI to 0.115 to resolve middleware unpacking error
+
 ## v3.0.3 (2026-03-06)
 
 ### Fix
