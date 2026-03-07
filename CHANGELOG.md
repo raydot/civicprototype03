@@ -1,3 +1,9 @@
+## v3.2.0 (2026-03-06)
+
+### Feat
+
+- add civic education placeholders and category browser
+
 ## v3.1.0 (2026-03-06)
 
 ### Feat
