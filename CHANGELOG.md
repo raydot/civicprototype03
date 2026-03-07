@@ -1,3 +1,9 @@
+## v3.3.0 (2026-03-06)
+
+### Feat
+
+- backend tightening including database pooling and rate limiting.  frontend redesign to move away from clunky Notion flow.
+
 ## v3.2.0 (2026-03-06)
 
 ### Feat
