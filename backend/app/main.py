@@ -67,9 +67,9 @@ async def Lifecycle(app: FastAPI):
                 await database.connect()
                 logger.info("Database connected successfully")
             
-            # Load political categories from database
+            # Load political categories from database with pre-computed embeddings
             query = """
-                SELECT id, name, type, description, keywords, 
+                SELECT id, name, type, description, keywords, embedding,
                        success_count, total_usage_count, is_active
                 FROM political_categories
                 WHERE is_active = true
@@ -87,7 +87,7 @@ async def Lifecycle(app: FastAPI):
                     "policy_area": row["type"],
                     "description": row["description"],
                     "keywords": json.loads(row["keywords"]) if isinstance(row["keywords"], str) else (row["keywords"] if row["keywords"] else []),
-                    "embedding": None,
+                    "embedding": list(row["embedding"]) if row["embedding"] else None,
                     "success_count": row["success_count"] or 0,
                     "total_usage_count": row["total_usage_count"] or 0,
                     "metadata": {

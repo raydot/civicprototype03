@@ -10,6 +10,7 @@ import asyncio
 from ..config import settings
 from ..utils.logging import structured_logger
 from ..services.openai_cost_tracker import get_cost_tracker
+from ..utils.retry import retry_with_backoff
 
 
 class TextEncoder:
@@ -60,11 +61,15 @@ class TextEncoder:
             
             self.logger.info(f"Encoding text with OpenAI: '{cleaned_text[:50]}...'")
             
-            # Call OpenAI embeddings API
-            response = self.client.embeddings.create(
-                model=self.model_name,
-                input=cleaned_text
-            )
+            # Call OpenAI embeddings API with retry logic
+            @retry_with_backoff(max_retries=3, base_delay=1.0)
+            def _create_embedding():
+                return self.client.embeddings.create(
+                    model=self.model_name,
+                    input=cleaned_text
+                )
+            
+            response = _create_embedding()
             
             # Extract embeddings from response
             embeddings = np.array(response.data[0].embedding)
@@ -115,11 +120,15 @@ class TextEncoder:
             
             self.logger.info(f"Encoding {len(cleaned_texts)} texts with OpenAI")
             
-            # Call OpenAI embeddings API with batch
-            response = self.client.embeddings.create(
-                model=self.model_name,
-                input=cleaned_texts
-            )
+            # Call OpenAI embeddings API with batch and retry logic
+            @retry_with_backoff(max_retries=3, base_delay=1.0)
+            def _create_batch_embeddings():
+                return self.client.embeddings.create(
+                    model=self.model_name,
+                    input=cleaned_texts
+                )
+            
+            response = _create_batch_embeddings()
             
             # Extract embeddings from response
             embeddings = np.array([item.embedding for item in response.data])

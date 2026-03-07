@@ -24,4 +24,8 @@ else:
         raise ValueError(f"Only PostgreSQL databases are supported. Got: {database_url[:20]}...")
     
     print(f"Using PostgreSQL database: {database_url[:30]}...")  # Debug info
-    database = databases.Database(database_url)
+    database = databases.Database(
+        database_url,
+        min_size=5,          # Minimum connections in pool
+        max_size=20,         # Maximum connections in pool
+    )

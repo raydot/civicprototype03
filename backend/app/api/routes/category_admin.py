@@ -3,7 +3,7 @@ AI-Assisted Category Administration
 Allows creating and enhancing political categories using AI
 Now uses PostgreSQL database instead of JSON file
 """
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from typing import List, Optional
@@ -15,6 +15,8 @@ from datetime import datetime
 
 from ...config import settings
 from ...utils.logging import structured_logger
+from ...utils.embedding_generator import get_embedding_generator
+from ...utils.rate_limiter import get_rate_limiter
 from ...db.database import database
 from ...models.category_matcher import get_category_matcher
 
@@ -180,15 +182,29 @@ async def load_categories(sort_by: str = "created_at", sort_order: str = "desc")
 
 
 async def save_category(category_data: dict, created_by: str = "ai_admin"):
-    """Save a new category to database"""
+    """Save a new category to database with auto-generated embedding"""
     if database is None:
         raise HTTPException(status_code=503, detail="Database not available")
     
+    # Generate embedding for the new category
+    try:
+        embedding_gen = get_embedding_generator()
+        embedding = embedding_gen.generate_category_embedding(
+            name=category_data["name"],
+            description=category_data["description"],
+            keywords=category_data.get("keywords", [])
+        )
+        logger.info(f"Generated embedding for new category: {category_data['name']}")
+    except Exception as e:
+        logger.error(f"Failed to generate embedding for category {category_data['name']}: {str(e)}")
+        # Continue without embedding - can be generated later
+        embedding = None
+    
     query = """
         INSERT INTO political_categories 
-        (id, name, type, description, keywords, success_count, total_usage_count,
+        (id, name, type, description, keywords, embedding, success_count, total_usage_count,
          terminology_source, terminology_sections, metadata, created_by, updated_by)
-        VALUES (:id, :name, :type, :description, :keywords, :success_count, :total_usage_count,
+        VALUES (:id, :name, :type, :description, :keywords, :embedding, :success_count, :total_usage_count,
                 :terminology_source, :terminology_sections, :metadata, :created_by, :updated_by)
         RETURNING id
     """
@@ -199,6 +215,7 @@ async def save_category(category_data: dict, created_by: str = "ai_admin"):
         "type": category_data["type"],
         "description": category_data["description"],
         "keywords": json.dumps(category_data["keywords"]),
+        "embedding": embedding,
         "success_count": category_data.get("success_count", 0),
         "total_usage_count": category_data.get("total_usage_count", 0),
         "terminology_source": category_data.get("terminology_source", "ai_generated"),
@@ -233,11 +250,15 @@ async def reload_category_matcher():
 
 
 @router.post("/generate-preview", response_model=CategoryPreview)
-async def generate_category_preview(request: CategoryRequest, admin: str = Depends(verify_admin)):
+async def generate_category_preview(request: CategoryRequest, http_request: Request, admin: str = Depends(verify_admin)):
     """
     Generate a category preview from natural language description.
     AI checks for redundancy and suggests complete category definition.
     """
+    # Rate limiting: 10 requests per minute for AI operations
+    limiter = get_rate_limiter()
+    limiter.check_rate_limit(http_request, max_requests=10, window_seconds=60)
+    
     try:
         # Initialize OpenAI client with API key from settings
         if not settings.openai_api_key:
@@ -461,20 +482,38 @@ async def update_category_keywords(category_id: int, request: dict, admin: str =
         
         keywords = request.get("keywords", [])
         
-        # Update database
+        # Get category details for embedding regeneration
+        get_query = "SELECT name, description FROM political_categories WHERE id = :category_id AND is_active = true"
+        category = await database.fetch_one(get_query, {"category_id": category_id})
+        
+        if not category:
+            raise HTTPException(status_code=404, detail=f"Category {category_id} not found")
+        
+        # Regenerate embedding with updated keywords
+        try:
+            embedding_gen = get_embedding_generator()
+            new_embedding = embedding_gen.generate_category_embedding(
+                name=category['name'],
+                description=category['description'],
+                keywords=keywords
+            )
+            logger.info(f"Regenerated embedding for manually updated category: {category['name']}")
+        except Exception as e:
+            logger.error(f"Failed to regenerate embedding: {str(e)}")
+            new_embedding = None
+        
+        # Update database with new keywords and embedding
         query = """
             UPDATE political_categories 
-            SET keywords = :keywords, updated_at = NOW(), updated_by = 'admin'
+            SET keywords = :keywords, embedding = :embedding, updated_at = NOW(), updated_by = 'admin'
             WHERE id = :category_id AND is_active = true
             RETURNING id
         """
         result = await database.fetch_one(query, {
             "keywords": json.dumps(keywords),
+            "embedding": new_embedding,
             "category_id": category_id
         })
-        
-        if not result:
-            raise HTTPException(status_code=404, detail=f"Category {category_id} not found")
         
         # Reload category matcher so live site sees the updated keywords immediately
         await reload_category_matcher()
@@ -495,11 +534,15 @@ async def update_category_keywords(category_id: int, request: dict, admin: str =
 
 
 @router.post("/categories/{category_id}/enhance")
-async def enhance_category_keywords(category_id: int, request: EnhanceRequest, admin: str = Depends(verify_admin)):
+async def enhance_category_keywords(category_id: int, request: EnhanceRequest, http_request: Request, admin: str = Depends(verify_admin)):
     """
     Use AI to suggest additional keywords for an existing category.
     Useful when a category isn't matching well.
     """
+    # Rate limiting: 10 requests per minute for AI operations
+    limiter = get_rate_limiter()
+    limiter.check_rate_limit(http_request, max_requests=10, window_seconds=60)
+    
     try:
         # Initialize OpenAI client with API key from settings
         if not settings.openai_api_key:
@@ -554,15 +597,30 @@ Return JSON: {{"new_keywords": ["keyword1", "keyword2", ...]}}
         existing = set(k.lower() for k in current_keywords)
         added_keywords = [k for k in new_keywords if k.lower() not in existing]
         
-        # Update database
+        # Update database with new keywords
         updated_keywords = current_keywords + added_keywords
+        
+        # Regenerate embedding with updated keywords
+        try:
+            embedding_gen = get_embedding_generator()
+            new_embedding = embedding_gen.generate_category_embedding(
+                name=category['name'],
+                description=category['description'],
+                keywords=updated_keywords
+            )
+            logger.info(f"Regenerated embedding for updated category: {category['name']}")
+        except Exception as e:
+            logger.error(f"Failed to regenerate embedding: {str(e)}")
+            new_embedding = None
+        
         update_query = """
             UPDATE political_categories 
-            SET keywords = :keywords, updated_at = NOW(), updated_by = 'ai_admin'
+            SET keywords = :keywords, embedding = :embedding, updated_at = NOW(), updated_by = 'ai_admin'
             WHERE id = :category_id
         """
         await database.execute(update_query, {
             "keywords": json.dumps(updated_keywords),
+            "embedding": new_embedding,
             "category_id": category_id
         })
         
@@ -586,11 +644,15 @@ Return JSON: {{"new_keywords": ["keyword1", "keyword2", ...]}}
 
 
 @router.post("/categories/transform")
-async def transform_categories(request: TransformRequest, admin: str = Depends(verify_admin)):
+async def transform_categories(request: TransformRequest, http_request: Request, admin: str = Depends(verify_admin)):
     """
     Transform categories via natural language - handles both split and merge operations.
     Takes one or more source categories and generates new categories based on instructions.
     """
+    # Rate limiting: 10 requests per minute for AI operations
+    limiter = get_rate_limiter()
+    limiter.check_rate_limit(http_request, max_requests=10, window_seconds=60)
+    
     try:
         if not settings.openai_api_key:
             raise HTTPException(

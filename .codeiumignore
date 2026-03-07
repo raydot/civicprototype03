@@ -1,0 +1,34 @@
+# Windsurf/Cascade Ignore File
+# Prevents AI from reading files with actual secrets and credentials
+# Uses same syntax as .gitignore
+
+# Environment files with real secrets
+.envrc
+.env.local
+.env.production
+.env.staging
+
+# Backup environment files
+*.env.backup
+*.envrc.backup
+
+# Any file ending in .secret or .secrets
+*.secret
+*.secrets
+
+# SSH keys and certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Database dumps with potentially sensitive data
+*.sql
+*.dump
+
+# Credential files
+credentials.json
+secrets.json
+service-account*.json

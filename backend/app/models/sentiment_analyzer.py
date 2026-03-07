@@ -14,6 +14,7 @@ from openai import OpenAI
 from ..config import settings
 from ..utils.logging import structured_logger
 from ..services.openai_cost_tracker import get_cost_tracker
+from ..utils.retry import retry_with_backoff
 
 
 @dataclass
@@ -87,13 +88,18 @@ class SentimentAnalyzer:
             
             prompt = self._create_intensity_prompt(text)
             
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.1,
-                max_tokens=300,
-                response_format={"type": "json_object"}
-            )
+            # Call OpenAI with retry logic
+            @retry_with_backoff(max_retries=3, base_delay=1.0)
+            def _create_completion():
+                return self.client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.1,
+                    max_tokens=300,
+                    response_format={"type": "json_object"}
+                )
+            
+            response = _create_completion()
             
             # Track cost (non-blocking)
             try:

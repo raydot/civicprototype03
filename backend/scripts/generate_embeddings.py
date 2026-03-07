@@ -52,13 +52,13 @@ def generate_embeddings_batch(terms: list, openai_client: OpenAI) -> dict:
 
 
 def update_embeddings_in_db(embeddings: dict, engine):
-    """Update policy_terms table with generated embeddings"""
+    """Update political_categories table with generated embeddings"""
     
     with engine.begin() as conn:
         for term_id, embedding in embeddings.items():
             conn.execute(
                 text("""
-                    UPDATE policy_terms 
+                    UPDATE political_categories 
                     SET embedding = :embedding,
                         updated_at = NOW()
                     WHERE id = :id
@@ -81,12 +81,12 @@ def main():
     # Create database connection
     engine = create_engine(settings.database_url)
     
-    # Get all policy terms without embeddings
+    # Get all categories without embeddings
     with engine.connect() as conn:
         result = conn.execute(text("""
-            SELECT id, term, description 
-            FROM policy_terms 
-            WHERE embedding IS NULL
+            SELECT id, name, description 
+            FROM political_categories 
+            WHERE embedding IS NULL AND is_active = true
             ORDER BY id
         """))
         
@@ -96,10 +96,10 @@ def main():
         ]
     
     total_terms = len(terms)
-    structured_logger.info(f"Found {total_terms} policy terms needing embeddings")
+    structured_logger.info(f"Found {total_terms} categories needing embeddings")
     
     if total_terms == 0:
-        structured_logger.info("All policy terms already have embeddings!")
+        structured_logger.info("All categories already have embeddings!")
         return
     
     # Calculate estimated cost
@@ -147,7 +147,8 @@ def main():
             SELECT 
                 COUNT(*) as total,
                 COUNT(embedding) as with_embeddings
-            FROM policy_terms
+            FROM political_categories
+            WHERE is_active = true
         """))
         row = result.fetchone()
         total = row[0]

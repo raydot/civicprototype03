@@ -10,6 +10,7 @@ from ...models.category_matcher import get_category_matcher, CategoryMatch
 from ...data.category_loader import get_category_loader
 from ...services.feedback_service import UserSession, get_interaction_tracker
 from ...utils.logging import structured_logger
+from ...utils.rate_limiter import get_rate_limiter
 
 router = APIRouter(prefix="/category-matching", tags=["Category Matching"])
 logger = structured_logger
@@ -80,6 +81,10 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
     - "Healthcare access is my top priority"
     - "I want a progressive candidate who supports social justice"
     """
+    # Rate limiting: 20 requests per minute
+    limiter = get_rate_limiter()
+    limiter.check_rate_limit(http_request, max_requests=20, window_seconds=60)
+    
     start_time = time.time()
     
     try:
@@ -194,12 +199,16 @@ async def find_category_matches(request: CategoryMatchRequest, http_request: Req
 
 
 @router.post("/refine-matches", response_model=CategoryMatchingResult)
-async def refine_category_matches(request: CategoryRefinementRequest):
+async def refine_category_matches(request: CategoryRefinementRequest, http_request: Request):
     """
     Get alternative category matches when user rejects initial suggestions
     
     Use this when user says "No, that's not what I meant" to initial matches
     """
+    # Rate limiting: 20 requests per minute
+    limiter = get_rate_limiter()
+    limiter.check_rate_limit(http_request, max_requests=20, window_seconds=60)
+    
     start_time = time.time()
     
     try:

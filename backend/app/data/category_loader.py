@@ -21,7 +21,14 @@ class CategoryLoader:
             self.data_dir = Path(data_dir)
         
         self.logger = structured_logger
-        self.db_engine = db_engine or create_engine(settings.database_url)
+        self.db_engine = db_engine or create_engine(
+            settings.database_url,
+            pool_size=10,           # Keep 10 connections ready
+            max_overflow=10,        # Allow 10 extra during spikes (total: 20)
+            pool_timeout=30,        # Wait 30s for connection before failing
+            pool_recycle=3600,      # Refresh connections every hour (prevent stale)
+            pool_pre_ping=True      # Test connection health before using
+        )
         self._cache = None  # In-memory cache of policy terms
     
     def load_political_categories(self, filename: str = "political_categories.json") -> List[Dict[str, Any]]:
