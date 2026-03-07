@@ -89,14 +89,22 @@ export default function CivicEducationScreen({
             Learn about the issues that matter to you with trusted educational resources
           </p>
 
-          {/* TEST: Live Category Detail */}
+          {/* Browse All Categories Button */}
           {onTestCategoryClick && (
-            <button
-              onClick={() => onTestCategoryClick(1)}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg mb-4 font-medium hover:bg-blue-700 transition-colors"
-            >
-              🧪 Test Live Category Detail (Category 1)
-            </button>
+            <div className="space-y-3 mb-6">
+              <button
+                onClick={() => onTestCategoryClick(0)}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
+              >
+                📚 Browse All 70 Categories
+              </button>
+              <button
+                onClick={() => onTestCategoryClick(1)}
+                className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                🧪 Test Category 1 (Climate & Environment)
+              </button>
+            </div>
           )}
 
           {/* Education Categories List */}

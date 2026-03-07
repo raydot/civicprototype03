@@ -224,6 +224,14 @@ export const useNavigation = ({ state, actions }: NavigationProps) => {
     navigateToScreen('category-detail');
   };
 
+  const handleBackToCategoryBrowser = () => {
+    navigateToScreen('category-browser');
+  };
+
+  const handleOpenCategoryBrowser = () => {
+    navigateToScreen('category-browser');
+  };
+
   // Save/Share navigation
   const handleOpenSaveShare = () => {
     navigateToScreen('save-share');
@@ -315,6 +323,8 @@ export const useNavigation = ({ state, actions }: NavigationProps) => {
     handleBackToCivicEducation,
     handleBackToCivicEducationDetail,
     handleBackToCategoryDetail,
+    handleBackToCategoryBrowser,
+    handleOpenCategoryBrowser,
     
     // Save/Share handlers
     handleOpenSaveShare,

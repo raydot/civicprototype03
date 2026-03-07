@@ -28,6 +28,7 @@ export type Screen =
   | 'organization-view' 
   | 'civic-education' 
   | 'civic-education-detail' 
+  | 'category-browser'
   | 'category-detail'
   | 'educational-resource-view' 
   | 'save-share';

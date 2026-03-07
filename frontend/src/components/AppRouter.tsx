@@ -31,6 +31,7 @@ import OrganizationViewScreen from './OrganizationViewScreen';
 import CivicEducationScreen from './CivicEducationScreen';
 import CivicEducationDetailScreen from './CivicEducationDetailScreen';
 import CategoryDetailScreen from './CategoryDetailScreen';
+import CategoryBrowser from './CategoryBrowser';
 import EducationalResourceViewScreen from './EducationalResourceViewScreen';
 import SaveShareScreen from './SaveShareScreen';
 import PolicyMappingSummaryScreen from './PolicyMappingSummaryScreen';
@@ -423,7 +424,13 @@ export const AppRouter: React.FC<AppRouterProps> = ({
             onNavToRecommendations={navigationHandlers.handleNavToRecommendations}
             onNavToSaveShare={navigationHandlers.handleNavToSaveShare}
             onCategoryClick={navigationHandlers.handleEducationCategoryClick}
-            onTestCategoryClick={navigationHandlers.handleCategoryClick}
+            onTestCategoryClick={(categoryId) => {
+              if (categoryId === 0) {
+                navigationHandlers.handleOpenCategoryBrowser();
+              } else {
+                navigationHandlers.handleCategoryClick(categoryId);
+              }
+            }}
             onToggleSave={toggleSaveRecommendation}
             isRecommendationSaved={isRecommendationSaved}
             savedItemsCount={savedRecommendations.length}
@@ -444,11 +451,19 @@ export const AppRouter: React.FC<AppRouterProps> = ({
           />
         );
 
+      case 'category-browser':
+        return (
+          <CategoryBrowser 
+            onBack={navigationHandlers.handleBackToCivicEducation}
+            onCategoryClick={navigationHandlers.handleCategoryClick}
+          />
+        );
+
       case 'category-detail':
         return (
           <CategoryDetailScreen 
             categoryId={selectedCategoryId}
-            onBack={navigationHandlers.handleBackToCivicEducation}
+            onBack={navigationHandlers.handleBackToCategoryBrowser}
             onNavToConcerns={navigationHandlers.handleNavToConcerns}
             onNavToRecommendations={navigationHandlers.handleNavToRecommendations}
             onResourceClick={navigationHandlers.handleResourceClick}
