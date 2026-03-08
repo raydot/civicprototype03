@@ -154,7 +154,7 @@ app.add_middleware(
 if settings.environment == "production":
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["*.railway.app", "*.netlify.app", "testserver"]
+        allowed_hosts=["*.railway.app", "*.netlify.app", "testserver", "localhost", "127.0.0.1"]
     )
 
 # Mount static files after all middleware
