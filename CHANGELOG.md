@@ -1,3 +1,9 @@
+## v3.4.0 (2026-03-07)
+
+### Feat
+
+- integrate Sentry error monitoring for production
+
 ## v3.3.0 (2026-03-06)
 
 ### Feat

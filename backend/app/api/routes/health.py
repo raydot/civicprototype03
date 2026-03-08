@@ -73,3 +73,14 @@ async def readiness_check():
                 "timestamp": datetime.utcnow().isoformat()
             }
         )
+
+
+@router.get("/sentry-debug")
+async def trigger_sentry_error():
+    """
+    Debug endpoint to test Sentry error monitoring
+    WARNING: Only use in development/testing - triggers intentional error
+    """
+    structured_logger.warning("Sentry debug endpoint triggered - intentional error")
+    division_by_zero = 1 / 0
+    return {"message": "This should never be reached"}
