@@ -12,3 +12,6 @@ export BACKEND_URL_LOCAL="http://localhost:8000"
 # Frontend URLs
 export FRONTEND_URL_PROD="https://voterprime.netlify.app"
 export FRONTEND_URL_LOCAL="http://localhost:5173"
+
+# Sentry Error Monitoring (production only)
+export SENTRY_DSN="https://ceaae185f539a7990e35ff5b64da6b2c@o4511000956633088.ingest.us.sentry.io/4511001020661760"

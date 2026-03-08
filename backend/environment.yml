@@ -76,3 +76,4 @@ dependencies:
       - ipython==8.17.2
       - jupyter==1.0.0
       - mcp
+      - sentry-sdk[fastapi]==1.40.0

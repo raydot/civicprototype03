@@ -4,16 +4,37 @@ Railway-optimized configuration with proper logging and health checks
 """
 import signal
 import sys
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
+import sentry_sdk
 
 from .config import settings
 from .utils.logging import setup_logging, structured_logger
 from .utils.exceptions import AIRecommendationException
 from .api.routes import health, text_analysis, category_matching, sentiment_analysis, admin, feedback, category_admin, openai_costs, admin_migration, educational_resources
+
+
+# Initialize Sentry for error monitoring (only in production)
+if settings.environment == "production":
+    sentry_dsn = os.getenv("SENTRY_DSN")
+    if sentry_dsn:
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            environment=settings.environment,
+            release=f"voterprime@{settings.version}",
+            traces_sample_rate=0.1,  # 10% of transactions for performance monitoring
+            profiles_sample_rate=0.1,  # 10% for profiling
+            send_default_pii=False,  # Don't send PII for privacy
+        )
+        structured_logger.info("Sentry error monitoring initialized")
+    else:
+        structured_logger.warning("SENTRY_DSN not found - error monitoring disabled")
+else:
+    structured_logger.info(f"Sentry disabled in {settings.environment} environment")
 
 
 # Set up logging before anything else
@@ -154,7 +175,7 @@ app.add_middleware(
 if settings.environment == "production":
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["*.railway.app", "*.netlify.app", "testserver"]
+        allowed_hosts=["*.railway.app", "*.netlify.app", "testserver", "localhost", "127.0.0.1"]
     )
 
 # Mount static files after all middleware
