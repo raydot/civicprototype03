@@ -18,6 +18,9 @@ from .utils.exceptions import AIRecommendationException
 from .api.routes import health, text_analysis, category_matching, sentiment_analysis, admin, feedback, category_admin, openai_costs, admin_migration, educational_resources
 
 
+# Set up logging before anything else
+logger = setup_logging()
+
 # Initialize Sentry for error monitoring (only in production)
 if settings.environment == "production":
     sentry_dsn = os.getenv("SENTRY_DSN")
@@ -35,10 +38,6 @@ if settings.environment == "production":
         structured_logger.warning("SENTRY_DSN not found - error monitoring disabled")
 else:
     structured_logger.info(f"Sentry disabled in {settings.environment} environment")
-
-
-# Set up logging before anything else
-logger = setup_logging()
 
 
 @asynccontextmanager
